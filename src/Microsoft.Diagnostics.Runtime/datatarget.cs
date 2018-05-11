@@ -210,7 +210,7 @@ namespace Microsoft.Diagnostics.Runtime
             }
             else if (Flavor == ClrFlavor.Native)
             {
-                return new Native.NativeRuntime(this, _dataTarget, lib);
+                throw new NotSupportedException();
             }
             else if (Version.Major == 2)
             {
