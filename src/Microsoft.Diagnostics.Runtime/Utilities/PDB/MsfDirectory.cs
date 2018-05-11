@@ -1,58 +1,53 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
 {
-    internal class MsfDirectory
+  internal class MsfDirectory
+  {
+    internal MsfDirectory(PdbStreamHelper reader, PdbFileHeader head, BitAccess bits)
     {
-        internal MsfDirectory(PdbStreamHelper reader, PdbFileHeader head, BitAccess bits)
-        {
-            int pages = reader.PagesFromSize(head.DirectorySize);
+      var pages = reader.PagesFromSize(head.DirectorySize);
 
-            // 0..n in page of directory pages.
-            bits.MinCapacity(head.DirectorySize);
-            int directoryRootPages = head.DirectoryRoot.Length;
-            int pagesPerPage = head.PageSize / 4;
-            int pagesToGo = pages;
-            for (int i = 0; i < directoryRootPages; i++)
-            {
-                int pagesInThisPage = pagesToGo <= pagesPerPage ? pagesToGo : pagesPerPage;
-                reader.Seek(head.DirectoryRoot[i], 0);
-                bits.Append(reader.Reader, pagesInThisPage * 4);
-                pagesToGo -= pagesInThisPage;
-            }
-            bits.Position = 0;
+      // 0..n in page of directory pages.
+      bits.MinCapacity(head.DirectorySize);
+      var directoryRootPages = head.DirectoryRoot.Length;
+      var pagesPerPage = head.PageSize / 4;
+      var pagesToGo = pages;
+      for (var i = 0; i < directoryRootPages; i++)
+      {
+        var pagesInThisPage = pagesToGo <= pagesPerPage ? pagesToGo : pagesPerPage;
+        reader.Seek(head.DirectoryRoot[i], 0);
+        bits.Append(reader.Reader, pagesInThisPage * 4);
+        pagesToGo -= pagesInThisPage;
+      }
 
-            DataStream stream = new DataStream(head.DirectorySize, bits, pages);
-            bits.MinCapacity(head.DirectorySize);
-            stream.Read(reader, bits);
+      bits.Position = 0;
 
-            // 0..3 in directory pages
-            int count;
-            bits.ReadInt32(out count);
+      var stream = new DataStream(head.DirectorySize, bits, pages);
+      bits.MinCapacity(head.DirectorySize);
+      stream.Read(reader, bits);
 
-            // 4..n
-            int[] sizes = new int[count];
-            bits.ReadInt32(sizes);
+      // 0..3 in directory pages
+      int count;
+      bits.ReadInt32(out count);
 
-            // n..m
-            _streams = new DataStream[count];
-            for (int i = 0; i < count; i++)
-            {
-                if (sizes[i] <= 0)
-                {
-                    _streams[i] = new DataStream();
-                }
-                else
-                {
-                    _streams[i] = new DataStream(sizes[i], bits,
-                                                reader.PagesFromSize(sizes[i]));
-                }
-            }
-        }
+      // 4..n
+      var sizes = new int[count];
+      bits.ReadInt32(sizes);
 
-        internal DataStream[] _streams;
+      // n..m
+      _streams = new DataStream[count];
+      for (var i = 0; i < count; i++)
+        if (sizes[i] <= 0)
+          _streams[i] = new DataStream();
+        else
+          _streams[i] = new DataStream(
+            sizes[i],
+            bits,
+            reader.PagesFromSize(sizes[i]));
     }
+
+    internal DataStream[] _streams;
+  }
 }

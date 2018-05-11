@@ -5,309 +5,257 @@ using System.Collections.Generic;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
 {
-    internal class DesktopThreadPool : ClrThreadPool
+  internal class DesktopThreadPool : ClrThreadPool
+  {
+    private readonly DesktopRuntimeBase _runtime;
+    private ClrHeap _heap;
+    private readonly int _totalThreads;
+    private readonly int _runningThreads;
+    private readonly int _idleThreads;
+    private readonly int _minThreads;
+    private readonly int _maxThreads;
+    private readonly int _minCP;
+    private readonly int _maxCP;
+    private readonly int _cpu;
+    private readonly int _freeCP;
+    private readonly int _maxFreeCP;
+
+    public DesktopThreadPool(DesktopRuntimeBase runtime, IThreadPoolData data)
     {
-        private DesktopRuntimeBase _runtime;
-        private ClrHeap _heap;
-        private int _totalThreads;
-        private int _runningThreads;
-        private int _idleThreads;
-        private int _minThreads;
-        private int _maxThreads;
-        private int _minCP;
-        private int _maxCP;
-        private int _cpu;
-        private int _freeCP;
-        private int _maxFreeCP;
+      _runtime = runtime;
+      _totalThreads = data.TotalThreads;
+      _runningThreads = data.RunningThreads;
+      _idleThreads = data.IdleThreads;
+      _minThreads = data.MinThreads;
+      _maxThreads = data.MaxThreads;
+      _minCP = data.MinCP;
+      _maxCP = data.MaxCP;
+      _cpu = data.CPU;
+      _freeCP = data.NumFreeCP;
+      _maxFreeCP = data.MaxFreeCP;
+    }
 
-        public DesktopThreadPool(DesktopRuntimeBase runtime, IThreadPoolData data)
+    public override int TotalThreads => _totalThreads;
+
+    public override int RunningThreads => _runningThreads;
+
+    public override int IdleThreads => _idleThreads;
+
+    public override int MinThreads => _minThreads;
+
+    public override int MaxThreads => _maxThreads;
+
+    public override IEnumerable<NativeWorkItem> EnumerateNativeWorkItems()
+    {
+      return _runtime.EnumerateWorkItems();
+    }
+
+    public override IEnumerable<ManagedWorkItem> EnumerateManagedWorkItems()
+    {
+      foreach (var obj in EnumerateManagedThreadpoolObjects())
+        if (obj != 0)
         {
-            _runtime = runtime;
-            _totalThreads = data.TotalThreads;
-            _runningThreads = data.RunningThreads;
-            _idleThreads = data.IdleThreads;
-            _minThreads = data.MinThreads;
-            _maxThreads = data.MaxThreads;
-            _minCP = data.MinCP;
-            _maxCP = data.MaxCP;
-            _cpu = data.CPU;
-            _freeCP = data.NumFreeCP;
-            _maxFreeCP = data.MaxFreeCP;
-        }
-
-        public override int TotalThreads
-        {
-            get { return _totalThreads; }
-        }
-
-        public override int RunningThreads
-        {
-            get { return _runningThreads; }
-        }
-
-        public override int IdleThreads
-        {
-            get { return _idleThreads; }
-        }
-
-        public override int MinThreads
-        {
-            get { return _minThreads; }
-        }
-
-        public override int MaxThreads
-        {
-            get { return _maxThreads; }
-        }
-
-        public override IEnumerable<NativeWorkItem> EnumerateNativeWorkItems()
-        {
-            return _runtime.EnumerateWorkItems();
-        }
-
-        public override IEnumerable<ManagedWorkItem> EnumerateManagedWorkItems()
-        {
-            foreach (ulong obj in EnumerateManagedThreadpoolObjects())
-            {
-                if (obj != 0)
-                {
-                    ClrType type = _heap.GetObjectType(obj);
-                    if (type != null)
-                        yield return new DesktopManagedWorkItem(type, obj);
-                }
-            }
-        }
-
-        private IEnumerable<ulong> EnumerateManagedThreadpoolObjects()
-        {
-            _heap = _runtime.Heap;
-
-            ClrModule mscorlib = GetMscorlib();
-            if (mscorlib != null)
-            {
-                ClrType queueType = mscorlib.GetTypeByName("System.Threading.ThreadPoolGlobals");
-                if (queueType != null)
-                {
-                    ClrStaticField workQueueField = queueType.GetStaticFieldByName("workQueue");
-                    if (workQueueField != null)
-                    {
-                        foreach (var appDomain in _runtime.AppDomains)
-                        {
-                            object workQueueValue = workQueueField.GetValue(appDomain);
-                            ulong workQueue = workQueueValue == null ? 0L : (ulong)workQueueValue;
-                            ClrType workQueueType = _heap.GetObjectType(workQueue);
-
-                            if (workQueue == 0 || workQueueType == null)
-                                continue;
-
-                            ulong queueHead;
-                            do
-                            {
-                                if (!GetFieldObject(workQueueType, workQueue, "queueHead", out ClrType queueHeadType, out queueHead))
-                                    break;
-
-                                if (GetFieldObject(queueHeadType, queueHead, "nodes", out ClrType nodesType, out ulong nodes) && nodesType.IsArray)
-                                {
-                                    int len = nodesType.GetArrayLength(nodes);
-                                    for (int i = 0; i < len; ++i)
-                                    {
-                                        ulong addr = (ulong)nodesType.GetArrayElementValue(nodes, i);
-                                        if (addr != 0)
-                                            yield return addr;
-                                    }
-                                }
-
-                                if (!GetFieldObject(queueHeadType, queueHead, "Next", out queueHeadType, out queueHead))
-                                    break;
-                            } while (queueHead != 0);
-                        }
-                    }
-                }
-
-
-                queueType = mscorlib.GetTypeByName("System.Threading.ThreadPoolWorkQueue");
-                if (queueType != null)
-                {
-                    ClrStaticField threadQueuesField = queueType.GetStaticFieldByName("allThreadQueues");
-                    if (threadQueuesField != null)
-                    {
-                        foreach (ClrAppDomain domain in _runtime.AppDomains)
-                        {
-                            ulong? threadQueue = (ulong?)threadQueuesField.GetValue(domain);
-                            if (!threadQueue.HasValue || threadQueue.Value == 0)
-                                continue;
-
-                            ClrType threadQueueType = _heap.GetObjectType(threadQueue.Value);
-                            if (threadQueueType == null)
-                                continue;
-
-                            if (!GetFieldObject(threadQueueType, threadQueue.Value, "m_array", out ClrType outerArrayType, out ulong outerArray) || !outerArrayType.IsArray)
-                                continue;
-
-                            int outerLen = outerArrayType.GetArrayLength(outerArray);
-                            for (int i = 0; i < outerLen; ++i)
-                            {
-                                ulong entry = (ulong)outerArrayType.GetArrayElementValue(outerArray, i);
-                                if (entry == 0)
-                                    continue;
-
-                                ClrType entryType = _heap.GetObjectType(entry);
-                                if (entryType == null)
-                                    continue;
-
-                                if (!GetFieldObject(entryType, entry, "m_array", out ClrType arrayType, out ulong array) || !arrayType.IsArray)
-                                    continue;
-
-                                int len = arrayType.GetArrayLength(array);
-                                for (int j = 0; j < len; ++j)
-                                {
-                                    ulong addr = (ulong)arrayType.GetArrayElementValue(array, i);
-                                    if (addr != 0)
-                                        yield return addr;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private ClrModule GetMscorlib()
-        {
-            foreach (ClrModule module in _runtime.Modules)
-                if (module.AssemblyName.Contains("mscorlib.dll"))
-                    return module;
-
-            // Uh oh, this shouldn't have happened.  Let's look more carefully (slowly).
-            foreach (ClrModule module in _runtime.Modules)
-                if (module.AssemblyName.ToLower().Contains("mscorlib"))
-                    return module;
-
-            // Ok...not sure why we couldn't find it.
-            return null;
-        }
-
-        private bool GetFieldObject(ClrType type, ulong obj, string fieldName, out ClrType valueType, out ulong value)
-        {
-            value = 0;
-            valueType = null;
-
-            ClrInstanceField field = type.GetFieldByName(fieldName);
-            if (field == null)
-                return false;
-
-            value = (ulong)field.GetValue(obj);
-            if (value == 0)
-                return false;
-
-            valueType = _heap.GetObjectType(value);
-            return valueType != null;
-        }
-
-        public override int MinCompletionPorts
-        {
-            get { return _minCP; }
-        }
-
-        public override int MaxCompletionPorts
-        {
-            get { return _maxCP; }
-        }
-
-        public override int CpuUtilization
-        {
-            get { return _cpu; }
-        }
-
-        public override int FreeCompletionPortCount
-        {
-            get { return _freeCP; }
-        }
-
-        public override int MaxFreeCompletionPorts
-        {
-            get { return _maxFreeCP; }
+          var type = _heap.GetObjectType(obj);
+          if (type != null)
+            yield return new DesktopManagedWorkItem(type, obj);
         }
     }
 
-    internal class DesktopManagedWorkItem : ManagedWorkItem
+    private IEnumerable<ulong> EnumerateManagedThreadpoolObjects()
     {
-        private ClrType _type;
-        private ulong _addr;
+      _heap = _runtime.Heap;
 
-        public DesktopManagedWorkItem(ClrType type, ulong addr)
+      var mscorlib = GetMscorlib();
+      if (mscorlib != null)
+      {
+        var queueType = mscorlib.GetTypeByName("System.Threading.ThreadPoolGlobals");
+        if (queueType != null)
         {
-            _type = type;
-            _addr = addr;
-        }
-
-        public override ulong Object
-        {
-            get { return _addr; }
-        }
-
-        public override ClrType Type
-        {
-            get { return _type; }
-        }
-    }
-
-    internal class DesktopNativeWorkItem : NativeWorkItem
-    {
-        private WorkItemKind _kind;
-        private ulong _callback, _data;
-
-        public DesktopNativeWorkItem(DacpWorkRequestData result)
-        {
-            _callback = result.Function;
-            _data = result.Context;
-
-            switch (result.FunctionType)
+          var workQueueField = queueType.GetStaticFieldByName("workQueue");
+          if (workQueueField != null)
+            foreach (var appDomain in _runtime.AppDomains)
             {
-                default:
-                case WorkRequestFunctionTypes.UNKNOWNWORKITEM:
-                    _kind = WorkItemKind.Unknown;
-                    break;
+              var workQueueValue = workQueueField.GetValue(appDomain);
+              var workQueue = workQueueValue == null ? 0L : (ulong)workQueueValue;
+              var workQueueType = _heap.GetObjectType(workQueue);
 
-                case WorkRequestFunctionTypes.TIMERDELETEWORKITEM:
-                    _kind = WorkItemKind.TimerDelete;
-                    break;
+              if (workQueue == 0 || workQueueType == null)
+                continue;
 
-                case WorkRequestFunctionTypes.QUEUEUSERWORKITEM:
-                    _kind = WorkItemKind.QueueUserWorkItem;
-                    break;
+              ulong queueHead;
+              do
+              {
+                if (!GetFieldObject(workQueueType, workQueue, "queueHead", out var queueHeadType, out queueHead))
+                  break;
 
-                case WorkRequestFunctionTypes.ASYNCTIMERCALLBACKCOMPLETION:
-                    _kind = WorkItemKind.AsyncTimer;
-                    break;
+                if (GetFieldObject(queueHeadType, queueHead, "nodes", out var nodesType, out var nodes) && nodesType.IsArray)
+                {
+                  var len = nodesType.GetArrayLength(nodes);
+                  for (var i = 0; i < len; ++i)
+                  {
+                    var addr = (ulong)nodesType.GetArrayElementValue(nodes, i);
+                    if (addr != 0)
+                      yield return addr;
+                  }
+                }
 
-                case WorkRequestFunctionTypes.ASYNCCALLBACKCOMPLETION:
-                    _kind = WorkItemKind.AsyncCallback;
-                    break;
+                if (!GetFieldObject(queueHeadType, queueHead, "Next", out queueHeadType, out queueHead))
+                  break;
+              } while (queueHead != 0);
             }
         }
 
-
-        public DesktopNativeWorkItem(V45WorkRequestData result)
+        queueType = mscorlib.GetTypeByName("System.Threading.ThreadPoolWorkQueue");
+        if (queueType != null)
         {
-            _callback = result.Function;
-            _data = result.Context;
-            _kind = WorkItemKind.Unknown;
-        }
+          var threadQueuesField = queueType.GetStaticFieldByName("allThreadQueues");
+          if (threadQueuesField != null)
+            foreach (var domain in _runtime.AppDomains)
+            {
+              var threadQueue = (ulong?)threadQueuesField.GetValue(domain);
+              if (!threadQueue.HasValue || threadQueue.Value == 0)
+                continue;
 
-        public override WorkItemKind Kind
-        {
-            get { return _kind; }
-        }
+              var threadQueueType = _heap.GetObjectType(threadQueue.Value);
+              if (threadQueueType == null)
+                continue;
 
-        public override ulong Callback
-        {
-            get { return _callback; }
-        }
+              if (!GetFieldObject(threadQueueType, threadQueue.Value, "m_array", out var outerArrayType, out var outerArray) || !outerArrayType.IsArray)
+                continue;
 
-        public override ulong Data
-        {
-            get { return _data; }
+              var outerLen = outerArrayType.GetArrayLength(outerArray);
+              for (var i = 0; i < outerLen; ++i)
+              {
+                var entry = (ulong)outerArrayType.GetArrayElementValue(outerArray, i);
+                if (entry == 0)
+                  continue;
+
+                var entryType = _heap.GetObjectType(entry);
+                if (entryType == null)
+                  continue;
+
+                if (!GetFieldObject(entryType, entry, "m_array", out var arrayType, out var array) || !arrayType.IsArray)
+                  continue;
+
+                var len = arrayType.GetArrayLength(array);
+                for (var j = 0; j < len; ++j)
+                {
+                  var addr = (ulong)arrayType.GetArrayElementValue(array, i);
+                  if (addr != 0)
+                    yield return addr;
+                }
+              }
+            }
         }
+      }
     }
+
+    private ClrModule GetMscorlib()
+    {
+      foreach (var module in _runtime.Modules)
+        if (module.AssemblyName.Contains("mscorlib.dll"))
+          return module;
+
+      // Uh oh, this shouldn't have happened.  Let's look more carefully (slowly).
+      foreach (var module in _runtime.Modules)
+        if (module.AssemblyName.ToLower().Contains("mscorlib"))
+          return module;
+
+      // Ok...not sure why we couldn't find it.
+      return null;
+    }
+
+    private bool GetFieldObject(ClrType type, ulong obj, string fieldName, out ClrType valueType, out ulong value)
+    {
+      value = 0;
+      valueType = null;
+
+      var field = type.GetFieldByName(fieldName);
+      if (field == null)
+        return false;
+
+      value = (ulong)field.GetValue(obj);
+      if (value == 0)
+        return false;
+
+      valueType = _heap.GetObjectType(value);
+      return valueType != null;
+    }
+
+    public override int MinCompletionPorts => _minCP;
+
+    public override int MaxCompletionPorts => _maxCP;
+
+    public override int CpuUtilization => _cpu;
+
+    public override int FreeCompletionPortCount => _freeCP;
+
+    public override int MaxFreeCompletionPorts => _maxFreeCP;
+  }
+
+  internal class DesktopManagedWorkItem : ManagedWorkItem
+  {
+    private readonly ClrType _type;
+    private readonly ulong _addr;
+
+    public DesktopManagedWorkItem(ClrType type, ulong addr)
+    {
+      _type = type;
+      _addr = addr;
+    }
+
+    public override ulong Object => _addr;
+
+    public override ClrType Type => _type;
+  }
+
+  internal class DesktopNativeWorkItem : NativeWorkItem
+  {
+    private readonly WorkItemKind _kind;
+    private readonly ulong _callback;
+    private readonly ulong _data;
+
+    public DesktopNativeWorkItem(DacpWorkRequestData result)
+    {
+      _callback = result.Function;
+      _data = result.Context;
+
+      switch (result.FunctionType)
+      {
+        default:
+        case WorkRequestFunctionTypes.UNKNOWNWORKITEM:
+          _kind = WorkItemKind.Unknown;
+          break;
+
+        case WorkRequestFunctionTypes.TIMERDELETEWORKITEM:
+          _kind = WorkItemKind.TimerDelete;
+          break;
+
+        case WorkRequestFunctionTypes.QUEUEUSERWORKITEM:
+          _kind = WorkItemKind.QueueUserWorkItem;
+          break;
+
+        case WorkRequestFunctionTypes.ASYNCTIMERCALLBACKCOMPLETION:
+          _kind = WorkItemKind.AsyncTimer;
+          break;
+
+        case WorkRequestFunctionTypes.ASYNCCALLBACKCOMPLETION:
+          _kind = WorkItemKind.AsyncCallback;
+          break;
+      }
+    }
+
+    public DesktopNativeWorkItem(V45WorkRequestData result)
+    {
+      _callback = result.Function;
+      _data = result.Context;
+      _kind = WorkItemKind.Unknown;
+    }
+
+    public override WorkItemKind Kind => _kind;
+
+    public override ulong Callback => _callback;
+
+    public override ulong Data => _data;
+  }
 }
