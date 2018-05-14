@@ -51,7 +51,11 @@ namespace Microsoft.Diagnostics.Runtime
       var versions = new List<ClrInfo>();
       foreach (var module in modules)
       {
-        var clrName = Path.GetFileNameWithoutExtension(module.FileName).ToLower();
+        var moduleFileName = Path.GetFileNameWithoutExtension(module.FileName);
+        if (moduleFileName == null)
+          continue;
+        
+        var clrName = moduleFileName.ToLower();
 
         if (clrName != "clr" && clrName != "mscorwks" && clrName != "coreclr" && clrName != "mrt100_app")
           continue;
@@ -72,7 +76,7 @@ namespace Microsoft.Diagnostics.Runtime
             break;
         }
 
-        var dacLocation = Path.Combine(Path.GetDirectoryName(module.FileName), DacInfo.GetDacFileName(flavor, architecture));
+        var dacLocation = Path.Combine(moduleFileName, DacInfo.GetDacFileName(flavor, architecture));
         if (!File.Exists(dacLocation) || !NativeMethods.IsEqualFileVersion(dacLocation, module.Version))
           dacLocation = null;
 
