@@ -503,7 +503,6 @@ namespace Microsoft.Diagnostics.Runtime
       return obj + size > seg.End;
     }
 
-    #region Debug Tracing
     [Conditional("GCROOTTRACE")]
     private void TraceFullPath(LinkedList<PathEntry> path, LinkedListNode<ClrObject> foundEnding)
     {
@@ -535,7 +534,6 @@ namespace Microsoft.Diagnostics.Runtime
 
       Debug.WriteLine(prefix + string.Join(" ", path.Select(p => p.Object.ToString())));
     }
-    #endregion
 
     private struct PathEntry
     {

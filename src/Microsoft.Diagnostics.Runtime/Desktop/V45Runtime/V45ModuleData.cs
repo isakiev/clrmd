@@ -27,7 +27,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public ulong pThunkHeap;
     public ulong dwModuleIndex;
 
-    #region IModuleData
     public ulong Assembly => assembly;
 
     public ulong PEFile => bIsPEFile == 0 ? ilBase : peFile;
@@ -47,6 +46,5 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public ulong MetdataStart => metadataStart;
 
     public ulong MetadataLength => metadataSize;
-    #endregion
   }
 }

@@ -6,11 +6,9 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class MemoryRegion : ClrMemoryRegion
   {
-    #region Private Variables
     private readonly DesktopRuntimeBase _runtime;
     private ulong _domainModuleHeap;
     private GCSegmentType _segmentType;
-    #endregion
 
     private bool HasAppDomainData => Type <= ClrMemoryRegionType.CacheEntryHeap || Type == ClrMemoryRegionType.HandleTableChunk;
 
@@ -184,7 +182,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return ToString(false);
     }
 
-    #region Constructors
     internal MemoryRegion(DesktopRuntimeBase clr, ulong addr, ulong size, ClrMemoryRegionType type, ulong moduleOrAppDomain)
     {
       Address = addr;
@@ -220,6 +217,5 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       _domainModuleHeap = heap;
       _segmentType = seg;
     }
-    #endregion
   }
 }

@@ -262,7 +262,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       return ret;
     }
 
-    #region private
     private PEBuffer _headerBuff;
     private PEBuffer _freeBuff;
     private Stream _stream;
@@ -293,44 +292,5 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     {
       _freeBuff = buffer;
     }
-    #endregion
   }
-
-  #region private classes we may want to expose
-  #endregion
-
-  #region private classes
-  /* Resource information */
-  // Resource directory consists of two counts, following by a variable length
-  // array of directory entries.  The first count is the number of entries at
-  // beginning of the array that have actual names associated with each entry.
-  // The entries are in ascending order, case insensitive strings.  The second
-  // count is the number of entries that immediately follow the named entries.
-  // This second count identifies the number of entries that have 16-bit integer
-  // Ids as their name.  These entries are also sorted in ascending order.
-  //
-  // This structure allows fast lookup by either name or number, but for any
-  // given resource entry only one form of lookup is supported, not both.
-
-  //
-  // Each directory contains the 32-bit Name of the entry and an offset,
-  // relative to the beginning of the resource directory of the data associated
-  // with this directory entry.  If the name of the entry is an actual text
-  // string instead of an integer Id, then the high order bit of the name field
-  // is set to one and the low order 31-bits are an offset, relative to the
-  // beginning of the resource directory of the string, which is of type
-  // IMAGE_RESOURCE_DIRECTORY_STRING.  Otherwise the high bit is clear and the
-  // low-order 16-bits are the integer Id that identify this resource directory
-  // entry. If the directory entry is yet another resource directory (i.e. a
-  // subdirectory), then the high order bit of the offset field will be
-  // set to indicate this.  Otherwise the high bit is clear and the offset
-  // field points to a resource data entry.
-
-  // Each resource data entry describes a leaf node in the resource directory
-  // tree.  It contains an offset, relative to the beginning of the resource
-  // directory of the data for the resource, a size field that gives the number
-  // of bytes of data at that offset, a CodePage that should be used when
-  // decoding code point values within the resource data.  Typically for new
-  // applications the code page would be the unicode code page.
-  #endregion
 }

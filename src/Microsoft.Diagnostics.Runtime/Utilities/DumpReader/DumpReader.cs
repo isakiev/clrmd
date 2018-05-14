@@ -56,7 +56,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
   /// </summary>
   internal class DumpReader : IDisposable
   {
-    #region Utility
     // Get a DumpPointer from a MINIDUMP_LOCATION_DESCRIPTOR
     protected internal DumpPointer TranslateDescriptor(MINIDUMP_LOCATION_DESCRIPTOR location)
     {
@@ -133,9 +132,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       var s = ptr.ReadAsUnicodeString(lengthChars);
       return s;
     }
-    #endregion // Utility
 
-    #region Read Memory
     public bool VirtualQuery(ulong addr, out VirtualQueryData data)
     {
       uint min = 0, max = (uint)_memoryChunks.Count - 1;
@@ -441,7 +438,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     // The backup lookup method for memory that's not in the dump is to try and load the memory
     // from the same file on disk.
     protected LoadedFileMemoryLookups _mappedFileMemory;
-    #endregion // Read Memory
 
     /// <summary>
     ///   ToString override.
@@ -586,7 +582,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       return true;
     }
 
-    #region Information
     /// <summary>
     ///   Version numbers of OS that this dump was taken on.
     /// </summary>
@@ -603,9 +598,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         return _info.ProcessorArchitecture;
       }
     }
-    #endregion // Information
 
-    #region Threads
     /// <summary>
     ///   Get the thread for the given thread Id.
     /// </summary>
@@ -723,9 +716,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       // Now copy from dump into buffer. 
       pContext.Copy(buffer, (uint)sizeContext);
     }
-    #endregion // Threads
 
-    #region Modules
     // Internal helper to get the list of modules
     private MINIDUMP_MODULE_LIST GetModuleList()
     {
@@ -853,7 +844,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         yield return new DumpModule(this, module);
       }
     }
-    #endregion // Modules
 
     /*
     public class DumpMemoryRead : IMemoryRead

@@ -82,7 +82,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       }
     }
 
-    #region Working Path Helpers
     private static string _userSetWorkingPath;
     private static readonly Lazy<string> _workingPath = new Lazy<string>(() => CreateWorkingPath(), true);
 
@@ -100,7 +99,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     }
 
     internal static readonly string TempRoot = "clrmd_removeme_";
-    #endregion
   }
 
   [TestClass]

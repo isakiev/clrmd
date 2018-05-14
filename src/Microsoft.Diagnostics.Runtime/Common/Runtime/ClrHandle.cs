@@ -92,7 +92,6 @@ namespace Microsoft.Diagnostics.Runtime
       return HandleType + " " + (Type != null ? Type.Name : "");
     }
 
-    #region Internal
     internal ClrHandle()
     {
     }
@@ -143,7 +142,6 @@ namespace Microsoft.Diagnostics.Runtime
         DependentType = heap.GetObjectType(handleData.Secondary);
       }
     }
-    #endregion
 
     internal ClrHandle GetInteriorHandle()
     {

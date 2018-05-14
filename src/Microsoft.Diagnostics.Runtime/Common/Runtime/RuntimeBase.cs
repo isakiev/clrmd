@@ -202,7 +202,6 @@ namespace Microsoft.Diagnostics.Runtime
             }
     }
 
-    #region Abstract
     internal abstract ulong GetFirstThread();
     internal abstract IThreadData GetThread(ulong addr);
     internal abstract IHeapDetails GetSvrHeapDetails(ulong addr);
@@ -216,10 +215,7 @@ namespace Microsoft.Diagnostics.Runtime
     internal abstract uint GetThreadTypeIndex();
 
     internal abstract ClrAppDomain GetAppDomainByAddress(ulong addr);
-    #endregion
 
-    #region Helpers
-    #region Request Helpers
     protected bool Request(uint id, ulong param, byte[] output)
     {
       var input = BitConverter.GetBytes(param);
@@ -353,9 +349,7 @@ namespace Microsoft.Diagnostics.Runtime
 
       return result;
     }
-    #endregion
 
-    #region Marshalling Helpers
     protected static string BytesToString(byte[] output)
     {
       var len = 0;
@@ -428,9 +422,7 @@ namespace Microsoft.Diagnostics.Runtime
 
       return offset + sizeof(ulong);
     }
-    #endregion
 
-    #region Data Read
     public override bool ReadMemory(ulong address, byte[] buffer, int bytesRequested, out int bytesRead)
     {
       return _dataReader.ReadMemory(address, buffer, bytesRequested, out bytesRead);
@@ -621,7 +613,5 @@ namespace Microsoft.Diagnostics.Runtime
         yield return obj;
       }
     }
-    #endregion
-    #endregion
   }
 }

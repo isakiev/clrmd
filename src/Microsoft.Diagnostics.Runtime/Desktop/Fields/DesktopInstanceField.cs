@@ -198,7 +198,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public override bool HasSimpleValue => _type != null && !ClrRuntime.IsValueClass(ElementType);
     public override int Size => GetSize(_type.Value, ElementType);
 
-    #region Fields
     private readonly string _name;
     private readonly DesktopGCHeap _heap;
     private readonly Lazy<BaseDesktopHeapType> _type;
@@ -206,7 +205,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private readonly FieldAttributes _attributes;
     private ClrElementType _elementType = ClrElementType.Unknown;
     private readonly uint _token;
-    #endregion
 
     public override object GetValue(ulong objRef, bool interior = false, bool convertStrings = true)
     {

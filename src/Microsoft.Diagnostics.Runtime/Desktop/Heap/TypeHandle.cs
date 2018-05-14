@@ -8,7 +8,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public ulong MethodTable;
     public ulong ComponentMethodTable;
 
-    #region Constructors
     public TypeHandle(ulong mt)
     {
       MethodTable = mt;
@@ -20,7 +19,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       MethodTable = mt;
       ComponentMethodTable = cmt;
     }
-    #endregion
 
     public override int GetHashCode()
     {
@@ -32,7 +30,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return MethodTable == other.MethodTable && ComponentMethodTable == other.ComponentMethodTable;
     }
 
-    #region Compare Helpers
     // TODO should not be needed.   IEquatable should cover it.  
     public static IEqualityComparer<TypeHandle> EqualityComparer = new HeapTypeEqualityComparer();
 
@@ -48,6 +45,5 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         return ((int)obj.MethodTable + (int)obj.ComponentMethodTable) >> 3;
       }
     }
-    #endregion
   }
 }

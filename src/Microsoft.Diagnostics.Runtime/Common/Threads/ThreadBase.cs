@@ -65,7 +65,6 @@ namespace Microsoft.Diagnostics.Runtime
       _blockingObjs = blobjs;
     }
 
-    #region Helper Enums
     internal enum TlsThreadType
     {
       ThreadType_GC = 0x00000001,
@@ -137,9 +136,7 @@ namespace Microsoft.Diagnostics.Runtime
       //TS_FailStarted            = 0x40000000,    // The thread fails during startup.
       //TS_Detached               = 0x80000000,    // Thread was detached by DllMain
     }
-    #endregion
 
-    #region Internal Methods
     private void InitTls()
     {
       if (_tlsInit)
@@ -232,6 +229,5 @@ namespace Microsoft.Diagnostics.Runtime
         return _threadType;
       }
     }
-    #endregion
   }
 }

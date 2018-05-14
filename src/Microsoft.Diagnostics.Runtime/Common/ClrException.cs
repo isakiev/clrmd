@@ -65,7 +65,6 @@ namespace Microsoft.Diagnostics.Runtime
     /// </summary>
     public new int HResult => base.HResult;
 
-    #region Functions
     internal ClrDiagnosticsException(string message)
       : base(message)
     {
@@ -77,7 +76,6 @@ namespace Microsoft.Diagnostics.Runtime
     {
       base.HResult = (int)hr;
     }
-    #endregion
 
     internal static void ThrowRevisionError(int revision, int runtimeRevision)
     {

@@ -8,13 +8,11 @@ namespace Microsoft.Diagnostics.Runtime
 {
   internal class DacLibrary
   {
-    #region Variables
     private readonly IntPtr _library;
     private readonly DacDataTarget _dacDataTarget;
     private readonly IXCLRDataProcess _dac;
     private ISOSDac _sos;
     private readonly HashSet<object> _release = new HashSet<object>();
-    #endregion
 
     public DacDataTarget DacDataTarget => _dacDataTarget;
 

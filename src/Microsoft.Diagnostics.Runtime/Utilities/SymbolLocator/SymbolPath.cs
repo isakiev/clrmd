@@ -99,7 +99,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       return Target;
     }
 
-    #region overrides
     /// <summary>
     ///   Implements object interface
     /// </summary>
@@ -122,9 +121,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     {
       return Target.GetHashCode();
     }
-    #endregion
 
-    #region private
     internal SymPathElement InsureHasCache(string defaultCachePath)
     {
       if (!IsSymServer)
@@ -186,6 +183,5 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         Target = strElem.Trim();
       }
     }
-    #endregion
   }
 }

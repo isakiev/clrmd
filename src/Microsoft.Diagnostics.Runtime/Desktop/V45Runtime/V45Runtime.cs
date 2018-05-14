@@ -13,7 +13,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
   {
     private ISOSDac _sos;
 
-    #region Constructor
     public V45Runtime(ClrInfo info, DataTargetImpl dt, DacLibrary lib)
       : base(info, dt, lib)
     {
@@ -34,9 +33,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (v != 9)
         throw new ClrDiagnosticsException("Unsupported dac version.", ClrDiagnosticsException.HR.DacError);
     }
-    #endregion
 
-    #region Overrides
     protected override void InitApi()
     {
       if (_sos == null)
@@ -538,7 +535,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
       return null;
     }
-    #endregion
 
     internal override ulong GetILForModule(ClrModule module, uint rva)
     {

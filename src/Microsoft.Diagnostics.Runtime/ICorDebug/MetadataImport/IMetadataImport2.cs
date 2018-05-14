@@ -11,7 +11,6 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
   // IMetaDataImport2
   internal interface IMetadataImport2 : IMetadataImport
   {
-    #region inheritted methods from IMetadataImport
     // <strip>@todo - check if there will be be better way how to declare IMetadataImport2 interface.
     //       - Would be very nice if we could avoid this (tried deriving from IM, doesn't work).</strip>
     // Need imports from IMetaDataImport to adjust IM2 vtable slots.
@@ -624,7 +623,6 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
     //         mdToken     pd,                     // [IN] Type, Field, or Method token.
     //         int         *pbGlobal) PURE;        // [OUT] Put 1 if global, 0 otherwise.
     new void IsGlobal_();
-    #endregion // inheritted methods from IMetadataImport
 
     //-----------------------------------------------------------------------------
     // Begin IMetaDataImport2

@@ -82,10 +82,8 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       }
     }
 
-    #region Private
     private readonly ulong _object;
     private readonly BaseDesktopHeapType _type;
     private IList<ClrStackFrame> _stackTrace;
-    #endregion
   }
 }

@@ -532,7 +532,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// </summary>
     public ImageDataDirectory ComDescriptorDirectory => Directory(14);
 
-    #region private
     internal static DateTime TimeDateStampToDate(int timeDateStampSec)
     {
       // Convert seconds from Jan 1 1970 to DateTime ticks.  
@@ -574,6 +573,5 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     private readonly IMAGE_NT_HEADERS* _ntHeader;
     private readonly IMAGE_SECTION_HEADER* _sections;
     private readonly bool _virt;
-    #endregion
   }
 }

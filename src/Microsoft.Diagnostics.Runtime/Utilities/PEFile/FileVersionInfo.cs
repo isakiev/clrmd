@@ -16,7 +16,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// </summary>
     public string Comments { get; }
 
-    #region private
     internal FileVersionInfo(byte* data, int dataLen)
     {
       FileVersion = "";
@@ -58,6 +57,5 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
       return null;
     }
-    #endregion
   }
 }

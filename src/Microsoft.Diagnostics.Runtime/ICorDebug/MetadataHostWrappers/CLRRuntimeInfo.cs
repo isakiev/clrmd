@@ -39,12 +39,10 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
       return (ICorDebug)m_runtimeInfo.GetInterface(ref clsId, ref ifaceId);
     }
 
-    #region private 
     private static readonly Guid s_ClsIdClrDebuggingLegacy = new Guid("DF8395B5-A4BA-450b-A77C-A9A47762C520");
     private static Guid s_ClsIdClrProfiler = new Guid("BD097ED8-733E-43FE-8ED7-A95FF9A8448C");
     private static Guid s_CorMetaDataDispenser = new Guid("E5CB7A31-7512-11d2-89CE-0080C792E5D8");
 
     private readonly ICLRRuntimeInfo m_runtimeInfo;
-    #endregion
   }
 }

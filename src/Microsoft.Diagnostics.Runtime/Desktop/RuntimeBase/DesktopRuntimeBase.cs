@@ -10,7 +10,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal abstract class DesktopRuntimeBase : RuntimeBase
   {
-    #region Variables
     protected CommonMethodTables _commonMTs;
     private Dictionary<uint, ICorDebugThread> _corDebugThreads;
     private ClrModule[] _moduleList;
@@ -23,7 +22,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private Dictionary<ulong, DesktopModule> _modules = new Dictionary<ulong, DesktopModule>();
     private Dictionary<string, DesktopModule> _moduleFiles = new Dictionary<string, DesktopModule>();
     private Lazy<ClrModule> _mscorlib;
-    #endregion
 
     internal DesktopRuntimeBase(ClrInfo info, DataTargetImpl dt, DacLibrary lib)
       : base(info, dt, lib)
@@ -432,7 +430,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       }
     }
 
-    #region Internal Functions
     protected ClrThread GetThreadByStackAddress(ulong address)
     {
       Debug.Assert(address != 0 || _dataReader.IsMinidump);
@@ -811,9 +808,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       _dacInterface.EndEnumMethodInstancesByAddress(handle);
       return tmp;
     }
-    #endregion
 
-    #region Abstract Functions
     internal abstract Dictionary<ulong, List<ulong>> GetDependentHandleMap(CancellationToken cancelToken);
     internal abstract uint GetExceptionHROffset();
 
@@ -867,6 +862,5 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     internal abstract uint GetStringFirstCharOffset();
     internal abstract uint GetStringLengthOffset();
     internal abstract ulong GetILForModule(ClrModule module, uint rva);
-    #endregion
   }
 }

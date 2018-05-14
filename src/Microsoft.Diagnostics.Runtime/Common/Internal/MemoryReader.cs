@@ -5,7 +5,6 @@ namespace Microsoft.Diagnostics.Runtime
 {
   internal unsafe class MemoryReader
   {
-    #region Variables
     protected ulong _currPageStart;
     protected int _currPageSize;
     protected byte[] _data;
@@ -13,7 +12,6 @@ namespace Microsoft.Diagnostics.Runtime
     private readonly byte[] _dword;
     protected IDataReader _dataReader;
     protected int _cacheSize;
-    #endregion
 
     public MemoryReader(IDataReader dataReader, int cacheSize)
     {
@@ -160,7 +158,6 @@ namespace Microsoft.Diagnostics.Runtime
       return _currPageStart <= addr && addr - _currPageStart < (uint)_currPageSize;
     }
 
-    #region Private Functions
     private bool MisalignedRead(ulong addr, out ulong value)
     {
       var res = _dataReader.ReadMemory(addr, _ptr, _ptr.Length, out var size);
@@ -207,6 +204,5 @@ namespace Microsoft.Diagnostics.Runtime
 
       return res;
     }
-    #endregion
   }
 }

@@ -21,7 +21,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       _size = size;
     }
 
-    #region Transforms
     /// <summary>
     ///   Returns a DumpPointer to the same memory, but associated with a smaller size.
     /// </summary>
@@ -52,9 +51,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
       return new DumpPointer(pointer, _size - delta);
     }
-    #endregion // Transforms
 
-    #region Data access
     /// <summary>
     ///   Copy numberBytesToCopy from the DumpPointer into &amp;destinationBuffer[indexDestination].
     /// </summary>
@@ -178,7 +175,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       var element = (T)Marshal.PtrToStructure(_pointer, typeof(T));
       return element;
     }
-    #endregion Data access
 
     private void EnsureSizeRemaining(uint requestedSize)
     {

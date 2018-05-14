@@ -6,7 +6,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class AppDomainHeapWalker
   {
-    #region Variables
     private enum InternalHeapTypes
     {
       IndcellHeap,
@@ -21,7 +20,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private ClrMemoryRegionType _type;
     private ulong _appDomain;
     private readonly DesktopRuntimeBase _runtime;
-    #endregion
 
     public AppDomainHeapWalker(DesktopRuntimeBase runtime)
     {
@@ -97,7 +95,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return _regions;
     }
 
-    #region Helper Functions
     private void VisitOneHeap(ulong address, IntPtr size, int isCurrent)
     {
       if (_appDomain == 0)
@@ -105,6 +102,5 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       else
         _regions.Add(new MemoryRegion(_runtime, address, (ulong)size.ToInt64(), _type, _appDomain));
     }
-    #endregion
   }
 }

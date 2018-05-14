@@ -850,7 +850,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override int BaseSize => (int)_baseSize;
 
-    #region private
     /// <summary>
     ///   A messy version with better performance that doesn't use regular expression.
     /// </summary>
@@ -1187,6 +1186,5 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     private static readonly ClrStaticField[] s_emptyStatics = new ClrStaticField[0];
     private static readonly ClrThreadStaticField[] s_emptyThreadStatics = new ClrThreadStaticField[0];
-    #endregion
   }
 }

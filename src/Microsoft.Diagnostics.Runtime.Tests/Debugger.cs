@@ -61,7 +61,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       return debugger;
     }
 
-    #region Private Helpers
     [DllImport("dbgeng.dll")]
     private static extern int DebugCreate(ref Guid InterfaceId, [MarshalAs(UnmanagedType.IUnknown)] out object Interface);
 
@@ -98,12 +97,10 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       sb.Append((char)0);
       return sb.ToString();
     }
-    #endregion
   }
 
   internal class Debugger : IDebugOutputCallbacks, IDebugEventCallbacks, IDisposable
   {
-    #region Fields
     private DEBUG_OUTPUT _outputMask;
     private readonly StringBuilder _output = new StringBuilder();
     private bool m_exited, _processing;
@@ -111,9 +108,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     private readonly IDebugClient5 _client;
     private readonly IDebugControl _control;
     private DataTarget _dataTarget;
-    #endregion
 
-    #region Events
     public delegate void ModuleEventHandler(Debugger dbg, ModuleEventArgs args);
 
     public event ModuleEventHandler ModuleLoadEvent;
@@ -139,7 +134,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     public delegate void ExitProcessEventHandler(Debugger dbg, int exitCode);
 
     public event ExitProcessEventHandler ExitProcessEvent;
-    #endregion
 
     public IDebugClient5 Client => _client;
 
@@ -264,7 +258,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       return _client.WriteDumpFile(dump, type);
     }
 
-    #region Helpers
     private void SetDebugStatus(DEBUG_STATUS status)
     {
       var hr = _control.SetExecutionStatus(status);
@@ -287,9 +280,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       return string.Format("{0} failed with hresult={1:X8}", name, hr);
     }
-    #endregion
 
-    #region IDebugOutputCallbacks
     public int Output(DEBUG_OUTPUT Mask, string Text)
     {
       if (_output != null && (_outputMask & Mask) != 0)
@@ -297,9 +288,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       return 0;
     }
-    #endregion
 
-    #region IDebugEventCallbacks
     public int GetInterestMask(out DEBUG_EVENT Mask)
     {
       Mask = DEBUG_EVENT.BREAKPOINT | DEBUG_EVENT.CREATE_PROCESS
@@ -407,7 +396,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       _client.SetEventCallbacks(null);
       _client.SetOutputCallbacks(null);
     }
-    #endregion
   }
 
   internal class ModuleEventArgs

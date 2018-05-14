@@ -406,7 +406,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       return null;
     }
 
-    #region private
     private static string ProbeForExe(string path)
     {
       if (File.Exists(path))
@@ -442,9 +441,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     private static string[] s_paths;
-    #endregion
 
-    #region private
     /* called data comes to either StdErr or Stdout */
     private void OnProcessOutput(object sender, DataReceivedEventArgs e)
     {
@@ -511,6 +508,5 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
             }
         }
 #endif
-    #endregion
   }
 }

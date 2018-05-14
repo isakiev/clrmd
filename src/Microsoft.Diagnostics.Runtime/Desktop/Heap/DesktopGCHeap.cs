@@ -1360,7 +1360,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       }
     }
 
-    #region Large array/dictionary helpers
     internal class ExtendedArray<T>
     {
       private const int Initial = 0x100000; // 1 million-ish
@@ -1514,6 +1513,5 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         public SortedDictionary<ulong, int> Dictionary;
       }
     }
-    #endregion
   }
 }

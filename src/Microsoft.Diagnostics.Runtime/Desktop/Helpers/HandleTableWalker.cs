@@ -7,15 +7,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class HandleTableWalker
   {
-    #region Variables
     private readonly DesktopRuntimeBase _runtime;
     private readonly ClrHeap _heap;
     private int _max = 10000;
     private VISITHANDLEV2 _mV2Delegate;
     private VISITHANDLEV4 _mV4Delegate;
-    #endregion
 
-    #region Properties
     public List<ClrHandle> Handles { get; }
     public byte[] V4Request
     {
@@ -49,9 +46,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         return request;
       }
     }
-    #endregion
 
-    #region Functions
     public HandleTableWalker(DesktopRuntimeBase dac)
     {
       _runtime = dac;
@@ -151,6 +146,5 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         ptr >>= 8;
       }
     }
-    #endregion
   }
 }

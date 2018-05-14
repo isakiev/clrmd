@@ -9,13 +9,11 @@ namespace Microsoft.Diagnostics.Runtime
 {
   internal unsafe class LiveDataReader : IDataReader
   {
-    #region Variables
     private readonly int _originalPid;
     private readonly IntPtr _snapshotHandle;
     private readonly IntPtr _cloneHandle;
     private IntPtr _process;
     private readonly int _pid;
-    #endregion
 
     private const int PROCESS_VM_READ = 0x10;
     private const int PROCESS_QUERY_INFORMATION = 0x0400;
@@ -289,7 +287,6 @@ namespace Microsoft.Diagnostics.Runtime
       }
     }
 
-    #region PInvoke Enums
     [Flags]
     private enum PSS_CAPTURE_FLAGS : uint
     {
@@ -326,9 +323,7 @@ namespace Microsoft.Diagnostics.Runtime
       PSS_QUERY_HANDLE_TRACE_INFORMATION = 6,
       PSS_QUERY_PERFORMANCE_COUNTERS = 7
     }
-    #endregion
 
-    #region PInvoke Structs
     [StructLayout(LayoutKind.Sequential)]
     internal struct MEMORY_BASIC_INFORMATION
     {
@@ -344,9 +339,7 @@ namespace Microsoft.Diagnostics.Runtime
 
       public ulong Size => (ulong)RegionSize;
     }
-    #endregion
 
-    #region PInvokes
     [DllImport("kernel32.dll", EntryPoint = "OpenProcess")]
     public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
@@ -389,7 +382,6 @@ namespace Microsoft.Diagnostics.Runtime
 
     [DllImport("kernel32")]
     private static extern int GetProcessId(IntPtr hObject);
-    #endregion
 
     private enum ThreadAccess
     {

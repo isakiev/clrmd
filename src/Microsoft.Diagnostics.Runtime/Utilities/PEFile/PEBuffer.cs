@@ -55,7 +55,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       GC.SuppressFinalize(this);
     }
 
-    #region private
     private void GetBuffer(int buffSize)
     {
       if (_pinningHandle.IsAllocated)
@@ -77,6 +76,5 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     private byte* _buffPtr;
     private GCHandle _pinningHandle;
     private readonly Stream _stream;
-    #endregion
   }
 }

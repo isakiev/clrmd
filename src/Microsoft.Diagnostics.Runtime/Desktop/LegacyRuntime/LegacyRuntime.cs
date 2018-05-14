@@ -9,15 +9,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class LegacyRuntime : DesktopRuntimeBase
   {
-    #region Fields
     // Buffer used for all name requests, this needs to be QUITE large because with anonymous types we can have
     // type names that are 8k+ long...
     private readonly byte[] _buffer = new byte[1024 * 32];
     private readonly DesktopVersion _version;
     private readonly int _patch;
-    #endregion
 
-    #region Constructor
     public LegacyRuntime(ClrInfo info, DataTargetImpl dt, DacLibrary lib, DesktopVersion version, int patch)
       : base(info, dt, lib)
     {
@@ -45,7 +42,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     protected override void InitApi()
     {
     }
-    #endregion
 
     internal override DesktopVersion CLRVersion => _version;
 

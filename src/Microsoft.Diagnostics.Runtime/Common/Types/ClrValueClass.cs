@@ -36,7 +36,6 @@ namespace Microsoft.Diagnostics.Runtime
       Debug.Assert(type.IsValueClass);
     }
 
-    #region GetField
     /// <summary>
     ///   Gets the given object reference field from this ClrObject.  Throws ArgumentException if the given field does
     ///   not exist in the object.  Throws NullReferenceException if IsNull is true.
@@ -141,6 +140,5 @@ namespace Microsoft.Diagnostics.Runtime
       var address = field.GetAddress(_address, _interior);
       return address;
     }
-    #endregion
   }
 }

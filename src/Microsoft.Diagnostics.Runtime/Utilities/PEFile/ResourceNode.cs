@@ -86,7 +86,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
 
-    #region private
     private void ToString(StringWriter sw, string indent)
     {
       sw.Write("{0}<ResourceNode", indent);
@@ -134,6 +133,5 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     private readonly bool _isTop;
     private readonly int _dataLen;
     private readonly int _dataFileOffset;
-    #endregion
   }
 }

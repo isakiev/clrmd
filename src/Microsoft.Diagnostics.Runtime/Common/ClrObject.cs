@@ -122,7 +122,6 @@ namespace Microsoft.Diagnostics.Runtime
       return (string)obj.Type.GetValue(obj.Address);
     }
 
-    #region GetField
     /// <summary>
     ///   Gets the given object reference field from this ClrObject.  Throws ArgumentException if the given field does
     ///   not exist in the object.  Throws NullReferenceException if IsNull is true.
@@ -236,9 +235,7 @@ namespace Microsoft.Diagnostics.Runtime
       var address = field.GetAddress(Address);
       return address;
     }
-    #endregion
 
-    #region IEquatable<ClrObject> 
     /// <summary>
     ///   Determines if this instance and another specific <see cref="ClrObject" /> have the same value.
     ///   <para>Instances are considered equal when they have same <see cref="Address" />.</para>
@@ -249,9 +246,7 @@ namespace Microsoft.Diagnostics.Runtime
     {
       return Address == other.Address;
     }
-    #endregion
 
-    #region Object overrides
     /// <summary>
     ///   Determines whether this instance and a specified object, which must also be a <see cref="ClrObject" />, have the same value.
     /// </summary>
@@ -276,9 +271,7 @@ namespace Microsoft.Diagnostics.Runtime
     {
       return Address.GetHashCode();
     }
-    #endregion
 
-    #region Operators overloads
     /// <summary>
     ///   Determines whether two specified <see cref="ClrObject" /> have the same value.
     /// </summary>
@@ -300,6 +293,5 @@ namespace Microsoft.Diagnostics.Runtime
     {
       return !left.Equals(right);
     }
-    #endregion
   }
 }

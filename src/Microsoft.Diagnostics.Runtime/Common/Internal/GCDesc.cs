@@ -7,11 +7,8 @@ namespace Microsoft.Diagnostics.Runtime
   {
     private static readonly int s_GCDescSize = IntPtr.Size * 2;
 
-    #region Variables
     private readonly byte[] _data;
-    #endregion
 
-    #region Functions
     public GCDesc(byte[] data)
     {
       _data = data;
@@ -67,9 +64,7 @@ namespace Microsoft.Diagnostics.Runtime
           }
       }
     }
-    #endregion
 
-    #region Private Functions
     private uint GetPointers(int curr, int i)
     {
       var offset = i * IntPtr.Size;
@@ -129,6 +124,5 @@ namespace Microsoft.Diagnostics.Runtime
 
       return (int)BitConverter.ToInt64(_data, _data.Length - IntPtr.Size);
     }
-    #endregion
   }
 }

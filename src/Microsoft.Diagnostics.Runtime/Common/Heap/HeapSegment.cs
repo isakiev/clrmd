@@ -176,7 +176,6 @@ namespace Microsoft.Diagnostics.Runtime
       return objRef;
     }
 
-    #region private
     internal static ulong Align(ulong size, bool large)
     {
       ulong AlignConst;
@@ -209,6 +208,5 @@ namespace Microsoft.Diagnostics.Runtime
     private readonly ISegmentData _segment;
     private readonly SubHeap _subHeap;
     private readonly HeapBase _heap;
-    #endregion
   }
 }
