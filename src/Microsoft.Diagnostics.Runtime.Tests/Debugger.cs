@@ -142,7 +142,10 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       get
       {
         if (_dataTarget == null)
-          _dataTarget = DataTarget.CreateFromDebuggerInterface(_client);
+        {
+          var dataReader = new DbgEngDataReader(_client);
+          _dataTarget = new DataTarget(dataReader);
+        }
 
         return _dataTarget;
       }

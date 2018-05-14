@@ -79,22 +79,22 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       var path = GetMiniDumpName(Executable, gc);
       if (File.Exists(path))
-        return DataTarget.LoadCrashDump(path);
+        return LoadCrashDump(path);
 
       WriteCrashDumps(gc);
 
-      return DataTarget.LoadCrashDump(_miniDumpPath[(int)gc]);
+      return LoadCrashDump(_miniDumpPath[(int)gc]);
     }
 
     public DataTarget LoadFullDump(GCMode gc = GCMode.Workstation)
     {
       var path = GetFullDumpName(Executable, gc);
       if (File.Exists(path))
-        return DataTarget.LoadCrashDump(path);
+        return LoadCrashDump(path);
 
       WriteCrashDumps(gc);
 
-      return DataTarget.LoadCrashDump(_fullDumpPath[(int)gc]);
+      return LoadCrashDump(_fullDumpPath[(int)gc]);
     }
 
     private void CompileSource()
@@ -203,6 +203,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       basePath += gc == GCMode.Workstation ? "_wks" : "_svr";
       basePath += "_full.dmp";
       return basePath;
+    }
+
+    private static DataTarget LoadCrashDump(string dumpPath)
+    {
+      return new DataTarget(new DbgEngDataReader(dumpPath));
     }
   }
 }

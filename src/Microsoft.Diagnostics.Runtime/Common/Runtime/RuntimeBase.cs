@@ -15,7 +15,7 @@ namespace Microsoft.Diagnostics.Runtime
     protected IXCLRDataProcess _dacInterface;
     private MemoryReader _cache;
     protected IDataReader _dataReader;
-    protected DataTargetImpl _dataTarget;
+    protected DataTarget _dataTarget;
 
     protected ICorDebugProcess _corDebugProcess;
     internal ICorDebugProcess CorDebugProcess
@@ -29,7 +29,7 @@ namespace Microsoft.Diagnostics.Runtime
       }
     }
 
-    public RuntimeBase(ClrInfo info, DataTargetImpl dataTarget, DacLibrary lib)
+    public RuntimeBase(ClrInfo info, DataTarget dataTarget, DacLibrary lib)
     {
       Debug.Assert(lib != null);
       Debug.Assert(lib.DacInterface != null);

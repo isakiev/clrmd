@@ -139,7 +139,7 @@ namespace Microsoft.Diagnostics.Runtime
       return Version.ToString();
     }
 
-    internal ClrInfo(DataTargetImpl dt, ClrFlavor flavor, ModuleInfo module, DacInfo dacInfo, string dacLocation)
+    internal ClrInfo(DataTarget dt, ClrFlavor flavor, ModuleInfo module, DacInfo dacInfo, string dacLocation)
     {
       Debug.Assert(dacInfo != null);
 
@@ -156,7 +156,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     private readonly string _dacLocation;
-    private readonly DataTargetImpl _dataTarget;
+    private readonly DataTarget _dataTarget;
 
     /// <summary>
     ///   IComparable.  Sorts the object by version.

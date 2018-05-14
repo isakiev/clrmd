@@ -29,14 +29,14 @@ namespace Microsoft.Diagnostics.Runtime
       }
     }
 
-    public DacLibrary(DataTargetImpl dataTarget, object ix)
+    public DacLibrary(DataTarget dataTarget, object ix)
     {
       _dac = ix as IXCLRDataProcess;
       if (_dac == null)
         throw new ArgumentException("clrDataProcess not an instance of IXCLRDataProcess");
     }
 
-    public DacLibrary(DataTargetImpl dataTarget, string dacDll)
+    public DacLibrary(DataTarget dataTarget, string dacDll)
     {
       if (dataTarget.ClrVersions.Count == 0)
         throw new ClrDiagnosticsException("Process is not a CLR process!");

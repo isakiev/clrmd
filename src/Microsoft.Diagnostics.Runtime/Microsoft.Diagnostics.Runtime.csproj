@@ -77,7 +77,6 @@
     <Compile Include="Common\DataTarget\DacInfo.cs" />
     <Compile Include="Common\DataTarget\DacLibrary.cs" />
     <Compile Include="Common\DataTarget\DataTarget.cs" />
-    <Compile Include="Common\DataTarget\DataTargetImpl.cs" />
     <Compile Include="Common\DataTarget\DbgEngDataReader.cs" />
     <Compile Include="Common\DataTarget\IDataReader.cs" />
     <Compile Include="Common\DataTarget\LiveDataReader.cs" />

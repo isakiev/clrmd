@@ -9,15 +9,15 @@ namespace Microsoft.Diagnostics.Runtime
 {
   internal class DacDataTarget : IDacDataTarget, IMetadataLocator, ICorDebugDataTarget
   {
-    private readonly DataTargetImpl _dataTarget;
+    private readonly DataTarget _dataTarget;
     private readonly IDataReader _dataReader;
     private readonly ModuleInfo[] _modules;
 
-    public DacDataTarget(DataTargetImpl dataTarget)
+    public DacDataTarget(DataTarget dataTarget)
     {
       _dataTarget = dataTarget;
       _dataReader = _dataTarget.DataReader;
-      _modules = dataTarget.EnumerateModules().ToArray();
+      _modules = dataTarget.Modules.ToArray();
       Array.Sort(_modules, delegate(ModuleInfo a, ModuleInfo b) { return a.ImageBase.CompareTo(b.ImageBase); });
     }
 
