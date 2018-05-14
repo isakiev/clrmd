@@ -349,7 +349,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// </summary>
     /// <param name="fmt"></param>
     /// <param name="args"></param>
-    protected static void Trace(string fmt, params object[] args)
+    protected virtual void Trace(string fmt, params object[] args)
     {
       if (args != null && args.Length > 0)
         fmt = string.Format(fmt, args);

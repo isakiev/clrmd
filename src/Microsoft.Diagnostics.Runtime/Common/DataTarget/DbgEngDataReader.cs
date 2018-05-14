@@ -200,7 +200,7 @@ namespace Microsoft.Diagnostics.Runtime
       _advanced.GetThreadContext(context, contextSize);
     }
 
-    internal int ReadVirtual(ulong address, byte[] buffer, int bytesRequested, out int bytesRead)
+    protected virtual int ReadVirtual(ulong address, byte[] buffer, int bytesRequested, out int bytesRead)
     {
       SetClientInstance();
       if (buffer == null)
