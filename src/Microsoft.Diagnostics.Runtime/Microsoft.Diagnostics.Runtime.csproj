@@ -106,7 +106,6 @@
     <Compile Include="Common\Internal\SafeLoadLibraryHandle.cs" />
     <Compile Include="Common\Internal\SafeMapViewHandle.cs" />
     <Compile Include="Common\Internal\SafeWin32Handle.cs" />
-    <Compile Include="Common\Internal\TraceDataReader.cs" />
     <Compile Include="Common\Internal\TypeHelpers.cs" />
     <Compile Include="Common\ISymbolResolver.cs" />
     <Compile Include="Common\MemoryReadException.cs" />

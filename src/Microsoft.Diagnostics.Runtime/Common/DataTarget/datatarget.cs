@@ -56,9 +56,6 @@ namespace Microsoft.Diagnostics.Runtime
 
     private static DataTarget CreateFromReader(IDataReader reader, IDebugClient client)
     {
-#if _TRACING
-            reader = new TraceDataReader(reader);
-#endif
       return new DataTargetImpl(reader, client);
     }
 
