@@ -137,15 +137,6 @@ namespace Microsoft.Diagnostics.Runtime
     public virtual ClrThreadPool ThreadPool => throw new NotImplementedException();
 
     /// <summary>
-    ///   Returns data on the CLR thread pool for this runtime.
-    /// </summary>
-    [Obsolete("Use ThreadPool property instead.")]
-    public virtual ClrThreadPool GetThreadPool()
-    {
-      throw new NotImplementedException();
-    }
-
-    /// <summary>
     ///   Enumerates regions of memory which CLR has allocated with a description of what data
     ///   resides at that location.  Note that this does not return every chunk of address space
     ///   that CLR allocates.

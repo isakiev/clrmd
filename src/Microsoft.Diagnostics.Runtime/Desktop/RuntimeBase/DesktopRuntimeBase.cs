@@ -216,12 +216,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override ClrThreadPool ThreadPool => _threadpool.Value;
 
-    [Obsolete]
-    public override ClrThreadPool GetThreadPool()
-    {
-      return _threadpool.Value;
-    }
-
     public ulong SystemDomainAddress => _appDomains.Value.System.Address;
     public ulong SharedDomainAddress => _appDomains.Value.Shared.Address;
     public override ClrAppDomain SystemDomain => _appDomains.Value.System;
