@@ -76,7 +76,8 @@ namespace Microsoft.Diagnostics.Runtime
             break;
         }
 
-        var dacLocation = Path.Combine(moduleFileName, DacInfo.GetDacFileName(flavor, architecture));
+        var moduleDirectory = Path.GetDirectoryName(module.FileName) ?? string.Empty;
+        var dacLocation = Path.Combine(moduleDirectory, DacInfo.GetDacFileName(flavor, architecture));
         if (!File.Exists(dacLocation) || !NativeMethods.IsEqualFileVersion(dacLocation, module.Version))
           dacLocation = null;
 
