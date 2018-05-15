@@ -138,6 +138,7 @@
     <Compile Include="Common\Types\ClrStaticField.cs" />
     <Compile Include="Common\Types\ClrThreadStaticField.cs" />
     <Compile Include="Common\Types\ClrType.cs" />
+    <Compile Include="Common\Types\ClrElementTypeExtensions.cs" />
     <Compile Include="Common\Types\ClrValueClass.cs" />
     <Compile Include="Common\Types\ComInterfaceData.cs" />
     <Compile Include="Common\Types\HotColdRegions.cs" />

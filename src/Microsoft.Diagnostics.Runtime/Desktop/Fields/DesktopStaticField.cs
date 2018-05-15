@@ -64,7 +64,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
               res = sigParser.PeekElemType(out etype);
               type = (ClrElementType)etype;
 
-              if (ClrRuntime.IsObjectReference(type))
+              if (type.IsObjectReference())
                 _type = (BaseDesktopHeapType)heap.GetBasicType(ClrElementType.SZArray);
               else
                 _type = heap.GetArrayType(type, -1, null);
@@ -136,7 +136,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       var types = new ClrType[domains.Count];
 
       var elType = ElementType;
-      if (ClrRuntime.IsPrimitive(elType) || elType == ClrElementType.String)
+      if (elType.IsPrimitive() || elType == ClrElementType.String)
         return ((DesktopGCHeap)heap).GetBasicType(elType);
 
       var count = 0;
@@ -255,7 +255,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         return 0;
 
       ulong addr;
-      if (ClrRuntime.IsPrimitive(ElementType))
+      if (ElementType.IsPrimitive())
         addr = data.NonGCStaticDataStart + _field.Offset;
       else
         addr = data.GCStaticDataStart + _field.Offset;

@@ -369,8 +369,10 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       if (!GetElemType(out var typ))
         return false;
 
+      var type = (ClrElementType)typ;
+
       int tmp;
-      if (!ClrRuntime.IsPrimitive((ClrElementType)typ))
+      if (!type.IsPrimitive())
         switch (typ)
         {
           default:

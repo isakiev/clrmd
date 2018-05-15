@@ -423,7 +423,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           // Statics
           foreach (var staticField in type.StaticFields)
           {
-            if (!ClrRuntime.IsPrimitive(staticField.ElementType))
+            if (!staticField.ElementType.IsPrimitive())
               foreach (var ad in DesktopRuntime.AppDomains)
               {
                 ulong addr = 0;
@@ -451,7 +451,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
           // Thread statics
           foreach (var tsf in type.ThreadStaticFields)
-            if (ClrRuntime.IsObjectReference(tsf.ElementType))
+            if (tsf.ElementType.IsObjectReference())
               foreach (var ad in DesktopRuntime.AppDomains)
               {
                 foreach (var thread in DesktopRuntime.Threads)

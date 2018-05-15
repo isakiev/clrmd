@@ -548,7 +548,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (_sos.GetThreadLocalModuleData(thread, moduleId, out var data) < 0)
         return 0;
 
-      if (IsObjectReference(type) || IsValueClass(type))
+      if (type.IsObjectReference() || type.IsValueClass())
         addr += data.pGCStaticDataStart;
       else
         addr += data.pNonGCStaticDataStart;

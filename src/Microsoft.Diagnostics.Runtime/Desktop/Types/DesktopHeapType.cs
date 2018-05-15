@@ -419,7 +419,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             parser.GetCallingConvInfo(out var ccinfo);
             parser.GetElemType(out var elemType);
 
-            var type = ClrRuntime.GetTypeForElementType((ClrElementType)pdwCPlusTypeFlag);
+            var type = ((ClrElementType)pdwCPlusTypeFlag).GetTypeForElementType();
             if (type != null)
             {
               var o = Marshal.PtrToStructure(ppValue, type);
