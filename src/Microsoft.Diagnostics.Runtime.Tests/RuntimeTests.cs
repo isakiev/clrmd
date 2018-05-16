@@ -19,7 +19,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
         Assert.IsNotNull(badDac);
 
-        dt.ClrVersions.Single().CreateRuntime(badDac);
+        dt.CreateRuntime(dt.ClrVersions.Single(), badDac);
 
         if (dt.ClrVersions.Single().DacInfo.FileName.Equals(SymbolLocatorTests.WellKnownDac, StringComparison.OrdinalIgnoreCase))
           Assert.Inconclusive();
@@ -32,11 +32,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       using (var dt = TestTargets.NestedException.LoadFullDump())
       {
         var info = dt.ClrVersions.Single();
-        var dac = info.LocalMatchingDac;
+        var dac = info.DacLocation;
 
         Assert.IsNotNull(dac);
 
-        var runtime = info.CreateRuntime(dac);
+        var runtime = dt.CreateRuntime(info, dac);
         Assert.IsNotNull(runtime);
       }
     }
@@ -47,7 +47,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       using (var dt = TestTargets.NestedException.LoadFullDump())
       {
         var info = dt.ClrVersions.Single();
-        var runtime = info.CreateRuntime();
+        var runtime = dt.CreateRuntime(info);
 
         Assert.AreEqual(info, runtime.ClrInfo);
       }
@@ -60,7 +60,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var expected = new HashSet<string>(new[] {"mscorlib.dll", "sharedlibrary.dll", "nestedexception.exe", "appdomains.exe"}, StringComparer.OrdinalIgnoreCase);
         var modules = new HashSet<ClrModule>();

@@ -14,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var field = runtime.GetModule("types.exe").GetTypeByName("Types").GetStaticFieldByName("s_i");
@@ -39,7 +39,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         // Ensure that we always have a component for every array type.
@@ -74,7 +74,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         foreach (var obj in heap.EnumerateObjectAddresses())
@@ -99,7 +99,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       const string TypeName = "Foo";
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var types = (from obj in heap.EnumerateObjectAddresses()
@@ -125,7 +125,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
         heap.StackwalkPolicy = ClrRootStackwalkPolicy.Exact;
 
@@ -163,7 +163,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var methodTables = (from obj in heap.EnumerateObjectAddresses()
@@ -189,7 +189,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         foreach (var type in heap.EnumerateObjectAddresses().Select(obj => heap.GetObjectType(obj)).Unique())
@@ -221,7 +221,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var i = 0;
@@ -267,7 +267,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var fooObjects = (from obj in heap.EnumerateObjectAddresses()
@@ -316,7 +316,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var domain = runtime.AppDomains.Single();
@@ -358,7 +358,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var domain = runtime.AppDomains.Single();
@@ -393,7 +393,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var domain = runtime.AppDomains.Single();
@@ -413,7 +413,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var domain = runtime.AppDomains.Single();

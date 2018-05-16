@@ -12,7 +12,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       ulong[] methodDescs;
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var module = runtime.GetModule("sharedlibrary.dll");
         var type = module.GetTypeByName("Foo");
@@ -24,7 +24,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var method = runtime.GetMethodByHandle(methodDescs[0]);
 
         Assert.IsNotNull(method);
@@ -34,7 +34,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var method = runtime.GetMethodByHandle(methodDescs[1]);
 
         Assert.IsNotNull(method);
@@ -49,7 +49,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       ulong methodDesc;
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var module = runtime.GetModule("sharedlibrary.dll");
         var type = module.GetTypeByName("Foo");
@@ -61,7 +61,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var method = runtime.GetMethodByHandle(methodDesc);
 
         Assert.IsNotNull(method);
@@ -71,7 +71,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var module = runtime.GetModule("sharedlibrary.dll");
         var type = module.GetTypeByName("Foo");
@@ -89,7 +89,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var module = runtime.GetModule("sharedlibrary.dll");
         var type = module.GetTypeByName("Foo");

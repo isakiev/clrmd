@@ -1,7 +1,5 @@
 ﻿using System;
 
-#pragma warning disable 0618
-
 namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
@@ -10,8 +8,6 @@ namespace Microsoft.Diagnostics.Runtime
   [Serializable]
   public class DacInfo : ModuleInfo
   {
-
-    
     /// <summary>
     ///   Returns the filename of the dac dll according to the specified parameters
     /// </summary>
@@ -61,5 +57,3 @@ namespace Microsoft.Diagnostics.Runtime
     }
   }
 }
-
-#pragma warning restore 0618

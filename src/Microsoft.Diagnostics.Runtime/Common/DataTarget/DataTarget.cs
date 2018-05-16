@@ -6,9 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Diagnostics.Runtime.Desktop;
 using Microsoft.Diagnostics.Runtime.Utilities;
-
-#pragma warning disable 0618
 
 namespace Microsoft.Diagnostics.Runtime
 {
@@ -26,7 +25,7 @@ namespace Microsoft.Diagnostics.Runtime
       Architecture = dataReader.GetArchitecture();
       PointerSize = dataReader.GetPointerSize();
       Modules = InitModules(dataReader);
-      ClrVersions = InitVersions(dataReader, Modules, Architecture, this);
+      ClrVersions = InitVersions(dataReader, Modules, Architecture);
     }
 
     public IDataReader DataReader { get; }
@@ -46,54 +45,13 @@ namespace Microsoft.Diagnostics.Runtime
       return sortedModules.ToArray();
     }
     
-    private static IReadOnlyCollection<ClrInfo> InitVersions(IDataReader dataReader, IReadOnlyCollection<ModuleInfo> modules, Architecture architecture, DataTarget dataTarget)
+    private static IReadOnlyCollection<ClrInfo> InitVersions(IDataReader dataReader, IReadOnlyCollection<ModuleInfo> modules, Architecture architecture)
     {
       var versions = new List<ClrInfo>();
       foreach (var module in modules)
       {
-        var moduleFileName = Path.GetFileNameWithoutExtension(module.FileName);
-        if (moduleFileName == null)
-          continue;
-        
-        var clrName = moduleFileName.ToLower();
-
-        if (clrName != "clr" && clrName != "mscorwks" && clrName != "coreclr" && clrName != "mrt100_app")
-          continue;
-
-        ClrFlavor flavor;
-        switch (clrName)
-        {
-          case "mrt100_app":
-            flavor = ClrFlavor.Native;
-            break;
-
-          case "coreclr":
-            flavor = ClrFlavor.Core;
-            break;
-
-          default:
-            flavor = ClrFlavor.Desktop;
-            break;
-        }
-
-        var moduleDirectory = Path.GetDirectoryName(module.FileName) ?? string.Empty;
-        var dacLocation = Path.Combine(moduleDirectory, DacInfo.GetDacFileName(flavor, architecture));
-        if (!File.Exists(dacLocation) || !NativeMethods.IsEqualFileVersion(dacLocation, module.Version))
-          dacLocation = null;
-
-        var version = module.Version;
-        var dacAgnosticName = DacInfo.GetDacRequestFileName(flavor, architecture, architecture, version);
-        var dacFileName = DacInfo.GetDacRequestFileName(flavor, IntPtr.Size == 4 ? Architecture.X86 : Architecture.Amd64, architecture, version);
-
-        var dacInfo = new DacInfo(dataReader, dacAgnosticName, architecture)
-        {
-          FileSize = module.FileSize,
-          TimeStamp = module.TimeStamp,
-          FileName = dacFileName,
-          Version = module.Version
-        };
-
-        versions.Add(new ClrInfo(dataTarget, flavor, module, dacInfo, dacLocation));
+        if (ClrInfo.IsClrModule(module))
+          versions.Add(new ClrInfo(module, architecture, dataReader));
       }
 
       var result = versions.ToArray();
@@ -104,6 +62,79 @@ namespace Microsoft.Diagnostics.Runtime
     public void Dispose()
     {
       DataReader.Close();
+    }
+    
+    /// <summary>
+    ///   Creates a runtime from the given Dac file on disk.
+    /// </summary>
+    public ClrRuntime CreateRuntime(ClrInfo clrInfo)
+    {
+      if (clrInfo == null) throw new ArgumentNullException(nameof(clrInfo));
+
+      var dac = clrInfo.DacLocation;
+      if (dac != null && !File.Exists(dac))
+        dac = null;
+
+      if (dac == null)
+        dac = SymbolLocator.FindBinary(clrInfo.DacInfo);
+
+      if (!File.Exists(dac))
+        throw new FileNotFoundException(clrInfo.DacInfo.FileName);
+
+      if (IntPtr.Size != PointerSize)
+        throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
+
+      return ConstructRuntime(clrInfo, dac);
+    }
+
+    /// <summary>
+    ///   Creates a runtime from the given Dac file on disk.
+    /// </summary>
+    /// <param name="clrInfo">CLR info</param>
+    /// <param name="dacFilename">A full path to the matching mscordacwks for this process.</param>
+    /// <param name="ignoreMismatch">Whether or not to ignore mismatches between </param>
+    /// <returns></returns>
+    public ClrRuntime CreateRuntime(ClrInfo clrInfo, string dacFilename, bool ignoreMismatch = false)
+    {
+      if (clrInfo == null) throw new ArgumentNullException(nameof(clrInfo));
+      if (string.IsNullOrEmpty(dacFilename)) throw new ArgumentNullException(nameof(dacFilename));
+      if (!File.Exists(dacFilename)) throw new FileNotFoundException(dacFilename);
+
+      if (!ignoreMismatch)
+      {
+        NativeMethods.GetFileVersion(dacFilename, out var major, out var minor, out var revision, out var patch);
+        if (major != clrInfo.Version.Major || minor != clrInfo.Version.Minor || revision != clrInfo.Version.Revision || patch != clrInfo.Version.Patch)
+          throw new InvalidOperationException($"Mismatched dac. Version: {major}.{minor}.{revision}.{patch}");
+      }
+
+      return ConstructRuntime(clrInfo, dacFilename);
+    }
+
+    private ClrRuntime ConstructRuntime(ClrInfo clrInfo, string dac)
+    {
+      if (IntPtr.Size != (int)DataReader.GetPointerSize())
+        throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
+
+      if (IsMinidump)
+        SymbolLocator.PrefetchBinary(clrInfo.ModuleInfo.FileName, (int)clrInfo.ModuleInfo.TimeStamp, (int)clrInfo.ModuleInfo.FileSize);
+
+      var lib = new DacLibrary(this, dac);
+
+      DesktopVersion ver;
+      if (clrInfo.Flavor == ClrFlavor.Core)
+        return new V45Runtime(clrInfo, this, lib);
+
+      if (clrInfo.Flavor == ClrFlavor.Native)
+        throw new NotSupportedException();
+
+      if (clrInfo.Version.Major == 2)
+        ver = DesktopVersion.v2;
+      else if (clrInfo.Version.Major == 4 && clrInfo.Version.Minor == 0 && clrInfo.Version.Patch < 10000)
+        ver = DesktopVersion.v4;
+      else
+        return new V45Runtime(clrInfo, this, lib);
+
+      return new LegacyRuntime(clrInfo, this, lib, ver, clrInfo.Version.Patch);
     }
   }
 }

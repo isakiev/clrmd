@@ -11,7 +11,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var shared = runtime.GetModule("sharedlibrary.dll");

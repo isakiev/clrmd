@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.Diagnostics.Runtime.Desktop;
 
 namespace Microsoft.Diagnostics.Runtime
 {
@@ -12,16 +9,80 @@ namespace Microsoft.Diagnostics.Runtime
   [Serializable]
   public class ClrInfo : IComparable
   {
+    private const string DesktopModuleName1 = "clr";
+    private const string DesktopModuleName2 = "mscorwks";
+    private const string CoreModuleName = "coreclr";
+    private const string NativeModuleName = "mrt100_app";
+
+    private static string GetLowerCaseName(ModuleInfo module)
+    {
+      var fileName = Path.GetFileNameWithoutExtension(module.FileName);
+      return fileName?.ToLower();
+    }
+    
+    public static bool IsClrModule(ModuleInfo module)
+    {
+      if (module == null) throw new ArgumentNullException(nameof(module));
+
+      var moduleName = GetLowerCaseName(module);
+      return moduleName == DesktopModuleName1 || moduleName == DesktopModuleName2 || moduleName == CoreModuleName || moduleName == NativeModuleName;
+    }
+    
+    internal ClrInfo(ModuleInfo module, Architecture architecture, IDataReader dataReader)
+    {
+      if (module == null) throw new ArgumentNullException(nameof(module));
+      
+      var moduleName = GetLowerCaseName(module);
+      switch (moduleName)
+      {
+        case DesktopModuleName1:
+        case DesktopModuleName2:
+          Flavor = ClrFlavor.Desktop;
+          break;
+          
+        case CoreModuleName:
+          Flavor = ClrFlavor.Core;
+          break;
+        
+        case NativeModuleName:
+          Flavor = ClrFlavor.Native;
+          break;
+
+        default:
+          throw new ClrDiagnosticsException("Specified module is not recognized as a CLR one");
+      }
+      
+      var moduleDirectory = Path.GetDirectoryName(module.FileName) ?? string.Empty;
+      DacLocation = Path.Combine(moduleDirectory, DacInfo.GetDacFileName(Flavor, architecture));
+      if (!File.Exists(DacLocation) || !NativeMethods.IsEqualFileVersion(DacLocation, module.Version))
+        DacLocation = null;
+
+      var version = module.Version;
+      var dacAgnosticName = DacInfo.GetDacRequestFileName(Flavor, architecture, architecture, version);
+      var dacFileName = DacInfo.GetDacRequestFileName(Flavor, IntPtr.Size == 4 ? Architecture.X86 : Architecture.Amd64, architecture, version);
+
+      DacInfo = new DacInfo(dataReader, dacAgnosticName, architecture)
+      {
+        FileSize = module.FileSize,
+        TimeStamp = module.TimeStamp,
+        FileName = dacFileName,
+        Version = module.Version
+      };
+      
+      ModuleInfo = module;
+      module.IsRuntime = true; //strange logic //TODO: revisit
+    }
+    
     /// <summary>
     ///   The version number of this runtime.
     /// </summary>
     public VersionInfo Version => ModuleInfo.Version;
-
+    
     /// <summary>
     ///   The type of CLR this module represents.
     /// </summary>
     public ClrFlavor Flavor { get; }
-
+    
     /// <summary>
     ///   Returns module information about the Dac needed create a ClrRuntime instance for this runtime.
     /// </summary>
@@ -36,130 +97,15 @@ namespace Microsoft.Diagnostics.Runtime
     ///   Returns the location of the local dac on your machine which matches this version of Clr, or null
     ///   if one could not be found.
     /// </summary>
-    public string LocalMatchingDac => _dacLocation;
-
-    /// <summary>
-    ///   Creates a runtime from the given Dac file on disk.
-    /// </summary>
-    public ClrRuntime CreateRuntime()
-    {
-      var dac = _dacLocation;
-      if (dac != null && !File.Exists(dac))
-        dac = null;
-
-      if (dac == null)
-        dac = _dataTarget.SymbolLocator.FindBinary(DacInfo);
-
-      if (!File.Exists(dac))
-        throw new FileNotFoundException(DacInfo.FileName);
-
-      if (IntPtr.Size != (int)_dataTarget.DataReader.GetPointerSize())
-        throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
-
-      return ConstructRuntime(dac);
-    }
-
-    /// <summary>
-    ///   Creates a runtime from a given IXClrDataProcess interface.  Used for debugger plugins.
-    /// </summary>
-    public ClrRuntime CreateRuntime(object clrDataProcess)
-    {
-      var lib = new DacLibrary(_dataTarget, (IXCLRDataProcess)clrDataProcess);
-
-      // Figure out what version we are on.
-      if (clrDataProcess is ISOSDac) return new V45Runtime(this, _dataTarget, lib);
-
-      var buffer = new byte[Marshal.SizeOf(typeof(V2HeapDetails))];
-
-      var val = lib.DacInterface.Request(DacRequests.GCHEAPDETAILS_STATIC_DATA, 0, null, (uint)buffer.Length, buffer);
-      if ((uint)val == 0x80070057)
-        return new LegacyRuntime(this, _dataTarget, lib, DesktopVersion.v4, 10000);
-
-      return new LegacyRuntime(this, _dataTarget, lib, DesktopVersion.v2, 3054);
-    }
-
-    /// <summary>
-    ///   Creates a runtime from the given Dac file on disk.
-    /// </summary>
-    /// <param name="dacFilename">A full path to the matching mscordacwks for this process.</param>
-    /// <param name="ignoreMismatch">Whether or not to ignore mismatches between </param>
-    /// <returns></returns>
-    public ClrRuntime CreateRuntime(string dacFilename, bool ignoreMismatch = false)
-    {
-      if (string.IsNullOrEmpty(dacFilename))
-        throw new ArgumentNullException("dacFilename");
-
-      if (!File.Exists(dacFilename))
-        throw new FileNotFoundException(dacFilename);
-
-      if (!ignoreMismatch)
-      {
-        NativeMethods.GetFileVersion(dacFilename, out var major, out var minor, out var revision, out var patch);
-        if (major != Version.Major || minor != Version.Minor || revision != Version.Revision || patch != Version.Patch)
-          throw new InvalidOperationException(string.Format("Mismatched dac. Version: {0}.{1}.{2}.{3}", major, minor, revision, patch));
-      }
-
-      return ConstructRuntime(dacFilename);
-    }
-
-#pragma warning disable 0618
-    private ClrRuntime ConstructRuntime(string dac)
-    {
-      if (IntPtr.Size != (int)_dataTarget.DataReader.GetPointerSize())
-        throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
-
-      if (_dataTarget.IsMinidump)
-        _dataTarget.SymbolLocator.PrefetchBinary(ModuleInfo.FileName, (int)ModuleInfo.TimeStamp, (int)ModuleInfo.FileSize);
-
-      var lib = new DacLibrary(_dataTarget, dac);
-
-      DesktopVersion ver;
-      if (Flavor == ClrFlavor.Core)
-        return new V45Runtime(this, _dataTarget, lib);
-
-      if (Flavor == ClrFlavor.Native)
-        throw new NotSupportedException();
-
-      if (Version.Major == 2)
-        ver = DesktopVersion.v2;
-      else if (Version.Major == 4 && Version.Minor == 0 && Version.Patch < 10000)
-        ver = DesktopVersion.v4;
-      else
-        return new V45Runtime(this, _dataTarget, lib);
-
-      return new LegacyRuntime(this, _dataTarget, lib, ver, Version.Patch);
-    }
-
-    /// <summary>
-    ///   To string.
-    /// </summary>
-    /// <returns>A version string for this Clr runtime.</returns>
+    public string DacLocation { get; }
+    
     public override string ToString()
     {
       return Version.ToString();
     }
 
-    internal ClrInfo(DataTarget dt, ClrFlavor flavor, ModuleInfo module, DacInfo dacInfo, string dacLocation)
-    {
-      Debug.Assert(dacInfo != null);
-
-      Flavor = flavor;
-      DacInfo = dacInfo;
-      ModuleInfo = module;
-      module.IsRuntime = true;
-      _dataTarget = dt;
-      _dacLocation = dacLocation;
-    }
-
-    internal ClrInfo()
-    {
-    }
-
-    private readonly string _dacLocation;
-    private readonly DataTarget _dataTarget;
-
     /// <summary>
-    ///   IComparable.  Sorts the object by version.
+    ///   IComparable. Sorts the object by version.
     /// </summary>
     /// <param name="obj">The object to compare to.</param>
     /// <returns>-1 if less, 0 if equal, 1 if greater.</returns>

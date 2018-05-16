@@ -19,7 +19,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.NestedException.LoadMiniDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var thread = runtime.GetMainThread();
 
         var frames = IntPtr.Size == 8 ? new[] {"Inner", "Inner", "Middle", "Outer", "Main"} : new[] {"Inner", "Middle", "Outer", "Main"};
@@ -49,7 +49,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.NestedException.LoadMiniDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         ExceptionTests.TestProperties(runtime);
       }
     }

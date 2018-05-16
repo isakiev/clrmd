@@ -14,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       // This test makes sure I have a stable enumeration.
       using (var dt = TestTargets.GCHandles.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var handles = new List<ClrHandle>();
 
@@ -52,7 +52,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
       using (var dt = TestTargets.GCHandles.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         foreach (var handle in runtime.EnumerateHandles()) Assert.IsTrue(handles.Add(handle));
 

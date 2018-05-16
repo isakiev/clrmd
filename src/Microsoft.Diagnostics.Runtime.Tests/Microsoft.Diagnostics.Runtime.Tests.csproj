@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppDomainTests.cs" />
+    <Compile Include="DataTargetTestExtensions.cs" />
     <Compile Include="Debugger.cs" />
     <Compile Include="GCHandleTests.cs" />
     <None Include="project.json" />

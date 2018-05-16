@@ -14,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       // Simply test that we can enumerate the heap.
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var encounteredFoo = false;
@@ -40,7 +40,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       // Simply test that we can enumerate the heap.
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var objects = new List<ClrObject>(heap.EnumerateObjects());
@@ -66,7 +66,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       // Simply test that we can enumerate the heap.
       using (var dt = TestTargets.Types.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         var expectedList = new List<ClrObject>(heap.EnumerateObjects());
@@ -94,7 +94,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump(GCMode.Server))
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         Assert.IsTrue(runtime.ServerGC);
@@ -108,7 +108,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.Types.LoadFullDump(GCMode.Workstation))
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
         var heap = runtime.Heap;
 
         Assert.IsFalse(runtime.ServerGC);

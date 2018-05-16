@@ -14,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var appDomainExe = runtime.GetDomainByName("AppDomains.exe");
         var nestedDomain = runtime.GetDomainByName("Second AppDomain");
@@ -62,7 +62,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var systemDomain = runtime.SystemDomain;
         Assert.AreEqual("System Domain", systemDomain.Name);
@@ -90,7 +90,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var systemDomain = runtime.SystemDomain;
         Assert.AreEqual(0, systemDomain.Modules.Count);
@@ -108,7 +108,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
       {
-        var runtime = dt.ClrVersions.Single().CreateRuntime();
+        var runtime = dt.CreateSingleRuntime();
 
         var appDomainsExe = runtime.GetDomainByName("AppDomains.exe");
         var nestedExceptionExe = runtime.GetDomainByName("Second AppDomain");
