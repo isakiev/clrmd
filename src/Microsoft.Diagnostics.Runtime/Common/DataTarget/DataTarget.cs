@@ -15,7 +15,7 @@ namespace Microsoft.Diagnostics.Runtime
   {
     private static readonly Regex InvalidChars = new Regex($"[{Regex.Escape(new string(Path.GetInvalidPathChars()))}]");
 
-    public DataTarget(IDataReader dataReader, SymbolLocator symbolLocator = null)
+    public DataTarget(IDataReader dataReader, ISymbolLocator symbolLocator = null)
     {
       DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
       SymbolLocator = symbolLocator ?? new DefaultSymbolLocator();
@@ -29,7 +29,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     public IDataReader DataReader { get; }
-    public SymbolLocator SymbolLocator { get; }
+    public ISymbolLocator SymbolLocator { get; }
     internal FileLoader FileLoader { get; }
     
     public bool IsMinidump { get; }
@@ -75,7 +75,7 @@ namespace Microsoft.Diagnostics.Runtime
 
       if (!File.Exists(dacLocation))
       {
-        var downloadedDac = SymbolLocator.FindBinary(dacRequestFileName, clrInfo.ModuleInfo.TimeStamp, clrInfo.ModuleInfo.FileSize);
+        var downloadedDac = SymbolLocator.FindBinary(dacRequestFileName, (int)clrInfo.ModuleInfo.TimeStamp, (int)clrInfo.ModuleInfo.FileSize);
         if (!File.Exists(downloadedDac))
           throw new FileNotFoundException(dacRequestFileName);
 
@@ -84,10 +84,6 @@ namespace Microsoft.Diagnostics.Runtime
 
       if (IntPtr.Size != PointerSize)
         throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
-
-      //TODO: revisit
-      if (IsMinidump)
-        SymbolLocator.PrefetchBinary(dacRequestFileName, (int)clrInfo.ModuleInfo.TimeStamp, (int)clrInfo.ModuleInfo.FileSize);
 
       return new DacLibrary(this, dacLocation);
     }

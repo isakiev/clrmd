@@ -133,7 +133,7 @@ namespace Microsoft.Diagnostics.Runtime
       var info = GetModule(address);
       if (info != null)
       {
-        var filePath = _dataTarget.SymbolLocator.FindBinary(info.FileName, info.TimeStamp, info.FileSize, true);
+        var filePath = _dataTarget.SymbolLocator.FindBinary(info.FileName, (int)info.TimeStamp, (int)info.FileSize);
         if (filePath == null)
         {
           bytesRead = 0;
@@ -224,7 +224,7 @@ namespace Microsoft.Diagnostics.Runtime
 
     public int GetMetadata(string filename, uint imageTimestamp, uint imageSize, IntPtr mvid, uint mdRva, uint flags, uint bufferSize, byte[] buffer, IntPtr dataSize)
     {
-      var filePath = _dataTarget.SymbolLocator.FindBinary(filename, imageTimestamp, imageSize, true);
+      var filePath = _dataTarget.SymbolLocator.FindBinary(filename, (int)imageTimestamp, (int)imageSize);
       if (filePath == null)
         return -1;
 

@@ -557,8 +557,10 @@
     <Compile Include="Utilities\PDB\PdbSource.cs" />
     <Compile Include="Utilities\PDB\PdbReader.cs" />
     <Compile Include="Utilities\SigParser\SigParser.cs" />
-    <Compile Include="Utilities\SymbolLocator\SymbolLocator.Async.cs" />
-    <Compile Include="Utilities\SymbolLocator\SymbolLocator.cs" />
+    <Compile Include="Utilities\SymbolLocator\DefaultSymbolLocator.cs" />
+    <Compile Include="Utilities\SymbolLocator\FileEntry.cs" />
+    <Compile Include="Utilities\SymbolLocator\FileLoader.cs" />
+    <Compile Include="Utilities\SymbolLocator\ISymbolLocator.cs" />
     <Compile Include="Utilities\SymbolLocator\SymbolPath.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
