@@ -1,12 +1,6 @@
-﻿using System;
-
-namespace Microsoft.Diagnostics.Runtime
+﻿namespace Microsoft.Diagnostics.Runtime
 {
-  /// <summary>
-  ///   Represents the dac dll
-  /// </summary>
-  [Serializable]
-  public class DacInfo : ModuleInfo
+  public static class DacInfo
   {
     /// <summary>
     ///   Returns the filename of the dac dll according to the specified parameters
@@ -34,26 +28,6 @@ namespace Microsoft.Diagnostics.Runtime
         return targetArchitecture == Architecture.Amd64 ? "mrt100dac_winamd64.dll" : "mrt100dac_winx86.dll";
 
       return flavor == ClrFlavor.Core ? "mscordaccore.dll" : "mscordacwks.dll";
-    }
-
-    /// <summary>
-    ///   The platform-agnostice filename of the dac dll
-    /// </summary>
-    public string PlatformAgnosticFileName { get; set; }
-
-    /// <summary>
-    ///   The architecture (x86 or amd64) being targeted
-    /// </summary>
-    public Architecture TargetArchitecture { get; set; }
-
-    /// <summary>
-    ///   Constructs a DacInfo object with the appropriate properties initialized
-    /// </summary>
-    public DacInfo(IDataReader reader, string agnosticName, Architecture targetArch)
-      : base(reader)
-    {
-      PlatformAgnosticFileName = agnosticName;
-      TargetArchitecture = targetArch;
     }
   }
 }

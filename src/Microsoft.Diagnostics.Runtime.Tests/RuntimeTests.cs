@@ -10,38 +10,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
   public class RuntimeTests
   {
     [TestMethod]
-    [ExpectedException(typeof(InvalidOperationException))]
-    public void CreationSpecificDacNegativeTest()
-    {
-      using (var dt = TestTargets.NestedException.LoadFullDump())
-      {
-        var badDac = dt.SymbolLocator.FindBinary(SymbolLocatorTests.WellKnownDac, SymbolLocatorTests.WellKnownDacTimeStamp, SymbolLocatorTests.WellKnownDacImageSize, false);
-
-        Assert.IsNotNull(badDac);
-
-        dt.CreateRuntime(dt.ClrVersions.Single(), badDac);
-
-        if (dt.ClrVersions.Single().DacInfo.FileName.Equals(SymbolLocatorTests.WellKnownDac, StringComparison.OrdinalIgnoreCase))
-          Assert.Inconclusive();
-      }
-    }
-
-    [TestMethod]
-    public void CreationSpecificDac()
-    {
-      using (var dt = TestTargets.NestedException.LoadFullDump())
-      {
-        var info = dt.ClrVersions.Single();
-        var dac = info.DacLocation;
-
-        Assert.IsNotNull(dac);
-
-        var runtime = dt.CreateRuntime(info, dac);
-        Assert.IsNotNull(runtime);
-      }
-    }
-
-    [TestMethod]
     public void RuntimeClrInfo()
     {
       using (var dt = TestTargets.NestedException.LoadFullDump())

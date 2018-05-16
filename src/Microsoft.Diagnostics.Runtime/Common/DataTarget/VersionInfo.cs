@@ -6,7 +6,7 @@ namespace Microsoft.Diagnostics.Runtime
   ///   Represents the version of a DLL.
   /// </summary>
   [Serializable]
-  public struct VersionInfo
+  public struct VersionInfo : IEquatable<VersionInfo>, IComparable<VersionInfo>
   {
     /// <summary>
     ///   In a version 'A.B.C.D', this field represents 'A'.
@@ -36,13 +36,28 @@ namespace Microsoft.Diagnostics.Runtime
       Patch = patch;
     }
 
-    /// <summary>
-    ///   To string.
-    /// </summary>
-    /// <returns>The A.B.C.D version prepended with 'v'.</returns>
+    public bool Equals(VersionInfo other)
+    {
+      return Major == other.Major && Minor == other.Minor && Revision == other.Revision && Patch == other.Patch;
+    }
+
+    public int CompareTo(VersionInfo other)
+    {
+      if (Major != other.Major)
+        return Major.CompareTo(other.Major);
+
+      if (Minor != other.Minor)
+        return Minor.CompareTo(other.Minor);
+
+      if (Revision != other.Revision)
+        return Revision.CompareTo(other.Revision);
+
+      return Patch.CompareTo(other.Patch);
+    }
+
     public override string ToString()
     {
-      return string.Format("v{0}.{1}.{2}.{3:D2}", Major, Minor, Revision, Patch);
+      return $"v{Major}.{Minor}.{Revision}.{Patch:D2}";
     }
   }
 }
