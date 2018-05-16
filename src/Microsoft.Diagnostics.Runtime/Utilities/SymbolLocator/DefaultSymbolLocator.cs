@@ -2,81 +2,90 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   public class DefaultSymbolLocator : ISymbolLocator
   {
-    private static readonly string[] s_microsoftSymbolServers = {"http://msdl.microsoft.com/download/symbols", "http://referencesource.microsoft.com/symbols"};
-    
-    private static readonly Dictionary<FileEntry, Task<string>> s_files = new Dictionary<FileEntry, Task<string>>();
+    private static readonly IEnumerable<string> MicrosoftSymbolServers = new[]
+    {
+      "http://msdl.microsoft.com/download/symbols",
+      "http://referencesource.microsoft.com/symbols"
+    };
 
-    /// <summary>
-    ///   The raw symbol path.  You should probably use the SymbolPath property instead.
-    /// </summary>
-    protected volatile string _symbolPath;
+    private readonly object myLock = new object();
+    private readonly IDictionary<FileEntry, string> myCache = new Dictionary<FileEntry, string>();
+    private readonly ICollection<FileEntry> myMissingEntries = new HashSet<FileEntry>();
+    private readonly IEnumerable<SymPathElement> mySymPathElements;
+    private readonly string myCacheLocation;
     
     /// <summary>
-    ///   The raw symbol cache.  You should probably use the SymbolCache property instead.
-    /// </summary>
-    protected volatile string _symbolCache;
-    
-    /// <summary>
-    ///   The timeout (in milliseconds) used when contacting each individual server.  This is not a total timeout for the entire
-    ///   symbol server operation.
+    ///   The timeout (in milliseconds) used when contacting each individual server. This is not a total timeout for the entire symbol server operation.
     /// </summary>
     public int Timeout { get; set; } = 60000;
     
-    /// <summary>
-    ///   A set of files that we did not find when requested.  This set is SymbolLocator specific (not global
-    ///   like successful downloads) and is cleared when we change the symbol path or cache.
-    /// </summary>
-    internal volatile HashSet<FileEntry> _missingFiles = new HashSet<FileEntry>();
-    
-    public DefaultSymbolLocator()
+    public DefaultSymbolLocator(string cacheLocation = null)
     {
-      var sympath = _NT_SYMBOL_PATH;
-      if (string.IsNullOrEmpty(sympath))
-        sympath = MicrosoftSymbolServerPath;
-
-      SymbolPath = sympath;
+      mySymPathElements = GetSymPathElements();
+      myCacheLocation = cacheLocation ?? Path.Combine(Path.GetTempPath(), "Symbols");
     }
-    
+
+    private static IEnumerable<SymPathElement> GetSymPathElements()
+    {
+      var result = new List<SymPathElement>();
+      foreach (var entry in MicrosoftSymbolServers)
+        result.Add(new SymPathElement(entry));
+      
+      var ntSymbolPath = Environment.GetEnvironmentVariable("_NT_SYMBOL_PATH");
+      var entries = (ntSymbolPath ?? "").Split(';').Where(e => !string.IsNullOrEmpty(e)).ToArray();
+      foreach (var entry in entries)
+        result.Add(new SymPathElement(entry));
+
+      return result;
+    }
+
+    private static FileEntry CreateEntry(string fileName, int buildTimeStamp, int imageSize)
+    {
+      fileName = Path.GetFileName(fileName);
+      if (string.IsNullOrEmpty(fileName))
+        return null;
+      
+      return new FileEntry(fileName.ToLower(), buildTimeStamp, imageSize);
+    }
     
     public string FindBinary(string fileName, int buildTimeStamp, int imageSize, bool checkProperties = true)
     {
-      var fullPath = fileName;
-      fileName = Path.GetFileName(fullPath).ToLower();
-
-      // First see if we already have the result cached.
-      var entry = new FileEntry(fileName, buildTimeStamp, imageSize);
-      var result = GetFileEntry(entry);
-      if (result != null)
-        return result;
-
-      var missingFiles = _missingFiles;
-      if (IsMissing(missingFiles, entry))
+      var entry = CreateEntry(fileName, buildTimeStamp, imageSize);
+      if (entry == null)
         return null;
 
-      // Test to see if the file is on disk.
-      if (ValidateBinary(fullPath, buildTimeStamp, imageSize, checkProperties))
+      lock (myLock)
       {
-        SetFileEntry(missingFiles, entry, fullPath);
-        return fullPath;
+        if (myCache.TryGetValue(entry, out var result))
+          return result;
+
+        if (myMissingEntries.Contains(entry))
+          return null;
+
+        if (ValidateBinary(fileName, buildTimeStamp, imageSize, checkProperties))
+        {
+          myCache[entry] = fileName;
+          return fileName;
+        }
       }
 
       // Finally, check the symbol paths.
-      string exeIndexPath = null;
-      foreach (var element in SymPathElement.GetElements(SymbolPath))
+      string indexPath = null;
+      foreach (var element in mySymPathElements)
+      {
         if (element.IsSymServer)
         {
-          if (exeIndexPath == null)
-            exeIndexPath = GetIndexPath(fileName, buildTimeStamp, imageSize);
+          if (indexPath == null)
+            indexPath = GetIndexPath(entry);
 
-          var target = TryGetFileFromServer(element.Target, exeIndexPath, element.Cache ?? SymbolCache);
+          var target = TryGetFileFromServer(element.Target, indexPath, element.Cache ?? myCacheLocation);
           if (target == null)
           {
             Trace($"Server '{element.Target}' did not have file '{Path.GetFileName(fileName)}' with timestamp={buildTimeStamp:x} and filesize={imageSize:x}.");
@@ -84,7 +93,9 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
           else if (ValidateBinary(target, buildTimeStamp, imageSize, checkProperties))
           {
             Trace($"Found '{fileName}' on server '{element.Target}'.  Copied to '{target}'.");
-            SetFileEntry(missingFiles, entry, target);
+            lock (myLock)
+              myCache[entry] = target;
+            
             return target;
           }
         }
@@ -94,34 +105,21 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
           if (ValidateBinary(filePath, buildTimeStamp, imageSize, checkProperties))
           {
             Trace($"Found '{fileName}' at '{filePath}'.");
-            SetFileEntry(missingFiles, entry, filePath);
+            lock (myLock)
+              myCache[entry] = filePath;
+            
             return filePath;
           }
         }
+      }
 
-      SetFileEntry(missingFiles, entry, null);
+      lock (myLock)
+        myMissingEntries.Add(entry);
+      
       return null;
     }
     
-    private string GetFileEntry(FileEntry entry)
-    {
-      lock (s_files)
-      {
-        if (s_files.TryGetValue(entry, out var task))
-          return task.Result;
-      }
-
-      return null;
-    }
-    
-    private static bool IsMissing<T>(HashSet<T> entries, T entry)
-    {
-      lock (entries)
-      {
-        return entries.Contains(entry);
-      }
-    }
-    
+   
     /// <summary>
     ///   Validates whether a file on disk matches the properties we expect.
     /// </summary>
@@ -130,33 +128,34 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// <param name="imageSize">The build image size we expect to match.</param>
     /// <param name="checkProperties">Whether we should actually validate the imagesize/timestamp or not.</param>
     /// <returns></returns>
-    protected virtual bool ValidateBinary(string fullPath, int buildTimeStamp, int imageSize, bool checkProperties)
+    private bool ValidateBinary(string fullPath, int buildTimeStamp, int imageSize, bool checkProperties)
     {
       if (string.IsNullOrEmpty(fullPath))
         return false;
 
-      if (File.Exists(fullPath))
+      if (!File.Exists(fullPath))
+        return false;
+
+      if (!checkProperties)
+        return true;
+
+      try
       {
-        if (!checkProperties) return true;
-
-        try
+        using (var pefile = new PEFile(fullPath))
         {
-          using (var pefile = new PEFile(fullPath))
-          {
-            var header = pefile.Header;
-            if (!checkProperties || header.TimeDateStampSec == buildTimeStamp && header.SizeOfImage == imageSize)
-              return true;
+          var header = pefile.Header;
+          if (header.TimeDateStampSec == buildTimeStamp && header.SizeOfImage == imageSize)
+            return true;
 
-            Trace("Rejected file '{0}' because file size and time stamp did not match.", fullPath);
-          }
-        }
-        catch (Exception e)
-        {
-          Trace("Encountered exception {0} while attempting to inspect file '{1}'.", e.GetType().Name, fullPath);
+          Trace("Rejected file '{0}' because file size and time stamp did not match.", fullPath);
+          return false;
         }
       }
-
-      return false;
+      catch (Exception e)
+      {
+        Trace("Encountered exception {0} while attempting to inspect file '{1}'.", e.GetType().Name, fullPath);
+        return false;
+      }
     }
     
     /// <summary>
@@ -165,7 +164,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// </summary>
     /// <param name="fmt"></param>
     /// <param name="args"></param>
-    protected virtual void Trace(string fmt, params object[] args)
+    private void Trace(string fmt, params object[] args)
     {
       if (args != null && args.Length > 0)
         fmt = string.Format(fmt, args);
@@ -173,51 +172,9 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       System.Diagnostics.Trace.WriteLine(fmt, "Microsoft.Diagnostics.Runtime.SymbolLocator");
     }
     
-    private void SetFileEntry(HashSet<FileEntry> missingFiles, FileEntry entry, string value)
+    private static string GetIndexPath(FileEntry entry)
     {
-      if (value != null)
-        lock (s_files)
-        {
-          if (!s_files.ContainsKey(entry))
-          {
-            var task = new Task<string>(() => value);
-            s_files[entry] = task;
-            task.Start();
-          }
-        }
-      else
-        lock (missingFiles)
-        {
-          missingFiles.Add(entry);
-        }
-    }
-    
-    /// <summary>
-    ///   Gets or sets the SymbolPath this object uses to attempt to find PDBs and binaries.
-    /// </summary>
-    public string SymbolPath
-    {
-      get => _symbolPath ?? "";
-
-      set
-      {
-        _symbolPath = (value ?? "").Trim();
-
-        SymbolPathOrCacheChanged();
-      }
-    }
-    
-    /// <summary>
-    ///   Called when changing the symbol file path or cache.
-    /// </summary>
-    protected virtual void SymbolPathOrCacheChanged()
-    {
-      _missingFiles.Clear();
-    }
-    
-    private static string GetIndexPath(string fileName, int buildTimeStamp, int imageSize)
-    {
-      return fileName + @"\" + buildTimeStamp.ToString("x") + imageSize.ToString("x") + @"\" + fileName;
+      return entry.FileName + @"\" + entry.TimeStamp.ToString("x") + entry.FileSize.ToString("x") + @"\" + entry.FileName;
     }
     
     private string TryGetFileFromServer(string urlForServer, string fileIndexPath, string cache)
@@ -346,7 +303,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// <param name="fullDestPath">The full destination path to copy the file to.</param>
     /// <param name="size">A hint as to the length of the stream.  This may be 0 or negative if the length is unknown.</param>
     /// <returns>True if the method successfully copied the file, false otherwise.</returns>
-    protected virtual void CopyStreamToFile(Stream input, string fullSrcPath, string fullDestPath, long size)
+    private void CopyStreamToFile(Stream input, string fullSrcPath, string fullDestPath, long size)
     {
       Debug.Assert(input != null);
 
@@ -389,73 +346,5 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         Trace("Encountered an error while attempting to copy '{0} to '{1}': {2}", fullSrcPath, fullDestPath, e.Message);
       }
     }
-    
-    /// <summary>
-    ///   Gets or sets the local symbol file cache.  This is the location that
-    ///   all symbol files are downloaded to on your computer.
-    /// </summary>
-    public string SymbolCache
-    {
-      get
-      {
-        var cache = _symbolCache;
-        if (!string.IsNullOrEmpty(cache))
-          return cache;
-
-        var tmp = Path.GetTempPath();
-        if (string.IsNullOrEmpty(tmp))
-          tmp = ".";
-
-        return Path.Combine(tmp, "symbols");
-      }
-      set
-      {
-        _symbolCache = value;
-        if (!string.IsNullOrEmpty(value))
-          Directory.CreateDirectory(value);
-
-        SymbolPathOrCacheChanged();
-      }
-    }
-    
-    /// <summary>
-    ///   This property gets and sets the global _NT_SYMBOL_PATH environment variable.
-    ///   This is the global setting for symbol paths on a computer.
-    /// </summary>
-    public static string _NT_SYMBOL_PATH
-    {
-      get
-      {
-        var ret = Environment.GetEnvironmentVariable("_NT_SYMBOL_PATH");
-        return ret ?? "";
-      }
-      set => Environment.SetEnvironmentVariable("_NT_SYMBOL_PATH", value);
-    }
-    
-    /// <summary>
-    ///   Return the string representing a symbol path for the 'standard' microsoft symbol servers.
-    ///   This returns the public msdl.microsoft.com server if outside Microsoft.
-    /// </summary>
-    public static string MicrosoftSymbolServerPath
-    {
-      get
-      {
-        var first = true;
-        var result = new StringBuilder();
-
-        foreach (var path in s_microsoftSymbolServers)
-        {
-          if (!first)
-            result.Append(';');
-
-          result.Append("SRV*");
-          result.Append(path);
-          first = false;
-        }
-
-        return result.ToString();
-      }
-    }
-
   }
 }

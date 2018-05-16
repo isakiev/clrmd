@@ -4,7 +4,6 @@
 // #define DEBUG_SERIALIZE
 
 using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 #pragma warning disable 649
@@ -17,22 +16,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
   /// </summary>
   public class SymPathElement
   {
-    /// <summary>
-    ///   returns a list of SymPathElements from a semicolon delimited string representing a symbol path
-    /// </summary>
-    public static List<SymPathElement> GetElements(string symbolPath)
-    {
-      var result = new List<SymPathElement>();
-      var entries = (symbolPath ?? "").Split(';');
-      result = new List<SymPathElement>(entries.Length);
-
-      foreach (var element in entries)
-        if (!string.IsNullOrEmpty(element))
-          result.Add(new SymPathElement(element));
-
-      return result;
-    }
-
     /// <summary>
     ///   returns true if this element of the symbol server path a symbol server specification
     /// </summary>

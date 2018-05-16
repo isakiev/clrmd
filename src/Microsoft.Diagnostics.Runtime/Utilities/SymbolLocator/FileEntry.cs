@@ -2,32 +2,43 @@
 
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
-  internal struct FileEntry : IEquatable<FileEntry>
+  internal class FileEntry : IEquatable<FileEntry>
   {
-    public string FileName;
-    public int TimeStamp;
-    public int FileSize;
+    public readonly string FileName;
+    public readonly int TimeStamp;
+    public readonly int FileSize;
 
     public FileEntry(string filename, int timestamp, int filesize)
     {
-      FileName = filename;
+      FileName = filename ?? throw new ArgumentNullException(nameof(filename));
       TimeStamp = timestamp;
       FileSize = filesize;
     }
 
-    public override int GetHashCode()
+    public bool Equals(FileEntry other)
     {
-      return FileName.ToLower().GetHashCode() ^ TimeStamp ^ FileSize;
+      if (ReferenceEquals(null, other)) return false;
+      if (ReferenceEquals(this, other)) return true;
+      return string.Equals(FileName, other.FileName) && TimeStamp == other.TimeStamp && FileSize == other.FileSize;
     }
 
     public override bool Equals(object obj)
     {
-      return obj is FileEntry && Equals((FileEntry)obj);
+      if (ReferenceEquals(null, obj)) return false;
+      if (ReferenceEquals(this, obj)) return true;
+      if (obj.GetType() != GetType()) return false;
+      return Equals((FileEntry) obj);
     }
 
-    public bool Equals(FileEntry other)
+    public override int GetHashCode()
     {
-      return FileName.Equals(other.FileName, StringComparison.OrdinalIgnoreCase) && TimeStamp == other.TimeStamp && FileSize == other.FileSize;
+      unchecked
+      {
+        var hashCode = FileName.GetHashCode();
+        hashCode = (hashCode * 397) ^ TimeStamp;
+        hashCode = (hashCode * 397) ^ FileSize;
+        return hashCode;
+      }
     }
   }
 }

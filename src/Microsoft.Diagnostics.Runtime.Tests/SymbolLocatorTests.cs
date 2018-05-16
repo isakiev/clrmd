@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Microsoft.Diagnostics.Runtime.Utilities;
-using Microsoft.Diagnostics.Runtime.Utilities.Pdb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
@@ -15,17 +11,16 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     public static readonly int WellKnownDacTimeStamp = 0x55b96946;
     public static readonly int WellKnownDacImageSize = 0x006a8000;
 
-    internal static DefaultSymbolLocator GetLocator()
+    internal static DefaultSymbolLocator GetLocator(string cacheLocation)
     {
-      return new DefaultSymbolLocator {SymbolCache = Helpers.TestWorkingDirectory};
+      return new DefaultSymbolLocator(cacheLocation);
     }
 
     [TestMethod]
     public void SymbolLocatorTimeoutTest()
     {
-      var locator = GetLocator();
+      var locator = GetLocator(Path.Combine(Helpers.TestWorkingDirectory, "TestTimeout"));
       locator.Timeout = 10000;
-      locator.SymbolCache += "\\TestTimeout";
 
       var dac = locator.FindBinary(WellKnownDac, WellKnownDacTimeStamp, WellKnownDacImageSize, false);
       Assert.IsNotNull(dac);
@@ -34,25 +29,18 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     [TestMethod]
     public void FindBinaryNegativeTest()
     {
-      var _locator = GetLocator();
-      var dac = _locator.FindBinary(WellKnownDac, WellKnownDacTimeStamp + 1, WellKnownDacImageSize + 1, false);
+      var locator = GetLocator(Helpers.TestWorkingDirectory);
+      var dac = locator.FindBinary(WellKnownDac, WellKnownDacTimeStamp + 1, WellKnownDacImageSize + 1, false);
       Assert.IsNull(dac);
     }
 
     [TestMethod]
     public void FindBinaryTest()
     {
-      var _locator = GetLocator();
-      var dac = _locator.FindBinary(WellKnownDac, WellKnownDacTimeStamp, WellKnownDacImageSize, false);
+      var locator = GetLocator(Helpers.TestWorkingDirectory);
+      var dac = locator.FindBinary(WellKnownDac, WellKnownDacTimeStamp, WellKnownDacImageSize, false);
       Assert.IsNotNull(dac);
       Assert.IsTrue(File.Exists(dac));
-    }
-
-    private static bool PdbMatches(string pdb, Guid guid, int age)
-    {
-      PdbReader.GetPdbProperties(pdb, out var fileGuid, out var fileAge);
-
-      return guid == fileGuid;
     }
   }
 }
