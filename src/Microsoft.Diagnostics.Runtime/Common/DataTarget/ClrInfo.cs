@@ -70,7 +70,6 @@ namespace Microsoft.Diagnostics.Runtime
       };
       
       ModuleInfo = module;
-      module.IsRuntime = true; //strange logic //TODO: revisit
     }
     
     /// <summary>
