@@ -37,6 +37,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
   public class TestTarget
   {
+    private static string _baseFolder;
     private static readonly TestTarget _sharedLibrary = new TestTarget("SharedLibrary.cs", true);
 
     private readonly bool _isLibrary;
@@ -45,6 +46,20 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     private object _sync = new object();
     private readonly string[] _miniDumpPath = new string[2];
     private readonly string[] _fullDumpPath = new string[2];
+
+    private static string GetBaseFolder()
+    {
+      if (_baseFolder != null)
+        return _baseFolder;
+
+      var binFolder = Path.GetDirectoryName(typeof(TestTarget).Assembly.Location);
+      var rootFolder = Path.GetDirectoryName(binFolder);
+      if (rootFolder == null)
+        throw new ApplicationException("Failed to detect project root folder");
+      
+      _baseFolder = Path.Combine(rootFolder, "Src", "Microsoft.Diagnostics.Runtime.Tests", "Data");
+      return _baseFolder;
+    }
 
     public string Executable
     {
@@ -62,13 +77,13 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     public TestTarget(string source, bool isLibrary = false)
     {
-      _source = Path.Combine(Environment.CurrentDirectory, "Targets", source);
+      _source = Path.Combine(GetBaseFolder(), source);
       _isLibrary = isLibrary;
     }
 
     public TestTarget(string source, params TestTarget[] required)
     {
-      _source = Path.Combine(Environment.CurrentDirectory, "Targets", source);
+      _source = Path.Combine(GetBaseFolder(), source);
       _isLibrary = false;
 
       foreach (var item in required)
