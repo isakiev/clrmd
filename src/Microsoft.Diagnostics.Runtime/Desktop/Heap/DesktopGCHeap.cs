@@ -212,23 +212,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         }
     }
 
-    private BlockingObject[] _managedLocks;
-
-    public override IEnumerable<BlockingObject> EnumerateBlockingObjects()
-    {
-      InitLockInspection();
-      return _managedLocks;
-    }
-
-    internal void InitLockInspection()
-    {
-      if (_managedLocks != null)
-        return;
-
-      var li = new LockInspection(this, DesktopRuntime);
-      _managedLocks = li.InitLockInspection();
-    }
-
     public override ClrRootStackwalkPolicy StackwalkPolicy
     {
       get => _stackwalkPolicy;

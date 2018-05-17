@@ -86,8 +86,6 @@
     <Compile Include="Common\DataTarget\VersionInfo.cs" />
     <Compile Include="Common\DataTarget\VirtualQueryData.cs" />
     <Compile Include="Common\DumpDataReader.cs" />
-    <Compile Include="Common\Heap\BlockingObject.cs" />
-    <Compile Include="Common\Heap\BlockingReason.cs" />
     <Compile Include="Common\Heap\ClrHeap.cs" />
     <Compile Include="Common\Heap\ClrRoot.cs" />
     <Compile Include="Common\Heap\ClrRootStackwalkPolicy.cs" />
@@ -199,7 +197,6 @@
     <Compile Include="Desktop\Fields\ErrorType.cs" />
     <Compile Include="Desktop\Fields\PrimitiveType.cs" />
     <Compile Include="Desktop\Heap\ArrayRankHandle.cs" />
-    <Compile Include="Desktop\Heap\DesktopBlockingObject.cs" />
     <Compile Include="Desktop\Heap\DesktopException.cs" />
     <Compile Include="Desktop\Heap\DesktopGCHeap.cs" />
     <Compile Include="Desktop\Heap\FinalizerRoot.cs" />
@@ -247,7 +244,6 @@
     <Compile Include="Desktop\LegacyRuntime\V4ThreadData.cs" />
     <Compile Include="Desktop\LegacyRuntime\V4ThreadPoolData.cs" />
     <Compile Include="Desktop\LegacyRuntime\WorkRequestFunctionTypes.cs" />
-    <Compile Include="Desktop\LockInspection\LockInspection.cs" />
     <Compile Include="Desktop\Methods\DesktopMethod.cs" />
     <Compile Include="Desktop\Methods\ImageCorILMethod.cs" />
     <Compile Include="Desktop\Modules\DesktopBaseModule.cs" />

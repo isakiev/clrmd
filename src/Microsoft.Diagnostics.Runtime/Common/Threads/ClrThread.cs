@@ -240,10 +240,5 @@ namespace Microsoft.Diagnostics.Runtime
     ///   Returns true if the thread is a COM multithreaded apartment.
     /// </summary>
     public abstract bool IsMTA { get; }
-
-    /// <summary>
-    ///   Returns the object this thread is blocked waiting on, or null if the thread is not blocked.
-    /// </summary>
-    public abstract IList<BlockingObject> BlockingObjects { get; }
   }
 }
