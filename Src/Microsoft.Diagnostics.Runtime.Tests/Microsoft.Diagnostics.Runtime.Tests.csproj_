@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -42,42 +42,29 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppDomainTests.cs" />
-    <Compile Include="DataTargetTestExtensions.cs" />
-    <Compile Include="Debugger.cs" />
-    <Compile Include="GCHandleTests.cs" />
-    <None Include="project.json" />
-    <None Include="Targets\GCHandles.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <Compile Include="GCRootTests.cs" />
-    <Compile Include="HeapTests.cs" />
-    <Compile Include="MethodTests.cs" />
-    <None Include="Targets\GCRoot.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <Compile Include="TypeTests.cs" />
-    <Compile Include="MinidumpTests.cs" />
-    <Compile Include="ModuleTests.cs" />
-    <Compile Include="PdbTests.cs" />
-    <Compile Include="RuntimeTests.cs" />
-    <None Include="Targets\Types.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Targets\SharedLibrary.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Targets\AppDomains.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <Compile Include="TestTargets.cs" />
-    <None Include="Targets\NestedException.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <Compile Include="ExceptionTests.cs" />
-    <Compile Include="Helpers.cs" />
-    <Compile Include="SymbolLocatorTests.cs" />
+    <Compile Include="Src\TypeTests.cs" />
+    <Compile Include="Src\AppDomainTests.cs" />
+    <Compile Include="Src\DataTargetTestExtensions.cs" />
+    <Compile Include="Src\Debugger.cs" />
+    <Compile Include="Src\ExceptionTests.cs" />
+    <Compile Include="Src\GCHandleTests.cs" />
+    <Compile Include="Src\GCRootTests.cs" />
+    <Compile Include="Src\HeapTests.cs" />
+    <Compile Include="Src\Helpers.cs" />
+    <Compile Include="Src\MethodTests.cs" />
+    <Compile Include="Src\MinidumpTests.cs" />
+    <Compile Include="Src\ModuleTests.cs" />
+    <Compile Include="Src\PdbTests.cs" />
+    <Compile Include="Src\RuntimeTests.cs" />
+    <Compile Include="Src\SymbolLocatorTests.cs" />
+    <Compile Include="Src\TestTargets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Src\Targets\AppDomains.cs" />
+    <None Include="Src\Targets\GCHandles.cs" />
+    <None Include="Src\Targets\GCRoot.cs" />
+    <None Include="Src\Targets\NestedException.cs" />
+    <None Include="Src\Targets\SharedLibrary.cs" />
+    <None Include="Src\Targets\Types.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Diagnostics.Runtime\Microsoft.Diagnostics.Runtime.csproj">
@@ -105,11 +92,4 @@
   </Choose>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
