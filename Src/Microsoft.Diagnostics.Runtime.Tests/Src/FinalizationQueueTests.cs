@@ -6,7 +6,26 @@ namespace Microsoft.Diagnostics.Runtime.Tests
   public class FinalizationQueueTests
   {
     [TestMethod]
-    public void TestQueuedObjectsCount()
+    public void TestAllFinalizableObjects()
+    {
+      using (var dt = TestTargets.FinalizationQueue.LoadFullDump())
+      {
+        var runtime = dt.CreateSingleRuntime();
+        var targetObjectsCount = 0;
+
+        foreach (var address in runtime.Heap.EnumerateFinalizableObjectAddresses())
+        {
+          var type = runtime.Heap.GetObjectType(address);
+          if (type.Name == typeof(DieFastA).FullName)
+            targetObjectsCount++;
+        }
+
+        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountA, targetObjectsCount);
+      }
+    }
+
+    [TestMethod]
+    public void TestFinalizerQueueObjects()
     {
       using (var dt = TestTargets.FinalizationQueue.LoadFullDump())
       {
@@ -16,11 +35,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         foreach (var address in runtime.EnumerateFinalizerQueueObjectAddresses())
         {
           var type = runtime.Heap.GetObjectType(address);
-          if (type.Name == typeof(DieFast).FullName)
+          if (type.Name == typeof(DieFastB).FullName)
             targetObjectsCount++;
         }
-        
-        Assert.AreEqual(FinalizationQueueTarget.ObjectsCount, targetObjectsCount);
+
+        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountB, targetObjectsCount);
       }
     }
   }
