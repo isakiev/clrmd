@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -80,6 +80,8 @@
     <Compile Include="Src\Common\DataTarget\DacLibrary.cs" />
     <Compile Include="Src\Common\DataTarget\DataTarget.cs" />
     <Compile Include="Src\Common\DataTarget\DbgEngDataReader.cs" />
+    <Compile Include="Src\Common\DataTarget\DefaultDacLocator.cs" />
+    <Compile Include="Src\Common\DataTarget\IDacLocator.cs" />
     <Compile Include="Src\Common\DataTarget\IDataReader.cs" />
     <Compile Include="Src\Common\DataTarget\LiveDataReader.cs" />
     <Compile Include="Src\Common\DataTarget\ModuleInfo.cs" />

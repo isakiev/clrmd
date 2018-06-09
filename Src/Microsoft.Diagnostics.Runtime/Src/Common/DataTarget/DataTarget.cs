@@ -15,10 +15,11 @@ namespace Microsoft.Diagnostics.Runtime
   {
     private static readonly Regex InvalidChars = new Regex($"[{Regex.Escape(new string(Path.GetInvalidPathChars()))}]");
 
-    public DataTarget(IDataReader dataReader, ISymbolLocator symbolLocator = null)
+    public DataTarget(IDataReader dataReader, IDacLocator dacLocator = null, ISymbolLocator symbolLocator = null)
     {
       DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
       SymbolLocator = symbolLocator ?? new DefaultSymbolLocator();
+      DacLocator = dacLocator ?? new DefaultDacLocator(SymbolLocator);
       FileLoader = new FileLoader(this);
 
       IsMinidump = dataReader.IsMinidump;
@@ -30,6 +31,7 @@ namespace Microsoft.Diagnostics.Runtime
 
     public IDataReader DataReader { get; }
     public ISymbolLocator SymbolLocator { get; }
+    public IDacLocator DacLocator { get; }
     internal FileLoader FileLoader { get; }
     
     public bool IsMinidump { get; }
@@ -62,40 +64,22 @@ namespace Microsoft.Diagnostics.Runtime
     {
       DataReader.Close();
     }
-
-    private DacLibrary GetDacLibrary(ClrInfo clrInfo)
-    {
-      if (clrInfo == null) throw new ArgumentNullException(nameof(clrInfo));
-      
-      var moduleDirectory = Path.GetDirectoryName(clrInfo.ModuleInfo.FileName) ?? string.Empty;
-      var dacFileName = DacInfo.GetDacFileName(clrInfo.Flavor, Architecture);
-      var dacRequestFileName = DacInfo.GetDacRequestFileName(clrInfo.Flavor, Architecture, Architecture, clrInfo.Version);
-      
-      var dacLocation = Path.Combine(moduleDirectory, dacFileName);
-
-      if (!File.Exists(dacLocation))
-      {
-        var downloadedDac = SymbolLocator.FindBinary(dacRequestFileName, (int)clrInfo.ModuleInfo.TimeStamp, (int)clrInfo.ModuleInfo.FileSize);
-        if (!File.Exists(downloadedDac))
-          throw new FileNotFoundException(dacRequestFileName);
-
-        dacLocation = downloadedDac;
-      }
-
-      if (IntPtr.Size != PointerSize)
-        throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
-
-      return new DacLibrary(this, dacLocation);
-    }
-    
+   
     /// <summary>
     ///   Creates a runtime from the given Dac file on disk.
     /// </summary>
     public ClrRuntime CreateRuntime(ClrInfo clrInfo)
     {
       if (clrInfo == null) throw new ArgumentNullException(nameof(clrInfo));
+      
+      if (IntPtr.Size != PointerSize)
+        throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
 
-      var lib = GetDacLibrary(clrInfo);
+      var dacLocation = DacLocator.FindDac(clrInfo, Architecture);
+      if (dacLocation == null || !File.Exists(dacLocation))
+        throw new FileNotFoundException("Failed to find matching dac file");
+
+      var lib = new DacLibrary(this, dacLocation);
 
       DesktopVersion ver;
       if (clrInfo.Flavor == ClrFlavor.Core)
