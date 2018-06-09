@@ -165,7 +165,7 @@ namespace Microsoft.Diagnostics.Runtime
       if (GetHeaps(out var heaps))
         foreach (var heap in heaps)
         {
-          foreach (var objAddr in GetPointersInRange(heap.FQStart, heap.FQStop))
+          foreach (var objAddr in GetPointersInRange(heap.FQRootsStart, heap.FQRootsStop))
             if (objAddr != 0)
               yield return objAddr;
         }

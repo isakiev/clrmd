@@ -19,6 +19,6 @@
     ulong FQAllObjectsStart { get; }
     ulong FQAllObjectsStop { get; }
     ulong FQRootsStart { get; }
-    ulong FQRootsEnd { get; }
+    ulong FQRootsStop { get; }
   }
 }

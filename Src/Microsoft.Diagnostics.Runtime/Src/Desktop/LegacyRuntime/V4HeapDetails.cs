@@ -44,13 +44,10 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public ulong EphemeralAllocContextLimit => generation_table0.AllocContextLimit;
     
-    public ulong FQAllObjectsStart => finalization_fill_pointers3;
-
-    public ulong FQAllObjectsStop => finalization_fill_pointers5;
-
-    public ulong FQRootsStart => finalization_fill_pointers0;
-
-    public ulong FQRootsEnd => finalization_fill_pointers3;
+    public ulong FQAllObjectsStart => finalization_fill_pointers0;
+    public ulong FQAllObjectsStop => finalization_fill_pointers3;
+    public ulong FQRootsStart => finalization_fill_pointers3;
+    public ulong FQRootsStop => finalization_fill_pointers5;
 
     public ulong Gen0Start => generation_table0.AllocationStart;
 

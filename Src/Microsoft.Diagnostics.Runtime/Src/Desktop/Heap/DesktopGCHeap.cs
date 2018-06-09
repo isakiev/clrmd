@@ -200,7 +200,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (DesktopRuntime.GetHeaps(out var heaps))
         foreach (var heap in heaps)
         {
-          foreach (var obj in DesktopRuntime.GetPointersInRange(heap.FQLiveStart, heap.FQLiveStop))
+          foreach (var obj in DesktopRuntime.GetPointersInRange(heap.FQAllObjectsStart, heap.FQAllObjectsStop))
           {
             if (obj == 0)
               continue;

@@ -33,10 +33,10 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     internal ulong Gen2Start => ActualHeap.Gen2Start;
     internal ulong FirstLargeSegment => ActualHeap.FirstLargeHeapSegment;
     internal ulong FirstSegment => ActualHeap.FirstHeapSegment;
-    internal ulong FQStart => ActualHeap.FQAllObjectsStart;
-    internal ulong FQStop => ActualHeap.FQAllObjectsStop;
-    internal ulong FQLiveStart => ActualHeap.FQRootsStart;
-    internal ulong FQLiveStop => ActualHeap.FQRootsEnd;
+    internal ulong FQAllObjectsStart => ActualHeap.FQAllObjectsStart;
+    internal ulong FQAllObjectsStop => ActualHeap.FQAllObjectsStop;
+    internal ulong FQRootsStart => ActualHeap.FQRootsStart;
+    internal ulong FQRootsStop => ActualHeap.FQRootsStop;
 
     internal SubHeap(IHeapDetails heap, int heapNum, Dictionary<ulong, ulong> allocPointers)
     {
