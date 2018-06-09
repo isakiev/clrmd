@@ -74,9 +74,9 @@
     <Compile Include="Src\Common\DataTarget\AttachFlag.cs" />
     <Compile Include="Src\Common\DataTarget\ClrFlavor.cs" />
     <Compile Include="Src\Common\DataTarget\ClrInfo.cs" />
+    <Compile Include="Src\Common\DataTarget\ClrInfoProvider.cs" />
     <Compile Include="Src\Common\DataTarget\CrashDumpReader.cs" />
     <Compile Include="Src\Common\DataTarget\DacDataTarget.cs" />
-    <Compile Include="Src\Common\DataTarget\DacInfo.cs" />
     <Compile Include="Src\Common\DataTarget\DacLibrary.cs" />
     <Compile Include="Src\Common\DataTarget\DataTarget.cs" />
     <Compile Include="Src\Common\DataTarget\DbgEngDataReader.cs" />

@@ -38,9 +38,6 @@ namespace Microsoft.Diagnostics.Runtime
 
     public DacLibrary(DataTarget dataTarget, string dacDll)
     {
-      if (dataTarget.ClrVersions.Count == 0)
-        throw new ClrDiagnosticsException("Process is not a CLR process!");
-
       _library = NativeMethods.LoadLibrary(dacDll);
       if (_library == IntPtr.Zero)
         throw new ClrDiagnosticsException("Failed to load dac: " + dacDll);

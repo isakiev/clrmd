@@ -3,6 +3,6 @@
   public interface IDacLocator
   {
     /// <returns>null if not found</returns>
-    string FindDac(ClrInfo clrInfo, Architecture architecture);
+    string FindDac(ClrInfo clrInfo);
   }
 }

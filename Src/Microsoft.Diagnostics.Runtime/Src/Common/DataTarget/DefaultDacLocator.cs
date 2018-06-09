@@ -13,19 +13,16 @@ namespace Microsoft.Diagnostics.Runtime
       _symbolLocator = symbolLocator ?? throw new ArgumentNullException(nameof(symbolLocator));
     }
 
-    public string FindDac(ClrInfo clrInfo, Architecture architecture)
+    public string FindDac(ClrInfo clrInfo)
     {
       if (clrInfo == null) throw new ArgumentNullException(nameof(clrInfo));
 
       var moduleDirectory = Path.GetDirectoryName(clrInfo.ModuleInfo.FileName) ?? string.Empty;
-      var dacFileName = DacInfo.GetDacFileName(clrInfo.Flavor, architecture);
-
-      var dacLocation = Path.Combine(moduleDirectory, dacFileName);
+      var dacLocation = Path.Combine(moduleDirectory, clrInfo.DacFileName);
       if (File.Exists(dacLocation))
         return dacLocation;
       
-      var dacRequestFileName = DacInfo.GetDacRequestFileName(clrInfo.Flavor, architecture, architecture, clrInfo.Version);
-      return _symbolLocator.FindBinary(dacRequestFileName, (int)clrInfo.ModuleInfo.TimeStamp, (int)clrInfo.ModuleInfo.FileSize);
+      return _symbolLocator.FindBinary(clrInfo.DacRequestFileName, (int)clrInfo.ModuleInfo.TimeStamp, (int)clrInfo.ModuleInfo.FileSize);
     }
   }
 }

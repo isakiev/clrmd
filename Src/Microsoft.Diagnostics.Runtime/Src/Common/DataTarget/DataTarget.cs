@@ -26,7 +26,8 @@ namespace Microsoft.Diagnostics.Runtime
       Architecture = dataReader.GetArchitecture();
       PointerSize = dataReader.GetPointerSize();
       Modules = InitModules(dataReader);
-      ClrVersions = InitVersions(Modules);
+      ClrVersions = InitVersions(Modules, Architecture, out var hasNativeRuntimes);
+      HasNativeRuntimes = hasNativeRuntimes;
     }
 
     public IDataReader DataReader { get; }
@@ -39,6 +40,8 @@ namespace Microsoft.Diagnostics.Runtime
     public uint PointerSize { get; }
     public IReadOnlyCollection<ModuleInfo> Modules { get; }
     public IReadOnlyCollection<ClrInfo> ClrVersions { get; }
+    public bool HasNativeRuntimes { get; }
+    
     
     private static IReadOnlyCollection<ModuleInfo> InitModules(IDataReader dataReader)
     {
@@ -47,16 +50,19 @@ namespace Microsoft.Diagnostics.Runtime
       return sortedModules.ToArray();
     }
     
-    private static IReadOnlyCollection<ClrInfo> InitVersions(IReadOnlyCollection<ModuleInfo> modules)
+    private static IReadOnlyCollection<ClrInfo> InitVersions(IReadOnlyCollection<ModuleInfo> modules, Architecture architecture, out bool hasNativeRuntimes)
     {
       var versions = new List<ClrInfo>();
+      hasNativeRuntimes = false;
+      
       foreach (var module in modules)
       {
-        if (ClrInfo.IsClrRuntime(module, out var clrInfo))
-          versions.Add(clrInfo);
+        if (ClrInfoProvider.IsSupportedRuntime(module, out var flavor)) 
+          versions.Add(new ClrInfo(flavor, module, architecture));
+        else if (ClrInfoProvider.IsNativeRuntime(module))
+          hasNativeRuntimes = true;
       }
 
-      versions.Sort();
       return versions;
     }
 
@@ -75,7 +81,7 @@ namespace Microsoft.Diagnostics.Runtime
       if (IntPtr.Size != PointerSize)
         throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
 
-      var dacLocation = DacLocator.FindDac(clrInfo, Architecture);
+      var dacLocation = DacLocator.FindDac(clrInfo);
       if (dacLocation == null || !File.Exists(dacLocation))
         throw new FileNotFoundException("Failed to find matching dac file");
 
@@ -84,9 +90,6 @@ namespace Microsoft.Diagnostics.Runtime
       DesktopVersion ver;
       if (clrInfo.Flavor == ClrFlavor.Core)
         return new V45Runtime(clrInfo, this, lib);
-
-      if (clrInfo.Flavor == ClrFlavor.Native)
-        throw new NotSupportedException();
 
       if (clrInfo.Version.Major == 2)
         ver = DesktopVersion.v2;
