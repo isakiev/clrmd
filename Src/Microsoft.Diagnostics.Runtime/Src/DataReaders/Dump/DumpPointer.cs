@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Diagnostics.Runtime.Utilities
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
   ///   Immutable pointer into the dump file. Has associated size for runtime checking.

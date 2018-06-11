@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Microsoft.Diagnostics.Runtime.Utilities
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   [StructLayout(LayoutKind.Sequential)]
   internal struct MINIDUMP_HEADER

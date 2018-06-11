@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Microsoft.Diagnostics.Runtime.DataReaders;
 
 namespace Microsoft.Diagnostics.Runtime
 {

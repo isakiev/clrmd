@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Microsoft.Diagnostics.Runtime.Utilities
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
   /// Minidumps have a common variable length list structure for modules and threads implemented

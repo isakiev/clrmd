@@ -45,7 +45,7 @@ using System.Threading;
 // 
 //     
 
-namespace Microsoft.Diagnostics.Runtime.Utilities
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
   ///   Read contents of a minidump.

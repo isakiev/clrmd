@@ -2,6 +2,7 @@
 using System.CodeDom.Compiler;
 using System.IO;
 using Microsoft.CSharp;
+using Microsoft.Diagnostics.Runtime.DataReaders.DbgEng;
 using Microsoft.Diagnostics.Runtime.Interop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

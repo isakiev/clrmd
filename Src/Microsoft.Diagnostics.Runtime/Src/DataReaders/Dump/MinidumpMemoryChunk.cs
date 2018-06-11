@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.Diagnostics.Runtime.Utilities
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   internal class MinidumpMemoryChunk : IComparable<MinidumpMemoryChunk>
   {

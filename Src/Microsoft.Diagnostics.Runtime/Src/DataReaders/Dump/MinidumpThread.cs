@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 #pragma warning disable 0649
 #pragma warning disable 0169
 
-namespace Microsoft.Diagnostics.Runtime.Utilities
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
   ///   Raw MINIDUMP_THREAD structure imported from DbgHelp.h

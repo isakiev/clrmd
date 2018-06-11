@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Diagnostics.Runtime.Utilities
+﻿namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
   ///   List of Threads in the minidump.

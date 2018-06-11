@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Diagnostics.Runtime
+﻿namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
 {
   /// <summary>
   ///   Specifies how to attach to a live process.

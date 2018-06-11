@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Diagnostics.Runtime.Interop;
 
-namespace Microsoft.Diagnostics.Runtime
+namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
 {
   public unsafe class DbgEngDataReader : IDisposable, IDataReader
   {

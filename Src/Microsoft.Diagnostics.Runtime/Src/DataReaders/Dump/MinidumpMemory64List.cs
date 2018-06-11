@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Diagnostics.Runtime.Utilities
+﻿namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
   /// Usually about 300-500 elements long.

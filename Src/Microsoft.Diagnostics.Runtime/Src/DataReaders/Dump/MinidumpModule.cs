@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 #pragma warning disable 0649
 #pragma warning disable 0169
 
-namespace Microsoft.Diagnostics.Runtime.Utilities
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
   /// Default Pack of 8 makes this struct 4 bytes too long

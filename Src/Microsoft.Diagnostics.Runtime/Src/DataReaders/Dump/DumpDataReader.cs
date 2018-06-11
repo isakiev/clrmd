@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
-namespace Microsoft.Diagnostics.Runtime
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   public class DumpDataReader : IDataReader, IDisposable
   {
