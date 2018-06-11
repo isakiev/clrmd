@@ -134,6 +134,9 @@
     <Compile Include="Src\DataReaders\Live\PssQueryInformationClass.cs" />
     <Compile Include="Src\DataReaders\Live\RawPinvokes.cs" />
     <Compile Include="Src\DataReaders\Live\ThreadAccess.cs" />
+    <Compile Include="Src\DataReaders\Simple\SimpleDumpModule.cs" />
+    <Compile Include="Src\DataReaders\Simple\SimpleDataReader.cs" />
+    <Compile Include="Src\DataReaders\Simple\SimpleDumpThread.cs" />
     <Compile Include="Src\DataTargets\ClrFlavor.cs" />
     <Compile Include="Src\DataTargets\ClrInfo.cs" />
     <Compile Include="Src\DataTargets\ClrInfoProvider.cs" />
