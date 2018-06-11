@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.Diagnostics.Runtime.DataReaders.Simple;
+using Microsoft.Diagnostics.Runtime.DataReaders.Dump;
 
-namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 {
   /// <summary>
   ///   Represents a native module in a dump file. This is a flyweight object.

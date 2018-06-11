@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using Microsoft.Diagnostics.Runtime.DataReaders.Simple;
+using Microsoft.Diagnostics.Runtime.DataReaders.Dump;
 
-namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
+namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 {
   /// <summary>
   ///   Represents a thread from a minidump file. This is a flyweight object.
@@ -53,25 +53,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     ///   The native OS Thread Id of this thread.
     /// </summary>
     public int ThreadId => (int)_raw.ThreadId;
-
-    /* todo
-      /// <summary>
-      /// Safe way to get a thread's context
-      /// </summary>
-      /// <returns>a native context object representing the thread context</returns>
-      public NativeContext GetThreadContext()
-      {
-          return _owner.GetThreadContext(_raw.ThreadContext);
-      }
-
-      /// <summary>
-      /// Safe way to get a thread's context
-      /// </summary>
-      public void GetThreadContext(NativeContext context)
-      {
-          _owner.GetThreadContext(_raw.ThreadContext, context);
-      }
-       */
 
     /// <summary>
     ///   Get a thread's context using a raw buffer and size

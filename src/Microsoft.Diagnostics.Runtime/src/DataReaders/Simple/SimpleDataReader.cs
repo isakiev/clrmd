@@ -477,29 +477,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
           ClrDiagnosticsException.HR.CrashDumpError);
     }
 
-    /*
-
-    /// <summary>
-    /// Read memory from the dump file and copy into the buffer
-    /// </summary>
-    /// <param name="targetAddress">target address in dump to read buffer.Length bytets from</param>
-    /// <param name="buffer">destination buffer to copy target memory to.</param>
-    /// <remarks>All memory requested must be readable or it throws.</remarks>
-    public uint ReadPartialMemory(ulong targetAddress, byte[] buffer)
-    {
-        GCHandle h = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-        try
-        {
-            uint cbRequestSize = (uint)buffer.Length;
-            return ReadPartialMemory(targetAddress, h.AddrOfPinnedObject(), cbRequestSize);
-        }
-        finally
-        {
-            h.Free();
-        }
-    }
-    
-     */
     /// <summary>
     ///   Read memory from target and copy it to the local buffer pointed to by destinationBuffer.
     /// </summary>
@@ -911,32 +888,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       return null;
     }
 
-    /*
-    /// <summary>
-    /// Retrieve a thread context at the given location
-    /// </summary>
-    /// <param name="threadId">OS thread ID of the thread</param>
-    /// <returns>a native context object representing the thread context</returns>
-    internal NativeContext GetThreadContext(DumpReader.NativeMethods.MINIDUMP_LOCATION_DESCRIPTOR loc)
-    {
-        NativeContext context = ContextAllocator.GenerateContext();
-        GetThreadContext(loc, context);
-        return context;
-    }
-
-    /// <summary>
-    /// Retrieve a thread context at the given location
-    /// </summary>
-    /// <param name="threadId">OS thread ID of the thread</param>
-    /// <returns>a native context object representing the thread context</returns>
-    internal void GetThreadContext(DumpReader.NativeMethods.MINIDUMP_LOCATION_DESCRIPTOR loc, NativeContext context)
-    {
-        using (IContextDirectAccessor w = context.OpenForDirectAccess())
-        {
-            GetThreadContext(loc, w.RawBuffer, w.Size);
-        }
-    }
-    */
     internal void GetThreadContext(MINIDUMP_LOCATION_DESCRIPTOR loc, IntPtr buffer, int sizeBufferBytes)
     {
       if (loc.IsNull) throw new ClrDiagnosticsException("Context not present", ClrDiagnosticsException.HR.CrashDumpError);
@@ -997,15 +948,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       var es = GetExceptionStream();
       return es.ThreadId;
     }
-
-    //todo
-    /*
-    public NativeContext ExceptionStreamThreadContext()
-    {
-        NativeMethods.MINIDUMP_EXCEPTION_STREAM es = GetExceptionStream();
-        return GetThreadContext(es.ThreadContext);
-    }
-     */
 
     /// <summary>
     ///   Lookup the first module in the target with a matching.
@@ -1080,46 +1022,5 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
         yield return new SimpleDumpModule(this, module);
       }
     }
-
-    /*
-    public class DumpMemoryRead : IMemoryRead
-    {
-        public long Address { get; set; }
-        public int BytesRequested { get; set; }
-        public int BytesRead { get; set; }
-        public DumpModule Module { get; set; }
-        public FileSearchResult FileSearch { get; set; }
-        public override string ToString()
-        {
-            return ToString("");
-        }
-        public string ToString(string format)
-        {
-            StringBuilder sb = new StringBuilder();
-            if (BytesRead == 0)
-                sb.Append("Failed ");
-            else if (BytesRead < BytesRequested)
-                sb.Append("Partial");
-            else
-                sb.Append("Success");
-            sb.Append(string.Format(" - 0x{0,-16:x}: 0x{1,-8:x} of 0x{2,-8:x} bytes read", Address, BytesRead, BytesRequested));
-            if (format == "detailed")
-            {
-                sb.AppendLine();
-                string source = "Dump memory";
-                if (Module != null)
-                    source = string.Format("Image {0} (0x{1:x} - 0x{2:x})", Path.GetFileName(Module.FullName),
-                        Module.BaseAddress, Module.BaseAddress + Module.Size);
-                sb.AppendLine("Source: " + source);
-                if (FileSearch != null && FileSearch.Path == null)
-                {
-                    sb.AppendLine("Image search failed:");
-                    sb.AppendLine(FileSearch.ToString());
-                }
-            }
-            return sb.ToString();
-        }
-    }
-    */
-  } // DumpReader
+  }
 }
