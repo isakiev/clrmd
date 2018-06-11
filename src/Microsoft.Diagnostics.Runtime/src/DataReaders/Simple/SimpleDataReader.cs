@@ -6,7 +6,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Diagnostics.Runtime.DataReaders.Dump;
-using Microsoft.Diagnostics.Runtime.Utilities;
 
 // This provides a managed wrapper over the unmanaged dump-reading APIs in DbgHelp.dll.
 // 
@@ -52,9 +51,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       if (!File.Exists(file))
         throw new FileNotFoundException(file);
 
-      if (Path.GetExtension(file).ToLower() == ".cab")
-        file = ExtractCab(file);
-
       _fileName = file;
       _dumpReader = new SimpleDumpReader(file);
     }
@@ -62,53 +58,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     ~SimpleDataReader()
     {
       Dispose();
-    }
-
-    private string ExtractCab(string file)
-    {
-      _generatedPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-
-      while (Directory.Exists(_generatedPath))
-        _generatedPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-
-      Directory.CreateDirectory(_generatedPath);
-
-      var options = new CommandOptions
-      {
-        NoThrow = true,
-        NoWindow = true
-      };
-
-      var cmd = Command.Run(string.Format("expand -F:*dmp {0} {1}", file, _generatedPath), options);
-
-      var error = false;
-      if (cmd.ExitCode != 0)
-      {
-        error = true;
-      }
-      else
-      {
-        file = null;
-        foreach (var item in Directory.GetFiles(_generatedPath))
-        {
-          var ext = Path.GetExtension(item).ToLower();
-          if (ext == ".dll" || ext == ".pdb" || ext == ".exe")
-            continue;
-
-          file = item;
-          break;
-        }
-
-        error |= file == null;
-      }
-
-      if (error)
-      {
-        Dispose();
-        throw new IOException("Failed to extract a crash dump from " + file);
-      }
-
-      return file;
     }
 
     public bool IsMinidump => _dumpReader.IsMinidump;
