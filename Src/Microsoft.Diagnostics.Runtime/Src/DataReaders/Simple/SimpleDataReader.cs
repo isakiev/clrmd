@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
+using System.Text;
 using Microsoft.Diagnostics.Runtime.DataReaders.Dump;
 
 // This provides a managed wrapper over the unmanaged dump-reading APIs in DbgHelp.dll.
@@ -36,82 +37,115 @@ using Microsoft.Diagnostics.Runtime.DataReaders.Dump;
 // working set and complexity of real clients.
 // 
 //     
+// DumpReader:
+//   Read contents of a minidump.
+//   If we have a 32-bit dump, then there's an addressing collision possible.
+//   OS debugging code sign extends 32 bit wide addresses into 64 bit wide addresses.
+//   The CLR does not sign extend, thus you cannot round-trip target addresses exposed by this class.
+//   Currently we read these addresses once and don't hand them back, so it's not an issue.
 
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 {
   public class SimpleDataReader : IDataReader, IDisposable
   {
-    private readonly string _fileName;
-    private readonly SimpleDumpReader _dumpReader;
-    private List<ModuleInfo> _modules;
-    private string _generatedPath;
+    private const uint DumpSignature = 0x504d444d;
+    private const uint DumpVersion = 0xa793;
+    private const uint DumpVersionMask = 0xffff;
+    private const uint DumpWithFullMemoryInfo = 0x0002;
+    
+    private readonly BinaryReader myReader;
+    private readonly DumpHeader myHeader;
+    private readonly DumpSystemInfo mySystemInfo;
+    private readonly IDictionary<DumpStreamType, DumpStreamDetails> myStreamDictionary;
+    
+    // Caching the chunks avoids the cost of Marshal.PtrToStructure on every single element in the memory list.
+    // Empirically, this cache provides huge performance improvements for read memory.
+    // This cache could be completey removed if we used unsafe C# and just had direct pointers
+    // into the mapped dump file.
+    private readonly DumpMemoryChunk[] myChunks;
 
-    public SimpleDataReader(string file)
+    private IReadOnlyCollection<MINIDUMP_MODULE> myModules;
+    private IReadOnlyCollection<MINIDUMP_THREAD> myThreads;
+    
+
+    public SimpleDataReader(string filePath)
     {
-      if (!File.Exists(file))
-        throw new FileNotFoundException(file);
+      if (!File.Exists(filePath))
+        throw new FileNotFoundException(filePath);
+      
+      myReader = new BinaryReader(File.OpenRead(filePath));
+      myHeader = myReader.ReadStructure<DumpHeader>();
+      
+      if (myHeader.Singature != DumpSignature)
+        throw new ClrDiagnosticsException("Incorrect dump signature");
+      if ((myHeader.Version & DumpVersionMask) != DumpVersion)
+        throw new ClrDiagnosticsException("Unsupported dump version");
 
-      _fileName = file;
-      _dumpReader = new SimpleDumpReader(file);
+      myStreamDictionary = new Dictionary<DumpStreamType, DumpStreamDetails>();
+      myReader.Seek(myHeader.StreamDirectoryPosition);
+      for (var i = 0; i < myHeader.NumberOfStreams; i++)
+      {
+        var details = myReader.ReadStructure<DumpStreamDetails>();
+        if (details.Size > 0 && !myStreamDictionary.ContainsKey(details.Type))
+          myStreamDictionary.Add(details.Type, details);
+      }
+
+      var systemInfoStreamDetails = GetStreamDetails(DumpStreamType.SystemInfo);
+      mySystemInfo = myReader.Seek(systemInfoStreamDetails.Position).ReadStructure<DumpSystemInfo>();
+      IsMinidump = (myHeader.Flags & DumpWithFullMemoryInfo) == 0;
+
+      List<DumpMemoryChunk> chunks;
+      var isList64 = false;
+      if (myStreamDictionary.TryGetValue(DumpStreamType.Memory64List, out var streamDetails64))
+      {
+        chunks = DumpMemoryChunkReader.ReadChunks64(myReader.Seek(streamDetails64.Position));
+        isList64 = true;
+      }
+      else if (myStreamDictionary.TryGetValue(DumpStreamType.MemoryList, out var streamDetails))
+        chunks = DumpMemoryChunkReader.ReadChunks32(myReader.Seek(streamDetails.Position));
+      else
+        throw new ClrDiagnosticsException("Dump doesn't contain MemoryList stream");
+
+      myChunks = DumpMemoryChunkAggregator.MergeAndValidate(chunks, isList64).ToArray();
     }
 
-    ~SimpleDataReader()
+    private DumpStreamDetails GetStreamDetails(DumpStreamType type)
     {
-      Dispose();
+      if (!myStreamDictionary.TryGetValue(type, out var details))
+        throw new ClrDiagnosticsException($"Dump doesn't contain {type} stream");
+
+      return details;
     }
-
-    public bool IsMinidump => _dumpReader.IsMinidump;
-
-    public override string ToString()
-    {
-      return _fileName;
-    }
-
-    public void Close()
-    {
-      _dumpReader.Dispose();
-      Dispose();
-    }
-
+    
     public void Dispose()
     {
-      if (_generatedPath != null)
-      {
-        try
-        {
-          foreach (var file in Directory.GetFiles(_generatedPath))
-            File.Delete(file);
-
-          Directory.Delete(_generatedPath, false);
-        }
-        catch
-        {
-        }
-
-        _generatedPath = null;
-      }
+      myReader.Dispose();
     }
+    
+    public void Close()
+    {
+      Dispose();
+    }
+
+    public bool IsMinidump { get; }
 
     public void Flush()
     {
-      _modules = null;
     }
 
     public Architecture GetArchitecture()
     {
-      switch (_dumpReader.ProcessorArchitecture)
+      switch (mySystemInfo.ProcessorArchitecture)
       {
-        case ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM:
-          return Architecture.Arm;
-
-        case ProcessorArchitecture.PROCESSOR_ARCHITECTURE_AMD64:
-          return Architecture.Amd64;
-
-        case ProcessorArchitecture.PROCESSOR_ARCHITECTURE_INTEL:
+        case DumpProcessorArchitecture.INTEL:
           return Architecture.X86;
+        case DumpProcessorArchitecture.AMD64:
+          return Architecture.Amd64;
+        case DumpProcessorArchitecture.ARM:
+          return Architecture.Arm;
+        default:
+          return Architecture.Unknown;
       }
-
-      return Architecture.Unknown;
     }
 
     public uint GetPointerSize()
@@ -125,44 +159,123 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
           return 4;
       }
     }
+    
+    private string ReadString(ContentPosition position)
+    {
+      myReader.Seek(position);
+      
+      // Minidump string is defined as:
+      // typedef struct _MINIDUMP_STRING {
+      //   ULONG32 Length;         // Length in bytes of the string
+      //    WCHAR   Buffer [0];     // Variable size buffer
+      // } MINIDUMP_STRING, *PMINIDUMP_STRING;
+      var lengthBytes = myReader.ReadInt32();
+      var bytes = myReader.ReadBytes(lengthBytes);
+
+      return Encoding.Unicode.GetString(bytes);
+    }
+
+    private IReadOnlyCollection<MINIDUMP_MODULE> GetModules()
+    {
+      if (myModules != null)
+        return myModules;
+      
+      var streamDetails = GetStreamDetails(DumpStreamType.ModuleList);
+      myReader.Seek(streamDetails.Position);
+
+      var entriesCount = myReader.ReadInt32();
+      var result = new List<MINIDUMP_MODULE>(entriesCount);
+      for (var i = 0; i < entriesCount; i++)
+        result.Add(myReader.ReadStructure<MINIDUMP_MODULE>());
+
+      myModules = result;
+      return myModules;
+    }
 
     public IList<ModuleInfo> EnumerateModules()
     {
-      if (_modules != null)
-        return _modules;
+      var result = new List<ModuleInfo>();
 
-      var modules = new List<ModuleInfo>();
-
-      foreach (var mod in _dumpReader.EnumerateModules())
+      foreach (var module in GetModules())
       {
-        var raw = mod.Raw;
-
-        var module = new ModuleInfo(this)
+        result.Add(new ModuleInfo(this)
         {
-          FileName = mod.FullName,
-          ImageBase = raw.BaseOfImage,
-          FileSize = raw.SizeOfImage,
-          TimeStamp = raw.TimeDateStamp,
-          Version = GetVersionInfo(mod)
-        };
-
-        modules.Add(module);
+          FileName = ReadString(new ContentPosition(module.ModuleNameRva.Value)),
+          ImageBase = module.BaseOfImage,
+          FileSize = module.SizeOfImage,
+          TimeStamp = module.TimeDateStamp,
+          Version = GetVersionInfo(module)
+        });
       }
 
-      _modules = modules;
-      return modules;
+      return result;
+    }
+
+    private IReadOnlyCollection<MINIDUMP_THREAD> GetThreads()
+    {
+      if (myThreads != null)
+        return myThreads;
+
+      var isThreadEx = false;
+      
+      // On x86 and X64, we have the ThreadListStream.  On IA64, we have the ThreadExListStream.
+      if (!myStreamDictionary.TryGetValue(DumpStreamType.ThreadList, out var streamDetails))
+      {
+        streamDetails = GetStreamDetails(DumpStreamType.ThreadExList);
+        isThreadEx = true;
+      }
+
+      myReader.Seek(streamDetails.Position);
+      
+      var entriesCount = myReader.ReadInt32();
+      var result = new List<MINIDUMP_THREAD>(entriesCount);
+
+      for (var i = 0; i < entriesCount; i++)
+      {
+        var entry = isThreadEx ? myReader.ReadStructure<MINIDUMP_THREAD_EX>() : myReader.ReadStructure<MINIDUMP_THREAD>();
+        result.Add(entry);
+      }
+
+      myThreads = result;
+      return result;
     }
 
     public void GetVersionInfo(ulong baseAddress, out VersionInfo version)
     {
-      var module = _dumpReader.TryLookupModuleByAddress(baseAddress);
+      var module = TryLookupModuleByAddress(baseAddress);
       version = module != null ? GetVersionInfo(module) : new VersionInfo();
     }
-
-    private static VersionInfo GetVersionInfo(SimpleDumpModule module)
+    
+    /// <summary>
+    ///   Return the module containing the target address, or null if no match.
+    /// </summary>
+    /// <param name="targetAddress">address in target</param>
+    /// <returns>
+    ///   Null if no match. Else a DumpModule such that the target address is in between the range specified
+    ///   by the DumpModule's .BaseAddress and .Size property
+    /// </returns>
+    /// <remarks>
+    ///   This can be useful for symbol lookups or for using module images to
+    ///   supplement memory read requests for minidumps.
+    /// </remarks>
+    private MINIDUMP_MODULE TryLookupModuleByAddress(ulong targetAddress)
     {
-      var raw = module.Raw;
-      var version = raw.VersionInfo;
+      // This is an optimized lookup path, which avoids using IEnumerable or creating
+      // unnecessary DumpModule objects.
+      foreach (var module in GetModules())
+      {
+        var targetStart = module.BaseOfImage;
+        var targetEnd = targetStart + module.SizeOfImage;
+        if (targetStart <= targetAddress && targetEnd > targetAddress)
+          return module;
+      }
+
+      return null;
+    }
+
+    private static VersionInfo GetVersionInfo(MINIDUMP_MODULE module)
+    {
+      var version = module.VersionInfo;
       int minor = (ushort)version.dwFileVersionMS;
       int major = (ushort)(version.dwFileVersionMS >> 16);
       int patch = (ushort)version.dwFileVersionLS;
@@ -172,33 +285,66 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       return versionInfo;
     }
 
-    private byte[] _ptrBuffer = new byte[IntPtr.Size];
+    private DumpMemoryChunk GetChunkContainingAddress(ulong address)
+    {
+      var targetChunk = new MinidumpMemoryChunk {TargetStartAddress = address};
+      var index = Array.BinarySearch(myChunks, targetChunk);
+      if (index >= 0)
+      {
+        Debug.Assert(myChunks[index].TargetStartAddress == address);
+        return myChunks[index]; // exact match will contain the address
+      }
+
+      //TODO: revisit
+      if (~index != 0)
+      {
+        var possibleIndex = Math.Min(myChunks.Length, ~index) - 1;
+        if (myChunks[possibleIndex].TargetStartAddress <= address &&
+          myChunks[possibleIndex].TargetEndAddress > address)
+          return myChunks[possibleIndex];
+      }
+
+      return null;
+    }
 
     public ulong ReadPointerUnsafe(ulong addr)
     {
-      return _dumpReader.ReadPointerUnsafe(addr);
+      var chunk = GetChunkContainingAddress(addr);
+      if (chunk == null)
+        return 0;
+
+      var offset = addr - chunk.TargetStartAddress;
+      
+      var position = new ContentPosition(chunk.ContentPosition.Value + (long)offset);
+      myReader.Seek(position);
+
+      //TODO: revisit assumption
+      if (IntPtr.Size == 4)
+        return myReader.ReadUInt32();
+
+      return myReader.ReadUInt64();
     }
 
     public uint ReadDwordUnsafe(ulong addr)
     {
-      return _dumpReader.ReadDwordUnsafe(addr);
+      throw new NotImplementedException();
     }
 
     public bool ReadMemory(ulong address, byte[] buffer, int bytesRequested, out int bytesRead)
     {
-      bytesRead = _dumpReader.ReadPartialMemory(address, buffer, bytesRequested);
+      bytesRead = ReadPartialMemory(address, buffer, bytesRequested);
       return bytesRead > 0;
     }
 
     public bool ReadMemory(ulong address, IntPtr buffer, int bytesRequested, out int bytesRead)
     {
-      bytesRead = (int)_dumpReader.ReadPartialMemory(address, buffer, (uint)bytesRequested);
+      bytesRead = (int)ReadPartialMemory(address, buffer, (uint)bytesRequested);
       return bytesRead > 0;
     }
 
     public ulong GetThreadTeb(uint id)
     {
-      var thread = _dumpReader.GetThread((int)id);
+      var thread = GetThreads().FirstOrDefault(x => x.ThreadId == id);
       if (thread == null)
         return 0;
 
@@ -207,126 +353,50 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 
     public IEnumerable<uint> EnumerateAllThreads()
     {
-      foreach (var dumpThread in _dumpReader.EnumerateThreads())
-        yield return (uint)dumpThread.ThreadId;
-    }
-
-    public bool VirtualQuery(ulong addr, out VirtualQueryData vq)
-    {
-      return _dumpReader.VirtualQuery(addr, out vq);
+      foreach (var thread in GetThreads())
+        yield return thread.ThreadId;
     }
 
     public bool GetThreadContext(uint id, uint contextFlags, uint contextSize, IntPtr context)
     {
-      var thread = _dumpReader.GetThread((int)id);
+      var thread = GetThreads().FirstOrDefault(x => x.ThreadId == id);
       if (thread == null)
         return false;
+      
+      var buffer = context;
+      var sizeBufferBytes = (int)contextSize;
+      var loc = thread.ThreadContext;
+      
+      if (loc.IsNull) throw new ClrDiagnosticsException("Context not present", ClrDiagnosticsException.HR.CrashDumpError);
 
-      thread.GetThreadContext(context, (int)contextSize);
+      var position = new ContentPosition(loc.Rva.Value);
+      var sizeContext = loc.DataSize;
+
+      if (sizeBufferBytes < sizeContext)
+        throw new ClrDiagnosticsException(
+          "Context size mismatch. Expected = 0x" + sizeBufferBytes.ToString("x") + ", Size in dump = 0x" + sizeContext.ToString("x"),
+          ClrDiagnosticsException.HR.CrashDumpError);
+
+      // Now copy from dump into buffer. 
+      CopyContent(position, sizeContext, buffer);
       return true;
     }
 
-    public bool GetThreadContext(uint threadID, uint contextFlags, uint contextSize, byte[] context)
+    public bool GetThreadContext(uint threadId, uint contextFlags, uint contextSize, byte[] context)
     {
       throw new NotImplementedException();
-    }
-  }
-  
-  /// <summary>
-  ///   Read contents of a minidump.
-  ///   If we have a 32-bit dump, then there's an addressing collision possible.
-  ///   OS debugging code sign extends 32 bit wide addresses into 64 bit wide addresses.
-  ///   The CLR does not sign extend, thus you cannot round-trip target addresses exposed by this class.
-  ///   Currently we read these addresses once and don't hand them back, so it's not an issue.
-  /// </summary>
-  internal class SimpleDumpReader : IDisposable
-  {
-    // Get a DumpPointer from a MINIDUMP_LOCATION_DESCRIPTOR
-    protected internal DumpPointer TranslateDescriptor(MINIDUMP_LOCATION_DESCRIPTOR location)
-    {
-      // A Location has both an RVA and Size. If we just TranslateRVA, then that would be a
-      // DumpPointer associated with a larger size (to the end of the dump-file). 
-      var p = TranslateRVA(location.Rva);
-      p.Shrink(location.DataSize);
-      return p;
-    }
-
-    /// <summary>
-    ///   Translates from an RVA to Dump Pointer.
-    /// </summary>
-    /// <param name="rva">RVA within the dump</param>
-    /// <returns>DumpPointer representing RVA.</returns>
-    protected internal DumpPointer TranslateRVA(ulong rva)
-    {
-      return _base.Adjust(rva);
-    }
-
-    /// <summary>
-    ///   Translates from an RVA to Dump Pointer.
-    /// </summary>
-    /// <param name="rva">RVA within the dump</param>
-    /// <returns>DumpPointer representing RVA.</returns>
-    protected internal DumpPointer TranslateRVA(RVA rva)
-    {
-      return _base.Adjust(rva.Value);
-    }
-
-    /// <summary>
-    ///   Translates from an RVA to Dump Pointer.
-    /// </summary>
-    /// <param name="rva">RVA within the dump</param>
-    /// <returns>DumpPointer representing RVA.</returns>
-    protected internal DumpPointer TranslateRVA(RVA64 rva)
-    {
-      return _base.Adjust(rva.Value);
-    }
-
-    /// <summary>
-    ///   Gets a MINIDUMP_STRING at the given RVA as an System.String.
-    /// </summary>
-    /// <param name="rva">RVA of MINIDUMP_STRING</param>
-    /// <returns>System.String representing contents of MINIDUMP_STRING at the given RVA</returns>
-    protected internal string GetString(RVA rva)
-    {
-      var p = TranslateRVA(rva);
-      return GetString(p);
-    }
-
-    /// <summary>
-    ///   Gets a MINIDUMP_STRING at the given DumpPointer as an System.String.
-    /// </summary>
-    /// <param name="ptr">DumpPointer to a MINIDUMP_STRING</param>
-    /// <returns>
-    ///   System.String representing contents of MINIDUMP_STRING at the given location
-    ///   in the dump
-    /// </returns>
-    protected internal string GetString(DumpPointer ptr)
-    {
-      EnsureValid();
-
-      // Minidump string is defined as:
-      // typedef struct _MINIDUMP_STRING {
-      //   ULONG32 Length;         // Length in bytes of the string
-      //    WCHAR   Buffer [0];     // Variable size buffer
-      // } MINIDUMP_STRING, *PMINIDUMP_STRING;
-      var lengthBytes = ptr.ReadInt32();
-
-      ptr = ptr.Adjust(4); // move past the Length field
-
-      var lengthChars = lengthBytes / 2;
-      var s = ptr.ReadAsUnicodeString(lengthChars);
-      return s;
     }
 
     public bool VirtualQuery(ulong addr, out VirtualQueryData data)
     {
-      uint min = 0, max = (uint)_memoryChunks.Count - 1;
+      uint min = 0;
+      uint max = (uint)myChunks.Length - 1;
 
       while (min <= max)
       {
         var mid = (max + min) / 2;
 
-        var targetStartAddress = _memoryChunks.StartAddress(mid);
+        var targetStartAddress = myChunks[mid].TargetStartAddress;
 
         if (addr < targetStartAddress)
         {
@@ -334,14 +404,14 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
         }
         else
         {
-          var targetEndAddress = _memoryChunks.EndAddress(mid);
+          var targetEndAddress = myChunks[mid].TargetEndAddress;
           if (targetEndAddress < addr)
           {
             min = mid + 1;
           }
           else
           {
-            data = new VirtualQueryData(targetStartAddress, _memoryChunks.Size(mid));
+            data = new VirtualQueryData(targetStartAddress, myChunks[mid].Size);
             return true;
           }
         }
@@ -351,23 +421,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       return false;
     }
 
-    public IEnumerable<VirtualQueryData> EnumerateMemoryRanges(ulong startAddress, ulong endAddress)
-    {
-      for (ulong i = 0; i < _memoryChunks.Count; i++)
-      {
-        var targetStartAddress = _memoryChunks.StartAddress(i);
-        var targetEndAddress = _memoryChunks.EndAddress(i);
-
-        if (targetEndAddress < startAddress)
-          continue;
-        if (endAddress < targetStartAddress)
-          continue;
-
-        var size = _memoryChunks.Size(i);
-        yield return new VirtualQueryData(targetStartAddress, size);
-      }
-    }
-
     /// <summary>
     ///   Read memory from the dump file and return results in newly allocated buffer
     /// </summary>
@@ -375,7 +428,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     /// <param name="length">number of bytes to read</param>
     /// <returns>newly allocated byte array containing dump memory</returns>
     /// <remarks>All memory requested must be readable or it throws.</remarks>
-    public byte[] ReadMemory(ulong targetAddress, int length)
+    private byte[] ReadMemory(ulong targetAddress, int length)
     {
       var buffer = new byte[length];
       ReadMemory(targetAddress, buffer, length);
@@ -389,7 +442,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     /// <param name="buffer">destination buffer to copy target memory to.</param>
     /// <param name="cbRequestSize">count of bytes to read</param>
     /// <remarks>All memory requested must be readable or it throws.</remarks>
-    public void ReadMemory(ulong targetAddress, byte[] buffer, int cbRequestSize)
+    private void ReadMemory(ulong targetAddress, byte[] buffer, int cbRequestSize)
     {
       var h = GCHandle.Alloc(buffer, GCHandleType.Pinned);
       try
@@ -412,7 +465,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     /// </param>
     /// <param name="destinationBuffer">pointer to copy the memory to.</param>
     /// <param name="destinationBufferSizeInBytes">size of the destinationBuffer in bytes.</param>
-    public void ReadMemory(ulong targetRequestStart, IntPtr destinationBuffer, uint destinationBufferSizeInBytes)
+    private void ReadMemory(ulong targetRequestStart, IntPtr destinationBuffer, uint destinationBufferSizeInBytes)
     {
       var bytesRead = ReadPartialMemory(targetRequestStart, destinationBuffer, destinationBufferSizeInBytes);
       if (bytesRead != destinationBufferSizeInBytes)
@@ -436,7 +489,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     /// <param name="destinationBuffer">pointer to copy the memory to.</param>
     /// <param name="destinationBufferSizeInBytes">size of the destinationBuffer in bytes.</param>
     /// <returns>Number of contiguous bytes successfuly copied into the destination buffer.</returns>
-    public virtual uint ReadPartialMemory(ulong targetRequestStart, IntPtr destinationBuffer, uint destinationBufferSizeInBytes)
+    private uint ReadPartialMemory(ulong targetRequestStart, IntPtr destinationBuffer, uint destinationBufferSizeInBytes)
     {
       var bytesRead = ReadPartialMemoryInternal(
         targetRequestStart,
@@ -446,36 +499,8 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       return bytesRead;
     }
 
-    internal ulong ReadPointerUnsafe(ulong addr)
+    private int ReadPartialMemory(ulong targetRequestStart, byte[] destinationBuffer, int bytesRequested)
     {
-      var chunkIndex = _memoryChunks.GetChunkContainingAddress(addr);
-      if (chunkIndex == -1)
-        return 0;
-
-      var chunk = TranslateRVA(_memoryChunks.RVA((uint)chunkIndex));
-      var offset = addr - _memoryChunks.StartAddress((uint)chunkIndex);
-
-      if (IntPtr.Size == 4)
-        return chunk.Adjust(offset).GetDword();
-
-      return chunk.Adjust(offset).GetUlong();
-    }
-
-    internal uint ReadDwordUnsafe(ulong addr)
-    {
-      var chunkIndex = _memoryChunks.GetChunkContainingAddress(addr);
-      if (chunkIndex == -1)
-        return 0;
-
-      var chunk = TranslateRVA(_memoryChunks.RVA((uint)chunkIndex));
-      var offset = addr - _memoryChunks.StartAddress((uint)chunkIndex);
-      return chunk.Adjust(offset).GetDword();
-    }
-
-    public virtual int ReadPartialMemory(ulong targetRequestStart, byte[] destinationBuffer, int bytesRequested)
-    {
-      EnsureValid();
-
       if (bytesRequested <= 0)
         return 0;
 
@@ -485,13 +510,13 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       var bytesRead = 0;
       do
       {
-        var chunkIndex = _memoryChunks.GetChunkContainingAddress(targetRequestStart + (uint)bytesRead);
-        if (chunkIndex == -1)
+        var chunk = GetChunkContainingAddress(targetRequestStart + (uint)bytesRead);
+        if (chunk == null)
           break;
 
-        var pointerCurrentChunk = TranslateRVA(_memoryChunks.RVA((uint)chunkIndex));
-        var startAddr = targetRequestStart + (uint)bytesRead - _memoryChunks.StartAddress((uint)chunkIndex);
-        var bytesAvailable = _memoryChunks.Size((uint)chunkIndex) - startAddr;
+        var pointerCurrentChunk = chunk.ContentPosition;
+        var startAddr = targetRequestStart + (uint)bytesRead - chunk.TargetStartAddress;
+        var bytesAvailable = chunk.Size - startAddr;
 
         Debug.Assert(bytesRequested >= bytesRead);
         var bytesToCopy = bytesRequested - bytesRead;
@@ -501,81 +526,41 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
         Debug.Assert(bytesToCopy > 0);
         if (bytesToCopy == 0)
           break;
+        
+        var adjustedPosition = new ContentPosition(pointerCurrentChunk.Value + (long)startAddr);
+        myReader.Seek(adjustedPosition);
 
-        pointerCurrentChunk.Adjust(startAddr).Copy(destinationBuffer, bytesRead, bytesToCopy);
+        myReader.BaseStream.Read(destinationBuffer, bytesRead, bytesToCopy);
+        
+        //TODO: check if copied less
         bytesRead += bytesToCopy;
       } while (bytesRead < bytesRequested);
 
       return bytesRead;
     }
 
-#pragma warning disable 0420
-    private volatile bool _disposing;
-    private volatile int _lock;
-
-    private bool AcquireReadLock()
-    {
-      var result = 0;
-      var value = 0;
-      do
-      {
-        value = _lock;
-        if (_disposing || value < 0)
-          return false;
-
-        result = Interlocked.CompareExchange(ref _lock, value + 1, value);
-      } while (result != value);
-
-      return true;
-    }
-
-    private void ReleaseReadLock()
-    {
-      Interlocked.Decrement(ref _lock);
-    }
-
-    private bool AcquireWriteLock()
-    {
-      var result = 0;
-      result = Interlocked.CompareExchange(ref _lock, -1, 0);
-      while (result != 0)
-      {
-        Thread.Sleep(50);
-        result = Interlocked.CompareExchange(ref _lock, -1, 0);
-      }
-
-      return true;
-    }
-
-    private void ReleaseWriteLock()
-    {
-      Interlocked.Increment(ref _lock);
-    }
-
     // Since a MemoryListStream makes no guarantees that there aren't duplicate, overlapping, or wholly contained
     // memory regions, we need to handle that.  For the purposes of this code, we presume all memory regions
     // in the dump that cover a given VA have the correct (duplicate) contents.
-    protected uint ReadPartialMemoryInternal(
+    private uint ReadPartialMemoryInternal(
       ulong targetRequestStart,
       IntPtr destinationBuffer,
       uint destinationBufferSizeInBytes,
       uint startIndex)
     {
-      EnsureValid();
-
       if (destinationBufferSizeInBytes == 0)
         return 0;
 
       uint bytesRead = 0;
       do
       {
-        var chunkIndex = _memoryChunks.GetChunkContainingAddress(targetRequestStart + bytesRead);
-        if (chunkIndex == -1)
+        var chunk = GetChunkContainingAddress(targetRequestStart + bytesRead);
+        if (chunk == null)
           break;
 
-        var pointerCurrentChunk = TranslateRVA(_memoryChunks.RVA((uint)chunkIndex));
-        var idxStart = (uint)(targetRequestStart + bytesRead - _memoryChunks.StartAddress((uint)chunkIndex));
-        var bytesAvailable = (uint)_memoryChunks.Size((uint)chunkIndex) - idxStart;
+        var pointerCurrentChunk = chunk.ContentPosition;
+        var idxStart = (uint)(targetRequestStart + bytesRead - chunk.TargetStartAddress);
+        var bytesAvailable = (uint)chunk.Size - idxStart;
         var bytesNeeded = destinationBufferSizeInBytes - bytesRead;
         var bytesToCopy = Math.Min(bytesAvailable, bytesNeeded);
 
@@ -585,390 +570,35 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 
         var dest = new IntPtr(destinationBuffer.ToInt64() + bytesRead);
         var destSize = destinationBufferSizeInBytes - bytesRead;
-        pointerCurrentChunk.Adjust(idxStart).Copy(dest, destSize, bytesToCopy);
+        
+        
+        var adjustedPosition = new ContentPosition(pointerCurrentChunk.Value + idxStart);
+        
+        if (bytesToCopy > destSize)
+          throw new ArgumentException("Buffer too small");
+
+        CopyContent(adjustedPosition, bytesToCopy, dest);
+
         bytesRead += bytesToCopy;
       } while (bytesRead < destinationBufferSizeInBytes);
 
       return bytesRead;
     }
 
-    // Caching the chunks avoids the cost of Marshal.PtrToStructure on every single element in the memory list.
-    // Empirically, this cache provides huge performance improvements for read memory.
-    // This cache could be completey removed if we used unsafe C# and just had direct pointers
-    // into the mapped dump file.
-    protected MinidumpMemoryChunks _memoryChunks;
-    // The backup lookup method for memory that's not in the dump is to try and load the memory
-    // from the same file on disk.
-    protected LoadedFileMemoryLookups _mappedFileMemory;
-
-    /// <summary>
-    ///   ToString override.
-    /// </summary>
-    /// <returns>string description of the DumpReader.</returns>
-    public override string ToString()
+    //TODO: revisit
+    private void CopyContent(ContentPosition sourcePosition, uint bytesToCopy, IntPtr destination)
     {
-      if (_file == null) return "Empty";
-
-      return _file.Name;
-    }
-
-    public bool IsMinidump { get; set; }
-
-    /// <summary>
-    ///   Constructor
-    /// </summary>
-    /// <param name="path">filename to open dump file</param>
-    public SimpleDumpReader(string path)
-    {
-      _file = File.OpenRead(path);
-      var length = _file.Length;
-
-      // The dump file may be many megabytes large, so we don't want to
-      // read it all at once. Instead, doing a mapping.
-      _fileMapping = NativeMethods.CreateFileMapping(_file.SafeFileHandle, IntPtr.Zero, NativeMethods.PageProtection.Readonly, 0, 0, null);
-
-      if (_fileMapping.IsInvalid)
-      {
-        var error = Marshal.GetHRForLastWin32Error();
-        Marshal.ThrowExceptionForHR(error, new IntPtr(-1));
-      }
-
-      _view = NativeMethods.MapViewOfFile(_fileMapping, NativeMethods.FILE_MAP_READ, 0, 0, IntPtr.Zero);
-      if (_view.IsInvalid)
-      {
-        var error = Marshal.GetHRForLastWin32Error();
-        Marshal.ThrowExceptionForHR(error, new IntPtr(-1));
-      }
-
-      _base = DumpPointer.DangerousMakeDumpPointer(_view.BaseAddress, (uint)length);
-
-      //
-      // Cache stuff
-      //
-
-      DumpPointer pStream;
-
-      // System info.            
-      pStream = GetStream(MINIDUMP_STREAM_TYPE.SystemInfoStream);
-      _info = pStream.PtrToStructure<MINIDUMP_SYSTEM_INFO>();
-
-      // Memory64ListStream is present in MinidumpWithFullMemory.
-      if (TryGetStream(MINIDUMP_STREAM_TYPE.Memory64ListStream, out pStream))
-      {
-        _memoryChunks = new MinidumpMemoryChunks(pStream, MINIDUMP_STREAM_TYPE.Memory64ListStream);
-      }
-      else
-      {
-        // MiniDumpNormal doesn't have a Memory64ListStream, it has a MemoryListStream.
-        pStream = GetStream(MINIDUMP_STREAM_TYPE.MemoryListStream);
-        _memoryChunks = new MinidumpMemoryChunks(pStream, MINIDUMP_STREAM_TYPE.MemoryListStream);
-      }
-
-      _mappedFileMemory = new LoadedFileMemoryLookups();
-      IsMinidump = DumpNative.IsMiniDump(_view.BaseAddress);
-    }
-
-    /// <summary>
-    ///   Dispose method.
-    /// </summary>
-    public void Dispose()
-    {
-      // Clear any cached objects.
-      _disposing = true;
-      AcquireWriteLock();
-
-      _info = null;
-      _memoryChunks = null;
-      _mappedFileMemory = null;
-
-      // All resources are backed by safe-handles, so we don't need a finalizer.
-      if (_fileMapping != null)
-        _fileMapping.Close();
-
-      if (_view != null)
-        _view.Close();
-
-      if (_file != null)
-        _file.Dispose();
-    }
-
-    // Helper to ensure the object is not yet disposed.
-    private void EnsureValid()
-    {
-      if (_file == null) throw new ObjectDisposedException("DumpReader");
-    }
-
-    private readonly FileStream _file;
-    private readonly SafeWin32Handle _fileMapping;
-    private readonly SafeMapViewHandle _view;
-
-    // DumpPointer (raw pointer that's aware of remaining buffer size) for start of minidump. 
-    // This is useful for computing RVAs.
-    private DumpPointer _base;
-
-    // Cached info
-    private MINIDUMP_SYSTEM_INFO _info;
-
-    /// <summary>
-    ///   Get a DumpPointer for the given stream. That can then be used to further decode the stream.
-    /// </summary>
-    /// <param name="type">type of stream to lookup</param>
-    /// <returns>DumpPointer refering into the stream. </returns>
-    private DumpPointer GetStream(MINIDUMP_STREAM_TYPE type)
-    {
-      if (!TryGetStream(type, out var stream))
-        throw new ClrDiagnosticsException("Dump does not contain a " + type + " stream.", ClrDiagnosticsException.HR.CrashDumpError);
-
-      return stream;
-    }
-
-    /// <summary>
-    ///   Get a DumpPointer for the given stream. That can then be used to further decode the stream.
-    /// </summary>
-    /// <param name="type">type of stream to lookup</param>
-    /// <param name="stream">DumpPointer refering into the stream. </param>
-    /// <returns>True if stream was succesfully retrived</returns>
-    private bool TryGetStream(MINIDUMP_STREAM_TYPE type, out DumpPointer stream)
-    {
-      EnsureValid();
-
-      var fOk = DumpNative.MiniDumpReadDumpStream(_view.BaseAddress, type, out var pStream, out var cbStreamSize);
-
-      if (!fOk || IntPtr.Zero == pStream || cbStreamSize < 1)
-      {
-        stream = default(DumpPointer);
-        return false;
-      }
-
-      stream = DumpPointer.DangerousMakeDumpPointer(pStream, cbStreamSize);
-      return true;
-    }
-
-    /// <summary>
-    ///   Version numbers of OS that this dump was taken on.
-    /// </summary>
-    public Version Version => _info.Version;
-
-    /// <summary>
-    ///   The processor architecture that this dump was taken on.
-    /// </summary>
-    public ProcessorArchitecture ProcessorArchitecture
-    {
-      get
-      {
-        EnsureValid();
-        return _info.ProcessorArchitecture;
-      }
-    }
-
-    /// <summary>
-    ///   Get the thread for the given thread Id.
-    /// </summary>
-    /// <param name="threadId">thread Id to lookup.</param>
-    /// <returns>
-    ///   a DumpThread object representing a thread in the dump whose thread id matches
-    ///   the requested id.
-    /// </returns>
-    public SimpleDumpThread GetThread(int threadId)
-    {
-      EnsureValid();
-      var raw = GetRawThread(threadId);
-      if (raw == null)
-        return null;
-
-      return new SimpleDumpThread(this, raw);
-    }
-
-    // Helper to get the thread list in the dump.
-    private IMinidumpThreadList GetThreadList()
-    {
-      EnsureValid();
-
-      DumpPointer pStream;
-
-      MINIDUMP_STREAM_TYPE streamType;
-      IMinidumpThreadList list;
+      myReader.Seek(sourcePosition);
+      var bytes = myReader.ReadBytes((int)bytesToCopy);
+      var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
       try
       {
-        // On x86 and X64, we have the ThreadListStream.  On IA64, we have the ThreadExListStream.
-        streamType = MINIDUMP_STREAM_TYPE.ThreadListStream;
-        pStream = GetStream(streamType);
-        list = new MINIDUMP_THREAD_LIST<MINIDUMP_THREAD>(pStream, streamType);
+        var source = handle.AddrOfPinnedObject();
+        NativeMethods.RtlMoveMemory(destination, source, new IntPtr(bytesToCopy));
       }
-      catch (ClrDiagnosticsException)
+      finally
       {
-        streamType = MINIDUMP_STREAM_TYPE.ThreadExListStream;
-        pStream = GetStream(streamType);
-        list = new MINIDUMP_THREAD_LIST<MINIDUMP_THREAD_EX>(pStream, streamType);
-      }
-
-      return list;
-    }
-
-    /// <summary>
-    ///   Enumerate all the native threads in the dump
-    /// </summary>
-    /// <returns>an enumerate of DumpThread objects</returns>
-    public IEnumerable<SimpleDumpThread> EnumerateThreads()
-    {
-      var list = GetThreadList();
-      var num = list.Count();
-
-      for (uint i = 0; i < num; i++)
-      {
-        var rawThread = list.GetElement(i);
-        yield return new SimpleDumpThread(this, rawThread);
-      }
-    }
-
-    // Internal helper to get the raw Minidump thread object.
-    // Throws if thread is not found.
-    private MINIDUMP_THREAD GetRawThread(int threadId)
-    {
-      var list = GetThreadList();
-      var num = list.Count();
-
-      for (uint i = 0; i < num; i++)
-      {
-        var thread = list.GetElement(i);
-        if (threadId == thread.ThreadId) return thread;
-      }
-
-      return null;
-    }
-
-    internal void GetThreadContext(MINIDUMP_LOCATION_DESCRIPTOR loc, IntPtr buffer, int sizeBufferBytes)
-    {
-      if (loc.IsNull) throw new ClrDiagnosticsException("Context not present", ClrDiagnosticsException.HR.CrashDumpError);
-
-      var pContext = TranslateDescriptor(loc);
-      var sizeContext = (int)loc.DataSize;
-
-      if (sizeBufferBytes < sizeContext)
-        throw new ClrDiagnosticsException(
-          "Context size mismatch. Expected = 0x" + sizeBufferBytes.ToString("x") + ", Size in dump = 0x" + sizeContext.ToString("x"),
-          ClrDiagnosticsException.HR.CrashDumpError);
-
-      // Now copy from dump into buffer. 
-      pContext.Copy(buffer, (uint)sizeContext);
-    }
-
-    // Internal helper to get the list of modules
-    private MINIDUMP_MODULE_LIST GetModuleList()
-    {
-      EnsureValid();
-      var pStream = GetStream(MINIDUMP_STREAM_TYPE.ModuleListStream);
-      var list = new MINIDUMP_MODULE_LIST(pStream);
-
-      return list;
-    }
-
-    private MINIDUMP_EXCEPTION_STREAM GetExceptionStream()
-    {
-      var pStream = GetStream(MINIDUMP_STREAM_TYPE.ExceptionStream);
-      return new MINIDUMP_EXCEPTION_STREAM(pStream);
-    }
-
-    /// <summary>
-    ///   Check on whether there's an exception stream in the dump
-    /// </summary>
-    /// <returns> true iff there is a MINIDUMP_EXCEPTION_STREAM in the dump. </returns>
-    public bool IsExceptionStream()
-    {
-      var ret = true;
-      try
-      {
-        GetExceptionStream();
-      }
-      catch (ClrDiagnosticsException)
-      {
-        ret = false;
-      }
-
-      return ret;
-    }
-
-    /// <summary>
-    ///   Return the TID from the exception stream.
-    /// </summary>
-    /// <returns> The TID from the exception stream. </returns>
-    public uint ExceptionStreamThreadId()
-    {
-      var es = GetExceptionStream();
-      return es.ThreadId;
-    }
-
-    /// <summary>
-    ///   Lookup the first module in the target with a matching.
-    /// </summary>
-    /// <param name="nameModule">The name can either be a matching full name, or just shortname</param>
-    /// <returns>The first DumpModule that has a matching name. </returns>
-    public SimpleDumpModule LookupModule(string nameModule)
-    {
-      var list = GetModuleList();
-      var num = list.Count;
-
-      for (uint i = 0; i < num; i++)
-      {
-        var module = list.GetElement(i);
-        var rva = module.ModuleNameRva;
-
-        var ptr = TranslateRVA(rva);
-
-        var name = GetString(ptr);
-        if (nameModule == name ||
-          name.EndsWith(nameModule))
-          return new SimpleDumpModule(this, module);
-      }
-
-      return null;
-    }
-
-    /// <summary>
-    ///   Return the module containing the target address, or null if no match.
-    /// </summary>
-    /// <param name="targetAddress">address in target</param>
-    /// <returns>
-    ///   Null if no match. Else a DumpModule such that the target address is in between the range specified
-    ///   by the DumpModule's .BaseAddress and .Size property
-    /// </returns>
-    /// <remarks>
-    ///   This can be useful for symbol lookups or for using module images to
-    ///   supplement memory read requests for minidumps.
-    /// </remarks>
-    public SimpleDumpModule TryLookupModuleByAddress(ulong targetAddress)
-    {
-      // This is an optimized lookup path, which avoids using IEnumerable or creating
-      // unnecessary DumpModule objects.
-      var list = GetModuleList();
-
-      var num = list.Count;
-
-      for (uint i = 0; i < num; i++)
-      {
-        var module = list.GetElement(i);
-        var targetStart = module.BaseOfImage;
-        var targetEnd = targetStart + module.SizeOfImage;
-        if (targetStart <= targetAddress && targetEnd > targetAddress) return new SimpleDumpModule(this, module);
-      }
-
-      return null;
-    }
-
-    /// <summary>
-    ///   Enumerate all the modules in the dump.
-    /// </summary>
-    /// <returns></returns>
-    public IEnumerable<SimpleDumpModule> EnumerateModules()
-    {
-      var list = GetModuleList();
-
-      var num = list.Count;
-
-      for (uint i = 0; i < num; i++)
-      {
-        var module = list.GetElement(i);
-        yield return new SimpleDumpModule(this, module);
+        handle.Free();
       }
     }
   }
