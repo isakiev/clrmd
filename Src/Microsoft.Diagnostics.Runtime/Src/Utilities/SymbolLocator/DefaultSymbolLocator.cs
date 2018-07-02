@@ -16,20 +16,23 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     };
 
     private readonly object myLock = new object();
+    private readonly IExternalLogger myLogger;
+    private readonly string myCacheLocation;
+    private readonly IEnumerable<SymPathElement> mySymPathElements;
     private readonly IDictionary<FileEntry, string> myCache = new Dictionary<FileEntry, string>();
     private readonly ICollection<FileEntry> myMissingEntries = new HashSet<FileEntry>();
-    private readonly IEnumerable<SymPathElement> mySymPathElements;
-    private readonly string myCacheLocation;
+    
     
     /// <summary>
     ///   The timeout (in milliseconds) used when contacting each individual server. This is not a total timeout for the entire symbol server operation.
     /// </summary>
     public int Timeout { get; set; } = 60000;
     
-    public DefaultSymbolLocator(string cacheLocation = null)
+    public DefaultSymbolLocator(IExternalLogger logger = null, string cacheLocation = null)
     {
-      mySymPathElements = GetSymPathElements();
+      myLogger = logger ?? DefaultLogger.Instance;
       myCacheLocation = cacheLocation ?? Path.Combine(Path.GetTempPath(), "Symbols");
+      mySymPathElements = GetSymPathElements();
     }
 
     private static IEnumerable<SymPathElement> GetSymPathElements()
@@ -158,18 +161,9 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     
-    /// <summary>
-    ///   Writes diagnostic messages about symbol loading to System.Diagnostics.Trace.  Figuring out symbol issues can be tricky,
-    ///   so if you override methods in SymbolLocator, be sure to trace the information here.
-    /// </summary>
-    /// <param name="fmt"></param>
-    /// <param name="args"></param>
-    private void Trace(string fmt, params object[] args)
+    private void Trace(string format, params object[] parameters)
     {
-      if (args != null && args.Length > 0)
-        fmt = string.Format(fmt, args);
-
-      System.Diagnostics.Trace.WriteLine(fmt, "Microsoft.Diagnostics.Runtime.SymbolLocator");
+      myLogger.Log("DefaultSymbolLocator", format, parameters);
     }
     
     private static string GetIndexPath(FileEntry entry)

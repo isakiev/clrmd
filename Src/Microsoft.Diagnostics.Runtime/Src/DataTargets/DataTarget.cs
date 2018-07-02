@@ -15,10 +15,10 @@ namespace Microsoft.Diagnostics.Runtime
   {
     private static readonly Regex InvalidChars = new Regex($"[{Regex.Escape(new string(Path.GetInvalidPathChars()))}]");
 
-    public DataTarget(IDataReader dataReader, IDacLocator dacLocator = null, ISymbolLocator symbolLocator = null)
+    public DataTarget(IDataReader dataReader, IDacLocator dacLocator = null, ISymbolLocator symbolLocator = null, IExternalLogger logger = null)
     {
       DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
-      SymbolLocator = symbolLocator ?? new DefaultSymbolLocator();
+      SymbolLocator = symbolLocator ?? new DefaultSymbolLocator(logger);
       DacLocator = dacLocator ?? new DefaultDacLocator(SymbolLocator);
       FileLoader = new FileLoader(this);
 

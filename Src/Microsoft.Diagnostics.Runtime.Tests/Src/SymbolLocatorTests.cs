@@ -13,7 +13,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     internal static DefaultSymbolLocator GetLocator(string cacheLocation)
     {
-      return new DefaultSymbolLocator(cacheLocation);
+      return new DefaultSymbolLocator(null, cacheLocation);
     }
 
     [TestMethod]
