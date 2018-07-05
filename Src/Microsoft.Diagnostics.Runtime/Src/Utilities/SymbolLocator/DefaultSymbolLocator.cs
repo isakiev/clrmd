@@ -28,10 +28,13 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// </summary>
     public int Timeout { get; set; } = 60000;
     
-    public DefaultSymbolLocator(IExternalLogger logger = null, string cacheLocation = null)
+    public DefaultSymbolLocator(ITempPathProvider tempPathProvider, IExternalLogger logger)
     {
-      myLogger = logger ?? DefaultLogger.Instance;
-      myCacheLocation = cacheLocation ?? Path.Combine(Path.GetTempPath(), "Symbols");
+      if (tempPathProvider == null) throw new ArgumentNullException(nameof(tempPathProvider));
+      if (logger == null) throw new ArgumentNullException(nameof(logger));
+
+      myCacheLocation = tempPathProvider.GetFixedTempPath("Symbols");
+      myLogger = logger;
       mySymPathElements = GetSymPathElements();
     }
 

@@ -9,6 +9,8 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 {
   public static class Helpers
   {
+    public static readonly SimpleTempPathProvider TempPathProvider = new SimpleTempPathProvider();
+    
     public static IEnumerable<ulong> GetObjectsOfType(this ClrHeap heap, string name)
     {
       return from obj in heap.EnumerateObjectAddresses()
@@ -71,34 +73,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       return thread.StackTrace.Where(sf => sf.Method != null ? sf.Method.Name == functionName : false).Single();
     }
-
-    public static string TestWorkingDirectory
-    {
-      get => _userSetWorkingPath ?? _workingPath.Value;
-      set
-      {
-        Debug.Assert(!_workingPath.IsValueCreated);
-        _userSetWorkingPath = value;
-      }
-    }
-
-    private static string _userSetWorkingPath;
-    private static readonly Lazy<string> _workingPath = new Lazy<string>(() => CreateWorkingPath(), true);
-
-    private static string CreateWorkingPath()
-    {
-      var r = new Random();
-      string path;
-      do
-      {
-        path = Path.Combine(Environment.CurrentDirectory, TempRoot + r.Next());
-      } while (Directory.Exists(path));
-
-      Directory.CreateDirectory(path);
-      return path;
-    }
-
-    internal static readonly string TempRoot = "clrmd_removeme_";
   }
 
   [TestClass]
@@ -110,9 +84,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       GC.Collect();
       GC.WaitForPendingFinalizers();
 
-      foreach (var directory in Directory.GetDirectories(Environment.CurrentDirectory))
-        if (directory.Contains(Helpers.TempRoot))
-          Directory.Delete(directory, true);
+      Helpers.TempPathProvider.Dispose();
     }
   }
 }

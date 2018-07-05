@@ -11,12 +11,16 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
   public class DumpDataReader : IDataReader, IDisposable
   {
     private readonly string _fileName;
+    private readonly ITempPathProvider _tempPathProvider;
     private readonly DumpReader _dumpReader;
     private List<ModuleInfo> _modules;
     private string _generatedPath;
 
-    public DumpDataReader(string file)
+    public DumpDataReader(string file, ITempPathProvider tempPathProvider)
     {
+      if (file == null) throw new ArgumentNullException(nameof(file));
+      if (tempPathProvider == null) throw new ArgumentNullException(nameof(tempPathProvider));
+      
       if (!File.Exists(file))
         throw new FileNotFoundException(file);
 
@@ -24,6 +28,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
         file = ExtractCab(file);
 
       _fileName = file;
+      _tempPathProvider = tempPathProvider;
       _dumpReader = new DumpReader(file);
     }
 
@@ -34,11 +39,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 
     private string ExtractCab(string file)
     {
-      _generatedPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-
-      while (Directory.Exists(_generatedPath))
-        _generatedPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-
+      _generatedPath = _tempPathProvider.GetUniqueTempPath();
       Directory.CreateDirectory(_generatedPath);
 
       var options = new CommandOptions
@@ -47,7 +48,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
         NoWindow = true
       };
 
-      var cmd = Command.Run(string.Format("expand -F:*dmp {0} {1}", file, _generatedPath), options);
+      var cmd = Command.Run($"expand -F:*dmp {file} {_generatedPath}", options);
 
       var error = false;
       if (cmd.ExitCode != 0)

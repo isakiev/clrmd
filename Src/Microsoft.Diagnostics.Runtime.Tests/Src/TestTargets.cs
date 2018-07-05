@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.CSharp;
 using Microsoft.Diagnostics.Runtime.DataReaders.DbgEng;
 using Microsoft.Diagnostics.Runtime.Interop;
+using Microsoft.Diagnostics.Runtime.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
@@ -131,7 +132,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     private string GetOutputAssembly()
     {
       var extension = _isLibrary ? "dll" : "exe";
-      return Path.Combine(Helpers.TestWorkingDirectory, Path.ChangeExtension(Path.GetFileNameWithoutExtension(_source), extension));
+      return Path.Combine(Helpers.TempPathProvider.GetFixedTempPath("Bin"), Path.ChangeExtension(Path.GetFileNameWithoutExtension(_source), extension));
     }
 
     private static string CompileCSharp(string source, string destination, bool isLibrary)
@@ -175,7 +176,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       if (gc == GCMode.Server)
         info.SetEnvironmentVariable("COMPlus_BuildFlavor", "svr");
 
-      using (var dbg = info.LaunchProcess(executable, Helpers.TestWorkingDirectory))
+      using (var dbg = info.LaunchProcess(executable, Path.GetDirectoryName(executable)))
       {
         dbg.SecondChanceExceptionEvent += delegate(Debugger d, EXCEPTION_RECORD64 ex)
           {
@@ -225,7 +226,8 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     private static DataTarget LoadCrashDump(string dumpPath)
     {
-      return new DataTarget(new DbgEngDataReader(dumpPath));
+      var symbolLocator = new DefaultSymbolLocator(Helpers.TempPathProvider, DefaultLogger.Instance);
+      return new DataTarget(new DbgEngDataReader(dumpPath), new DefaultDacLocator(symbolLocator), symbolLocator, Helpers.TempPathProvider);
     }
   }
 }

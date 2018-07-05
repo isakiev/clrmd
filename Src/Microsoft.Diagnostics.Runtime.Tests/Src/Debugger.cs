@@ -138,20 +138,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     public IDebugClient5 Client => _client;
 
-    public DataTarget DataTarget
-    {
-      get
-      {
-        if (_dataTarget == null)
-        {
-          var dataReader = new DbgEngDataReader(_client);
-          _dataTarget = new DataTarget(dataReader);
-        }
-
-        return _dataTarget;
-      }
-    }
-
     public Debugger(IDebugClient5 client, IDebugControl control)
     {
       _client = client;

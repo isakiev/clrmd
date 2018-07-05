@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Data\FinalizationQueue.cs" />
     <Compile Include="Src\FinalizationQueueTests.cs" />
+    <Compile Include="Src\SimpleTempPathProvider.cs" />
     <Compile Include="Src\TypeTests.cs" />
     <Compile Include="Src\AppDomainTests.cs" />
     <Compile Include="Src\DataTargetTestExtensions.cs" />
