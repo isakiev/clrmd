@@ -21,7 +21,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       if (streamType != MINIDUMP_STREAM_TYPE.ModuleListStream &&
         streamType != MINIDUMP_STREAM_TYPE.ThreadListStream &&
         streamType != MINIDUMP_STREAM_TYPE.ThreadExListStream)
-        throw new ClrDiagnosticsException("MinidumpArray does not support this stream type.", ClrDiagnosticsException.HR.CrashDumpError);
+        throw new ClrDiagnosticsException("MinidumpArray does not support this stream type.", ClrDiagnosticsExceptionKind.CrashDumpError);
 
       _streamPointer = streamPointer;
     }
@@ -32,7 +32,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 
     public T GetElement(uint idx)
     {
-      if (idx > Count) throw new ClrDiagnosticsException("Dump error: index " + idx + "is out of range.", ClrDiagnosticsException.HR.CrashDumpError);
+      if (idx > Count) throw new ClrDiagnosticsException("Dump error: index " + idx + "is out of range.", ClrDiagnosticsExceptionKind.CrashDumpError);
 
       // Although the Marshal.SizeOf(...) is not necessarily correct, it is nonetheless
       // how we're going to pull the bytes back from the dump in PtrToStructure

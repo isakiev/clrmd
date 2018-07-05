@@ -1186,8 +1186,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override IEnumerable<ClrObject> EnumerateObjects()
     {
-      if (Revision != GetRuntimeRevision())
-        ClrDiagnosticsException.ThrowRevisionError(Revision, GetRuntimeRevision());
+      RevisionValidator.Validate(Revision, GetRuntimeRevision());
 
       if (IsHeapCached)
         return _objectMap.Enumerate().Select(item => ClrObject.Create(item.Key, _objects[item.Value].Type));
@@ -1197,8 +1196,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override IEnumerable<ulong> EnumerateObjectAddresses()
     {
-      if (Revision != GetRuntimeRevision())
-        ClrDiagnosticsException.ThrowRevisionError(Revision, GetRuntimeRevision());
+      RevisionValidator.Validate(Revision, GetRuntimeRevision());
 
       if (IsHeapCached)
         return _objectMap.Enumerate().Select(item => item.Key);

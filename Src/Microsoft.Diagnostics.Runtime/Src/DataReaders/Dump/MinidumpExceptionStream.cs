@@ -34,7 +34,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
           "Crash dump error: Expected to find " + DumpNative.EXCEPTION_MAXIMUM_PARAMETERS +
           " exception params, but found " +
           ExceptionRecord.ExceptionInformation.Length + " instead.",
-          ClrDiagnosticsException.HR.CrashDumpError);
+          ClrDiagnosticsExceptionKind.CrashDumpError);
 
       for (var i = 0; i < DumpNative.EXCEPTION_MAXIMUM_PARAMETERS; i++) ExceptionRecord.ExceptionInformation[i] = dump.PtrToStructureAdjustOffset<ulong>(ref offset);
 

@@ -367,7 +367,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       var sizeBufferBytes = (int)contextSize;
       var loc = thread.ThreadContext;
       
-      if (loc.IsNull) throw new ClrDiagnosticsException("Context not present", ClrDiagnosticsException.HR.CrashDumpError);
+      if (loc.IsNull) throw new ClrDiagnosticsException("Context not present", ClrDiagnosticsExceptionKind.CrashDumpError);
 
       var position = new ContentPosition(loc.Rva.Value);
       var sizeContext = loc.DataSize;
@@ -375,7 +375,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       if (sizeBufferBytes < sizeContext)
         throw new ClrDiagnosticsException(
           "Context size mismatch. Expected = 0x" + sizeBufferBytes.ToString("x") + ", Size in dump = 0x" + sizeContext.ToString("x"),
-          ClrDiagnosticsException.HR.CrashDumpError);
+          ClrDiagnosticsExceptionKind.CrashDumpError);
 
       // Now copy from dump into buffer. 
       CopyContent(position, sizeContext, buffer);
@@ -476,7 +476,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
             targetRequestStart.ToString("x"),
             bytesRead,
             destinationBufferSizeInBytes),
-          ClrDiagnosticsException.HR.CrashDumpError);
+          ClrDiagnosticsExceptionKind.CrashDumpError);
     }
 
     /// <summary>

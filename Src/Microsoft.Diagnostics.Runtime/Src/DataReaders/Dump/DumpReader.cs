@@ -238,7 +238,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
             targetRequestStart.ToString("x"),
             bytesRead,
             destinationBufferSizeInBytes),
-          ClrDiagnosticsException.HR.CrashDumpError);
+          ClrDiagnosticsExceptionKind.CrashDumpError);
     }
 
     /*
@@ -555,7 +555,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     private DumpPointer GetStream(MINIDUMP_STREAM_TYPE type)
     {
       if (!TryGetStream(type, out var stream))
-        throw new ClrDiagnosticsException("Dump does not contain a " + type + " stream.", ClrDiagnosticsException.HR.CrashDumpError);
+        throw new ClrDiagnosticsException("Dump does not contain a " + type + " stream.", ClrDiagnosticsExceptionKind.CrashDumpError);
 
       return stream;
     }
@@ -703,7 +703,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     */
     internal void GetThreadContext(MINIDUMP_LOCATION_DESCRIPTOR loc, IntPtr buffer, int sizeBufferBytes)
     {
-      if (loc.IsNull) throw new ClrDiagnosticsException("Context not present", ClrDiagnosticsException.HR.CrashDumpError);
+      if (loc.IsNull) throw new ClrDiagnosticsException("Context not present", ClrDiagnosticsExceptionKind.CrashDumpError);
 
       var pContext = TranslateDescriptor(loc);
       var sizeContext = (int)loc.DataSize;
@@ -711,7 +711,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       if (sizeBufferBytes < sizeContext)
         throw new ClrDiagnosticsException(
           "Context size mismatch. Expected = 0x" + sizeBufferBytes.ToString("x") + ", Size in dump = 0x" + sizeContext.ToString("x"),
-          ClrDiagnosticsException.HR.CrashDumpError);
+          ClrDiagnosticsExceptionKind.CrashDumpError);
 
       // Now copy from dump into buffer. 
       pContext.Copy(buffer, (uint)sizeContext);

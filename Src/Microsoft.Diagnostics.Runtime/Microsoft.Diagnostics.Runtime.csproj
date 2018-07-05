@@ -60,6 +60,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Src\Common\ClrAppDomain.cs" />
     <Compile Include="Src\Common\ClrDiagnosticsException.cs" />
+    <Compile Include="Src\Common\ClrDiagnosticsExceptionKind.cs" />
     <Compile Include="Src\Common\ClrModule.cs" />
     <Compile Include="Src\Common\ClrObject.cs" />
     <Compile Include="Src\Common\DacInterfaces\ClrDataModuleExtent.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="Src\Common\DacInterfaces\IXCLRDataStackWalk.cs" />
     <Compile Include="Src\Common\DacInterfaces\IXCLRDataTask.cs" />
     <Compile Include="Src\Common\DacInterfaces\ModuleExtentType.cs" />
+    <Compile Include="Src\Common\ExceptionExtensions.cs" />
     <Compile Include="Src\Common\Heap\ClrHeap.cs" />
     <Compile Include="Src\Common\Heap\ClrRoot.cs" />
     <Compile Include="Src\Common\Heap\ClrRootStackwalkPolicy.cs" />
@@ -93,6 +95,7 @@
     <Compile Include="Src\Common\MemoryReadException.cs" />
     <Compile Include="Src\Common\ObjectSet.cs" />
     <Compile Include="Src\Common\ParallelObjectSet.cs" />
+    <Compile Include="Src\Common\RevisionValidator.cs" />
     <Compile Include="Src\Common\Roots\GCRoot.cs" />
     <Compile Include="Src\Common\Roots\GCRootProgressEvent.cs" />
     <Compile Include="Src\Common\Roots\RootPath.cs" />

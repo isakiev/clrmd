@@ -104,7 +104,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Live
       var size = (uint)modules.Length * sizeof(uint);
 
       if (!EnumProcessModules(_process, modules, size, out needed))
-        throw new ClrDiagnosticsException("Unable to get process modules.", ClrDiagnosticsException.HR.DataRequestError);
+        throw new ClrDiagnosticsException("Unable to get process modules.", ClrDiagnosticsExceptionKind.DataRequestError);
 
       for (var i = 0; i < modules.Length; i++)
       {

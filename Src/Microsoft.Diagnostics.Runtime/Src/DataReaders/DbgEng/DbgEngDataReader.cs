@@ -54,7 +54,10 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
       var hr = client.OpenDumpFile(dumpFile);
 
       if (hr != 0)
-        throw new ClrDiagnosticsException(string.Format("Could not load crash dump '{0}', HRESULT: 0x{1:x8}", dumpFile, hr), ClrDiagnosticsException.HR.DebuggerError);
+      {
+        var kind = (uint)hr == 0x80004005 ? ClrDiagnosticsExceptionKind.CorruptedFileOrUnknownFormat : ClrDiagnosticsExceptionKind.DebuggerError;
+        throw new ClrDiagnosticsException($"Could not load crash dump, HRESULT: 0x{hr:x8}", kind).AddData("DumpFile", dumpFile);
+      }
 
       CreateClient(client);
 
@@ -98,7 +101,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
         if ((uint)hr == 0xd00000bb)
           throw new InvalidOperationException("Mismatched architecture between this process and the target process.");
 
-        throw new ClrDiagnosticsException(string.Format("Could not attach to pid {0:X}, HRESULT: 0x{1:x8}", pid, hr), ClrDiagnosticsException.HR.DebuggerError);
+        throw new ClrDiagnosticsException(string.Format("Could not attach to pid {0:X}, HRESULT: 0x{1:x8}", pid, hr), ClrDiagnosticsExceptionKind.DebuggerError);
       }
     }
 
@@ -130,8 +133,8 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
       SetClientInstance();
 
       var hr = _control.GetExecutingProcessorType(out var machineType);
-      if (0 != hr)
-        throw new ClrDiagnosticsException(string.Format("Failed to get proessor type, HRESULT: {0:x8}", hr), ClrDiagnosticsException.HR.DebuggerError);
+      if (hr != 0)
+        throw new ClrDiagnosticsException($"Failed to get processor type, HRESULT: {hr:x8}", ClrDiagnosticsExceptionKind.DebuggerError);
 
       switch (machineType)
       {
@@ -176,7 +179,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
       if (hr == 1)
         return 4;
 
-      throw new ClrDiagnosticsException(string.Format("IsPointer64Bit failed: {0:x8}", hr), ClrDiagnosticsException.HR.DebuggerError);
+      throw new ClrDiagnosticsException($"IsPointer64Bit failed, HRESULT: {hr:x8}", ClrDiagnosticsExceptionKind.DebuggerError);
     }
 
     public void Flush()
@@ -300,7 +303,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
       Interlocked.Increment(ref s_totalInstanceCount);
 
       if (_systemObjects3 == null && s_totalInstanceCount > 1)
-        throw new ClrDiagnosticsException("This version of DbgEng is too old to create multiple instances of DataTarget.", ClrDiagnosticsException.HR.DebuggerError);
+        throw new ClrDiagnosticsException("This version of DbgEng is too old to create multiple instances of DataTarget.", ClrDiagnosticsExceptionKind.DebuggerError);
 
       if (_systemObjects3 != null)
         _systemObjects3.GetCurrentSystemId(out _instance);

@@ -179,7 +179,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     private void EnsureSizeRemaining(uint requestedSize)
     {
       if (requestedSize > _size)
-        throw new ClrDiagnosticsException("The given crash dump is in an incorrect format.", ClrDiagnosticsException.HR.CrashDumpError);
+        throw new ClrDiagnosticsException("The given crash dump is in an incorrect format.", ClrDiagnosticsExceptionKind.CrashDumpError);
     }
 
     // The actual raw pointer into the dump file (which is memory mapped into this process space.

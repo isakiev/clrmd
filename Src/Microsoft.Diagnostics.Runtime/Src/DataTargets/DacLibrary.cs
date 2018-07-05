@@ -53,7 +53,7 @@ namespace Microsoft.Diagnostics.Runtime
         _dac = obj as IXCLRDataProcess;
 
       if (_dac == null)
-        throw new ClrDiagnosticsException("Failure loading DAC: CreateDacInstance failed 0x" + res.ToString("x"), ClrDiagnosticsException.HR.DacError);
+        throw new ClrDiagnosticsException("Failure loading DAC: CreateDacInstance failed 0x" + res.ToString("x"), ClrDiagnosticsExceptionKind.DacError);
     }
 
     ~DacLibrary()

@@ -17,7 +17,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       : base(info, dt, lib)
     {
       if (!GetCommonMethodTables(ref _commonMTs))
-        throw new ClrDiagnosticsException("Could not request common MethodTable list.", ClrDiagnosticsException.HR.DacError);
+        throw new ClrDiagnosticsException("Could not request common MethodTable list.", ClrDiagnosticsExceptionKind.DacError);
 
       if (!_commonMTs.Validate())
         CanWalkHeap = false;
@@ -27,11 +27,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       var tmp = new byte[sizeof(int)];
 
       if (!Request(DacRequests.VERSION, null, tmp))
-        throw new ClrDiagnosticsException("Failed to request dac version.", ClrDiagnosticsException.HR.DacError);
+        throw new ClrDiagnosticsException("Failed to request dac version.", ClrDiagnosticsExceptionKind.DacError);
 
       var v = BitConverter.ToInt32(tmp, 0);
       if (v != 9)
-        throw new ClrDiagnosticsException("Unsupported dac version.", ClrDiagnosticsException.HR.DacError);
+        throw new ClrDiagnosticsException("Unsupported dac version.", ClrDiagnosticsExceptionKind.DacError);
     }
 
     protected override void InitApi()
