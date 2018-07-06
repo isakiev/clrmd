@@ -11,15 +11,15 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
   public class DumpDataReader : IDataReader, IDisposable
   {
     private readonly string _fileName;
-    private readonly ITempPathProvider _tempPathProvider;
+    private readonly string _tempPath;
     private readonly DumpReader _dumpReader;
     private List<ModuleInfo> _modules;
     private string _generatedPath;
 
-    public DumpDataReader(string file, ITempPathProvider tempPathProvider)
+    public DumpDataReader(string file, string tempPath)
     {
       if (file == null) throw new ArgumentNullException(nameof(file));
-      if (tempPathProvider == null) throw new ArgumentNullException(nameof(tempPathProvider));
+      if (tempPath == null) throw new ArgumentNullException(nameof(tempPath));
       
       if (!File.Exists(file))
         throw new FileNotFoundException(file);
@@ -28,7 +28,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
         file = ExtractCab(file);
 
       _fileName = file;
-      _tempPathProvider = tempPathProvider;
+      _tempPath = tempPath;
       _dumpReader = new DumpReader(file);
     }
 
@@ -39,7 +39,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 
     private string ExtractCab(string file)
     {
-      _generatedPath = _tempPathProvider.GetUniqueTempPath();
+      _generatedPath = Path.Combine(_tempPath, Guid.NewGuid().ToString()) ;
       Directory.CreateDirectory(_generatedPath);
 
       var options = new CommandOptions
@@ -246,7 +246,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       return true;
     }
 
-    public bool GetThreadContext(uint threadID, uint contextFlags, uint contextSize, byte[] context)
+    public bool GetThreadContext(uint threadId, uint contextFlags, uint contextSize, byte[] context)
     {
       throw new NotImplementedException();
     }

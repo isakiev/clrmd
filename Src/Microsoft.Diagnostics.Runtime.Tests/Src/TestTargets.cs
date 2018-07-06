@@ -132,7 +132,9 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     private string GetOutputAssembly()
     {
       var extension = _isLibrary ? "dll" : "exe";
-      return Path.Combine(Helpers.TempPathProvider.GetFixedTempPath("Bin"), Path.ChangeExtension(Path.GetFileNameWithoutExtension(_source), extension));
+      var binPath = Path.Combine(Helpers.GetTempPath(), "Bin");
+      Directory.CreateDirectory(binPath);
+      return Path.Combine(binPath, Path.ChangeExtension(Path.GetFileNameWithoutExtension(_source), extension));
     }
 
     private static string CompileCSharp(string source, string destination, bool isLibrary)
@@ -226,8 +228,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     private static DataTarget LoadCrashDump(string dumpPath)
     {
-      var symbolLocator = new DefaultSymbolLocator(Helpers.TempPathProvider, DefaultLogger.Instance);
-      return new DataTarget(new DbgEngDataReader(dumpPath), new DefaultDacLocator(symbolLocator), symbolLocator, Helpers.TempPathProvider);
+      var cacheLocation = Path.Combine(Helpers.GetTempPath(), "Cache");
+      Directory.CreateDirectory(cacheLocation);
+      
+      var symbolLocator = new DefaultSymbolLocator(DefaultLogger.Instance, cacheLocation);
+      return new DataTarget(new DbgEngDataReader(dumpPath), new DefaultDacLocator(symbolLocator), symbolLocator);
     }
   }
 }

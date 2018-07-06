@@ -13,7 +13,9 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     private static DefaultSymbolLocator GetLocator()
     {
-      return new DefaultSymbolLocator(Helpers.TempPathProvider, DefaultLogger.Instance);
+      var cacheLocation = Path.Combine(Helpers.GetTempPath(), "Cache");
+      Directory.CreateDirectory(cacheLocation);
+      return new DefaultSymbolLocator(DefaultLogger.Instance, cacheLocation);
     }
 
     [TestMethod]

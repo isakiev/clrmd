@@ -9,7 +9,25 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 {
   public static class Helpers
   {
-    public static readonly SimpleTempPathProvider TempPathProvider = new SimpleTempPathProvider();
+    private const string TempPathPrefix = "clrmd_tests_removeme_";
+    private static string _tempPath;
+    
+    public static string GetTempPath()
+    {
+      if (_tempPath == null)
+      {
+        _tempPath = Path.Combine(Path.GetTempPath(), TempPathPrefix + DateTime.Now.Ticks);
+        Directory.CreateDirectory(_tempPath);
+      }
+
+      return _tempPath;
+    }
+
+    public static void CleanupTempPaths()
+    {
+      foreach (var tempPath in Directory.GetDirectories(Path.GetTempPath(), TempPathPrefix + "*"))
+        Directory.Delete(tempPath, true);
+    }
     
     public static IEnumerable<ulong> GetObjectsOfType(this ClrHeap heap, string name)
     {
@@ -52,7 +70,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     public static ClrAppDomain GetDomainByName(this ClrRuntime runtime, string domainName)
     {
-      return runtime.AppDomains.Where(ad => ad.Name == domainName).Single();
+      return runtime.AppDomains.Single(ad => ad.Name == domainName);
     }
 
     public static ClrModule GetModule(this ClrRuntime runtime, string filename)
@@ -65,13 +83,13 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     public static ClrThread GetMainThread(this ClrRuntime runtime)
     {
-      var thread = runtime.Threads.Where(t => !t.IsFinalizer).Single();
+      var thread = runtime.Threads.Single(t => !t.IsFinalizer);
       return thread;
     }
 
     public static ClrStackFrame GetFrame(this ClrThread thread, string functionName)
     {
-      return thread.StackTrace.Where(sf => sf.Method != null ? sf.Method.Name == functionName : false).Single();
+      return thread.StackTrace.Single(sf => sf.Method != null && sf.Method.Name == functionName);
     }
   }
 
@@ -84,7 +102,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       GC.Collect();
       GC.WaitForPendingFinalizers();
 
-      Helpers.TempPathProvider.Dispose();
+      Helpers.CleanupTempPaths();
     }
   }
 }

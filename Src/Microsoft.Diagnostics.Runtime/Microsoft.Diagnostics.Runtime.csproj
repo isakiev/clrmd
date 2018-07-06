@@ -91,7 +91,6 @@
     <Compile Include="Src\Common\Internal\SafeMapViewHandle.cs" />
     <Compile Include="Src\Common\Internal\SafeWin32Handle.cs" />
     <Compile Include="Src\Common\Internal\TypeHelpers.cs" />
-    <Compile Include="Src\Common\ITempPathProvider.cs" />
     <Compile Include="Src\Common\MemoryReadException.cs" />
     <Compile Include="Src\Common\ObjectSet.cs" />
     <Compile Include="Src\Common\ParallelObjectSet.cs" />

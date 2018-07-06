@@ -15,12 +15,11 @@ namespace Microsoft.Diagnostics.Runtime
   {
     private static readonly Regex InvalidChars = new Regex($"[{Regex.Escape(new string(Path.GetInvalidPathChars()))}]");
 
-    public DataTarget(IDataReader dataReader, IDacLocator dacLocator, ISymbolLocator symbolLocator, ITempPathProvider tempPathProvider)
+    public DataTarget(IDataReader dataReader, IDacLocator dacLocator, ISymbolLocator symbolLocator)
     {
       DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
       DacLocator = dacLocator ?? throw new ArgumentNullException(nameof(dacLocator));
       SymbolLocator = symbolLocator ?? throw new ArgumentNullException(nameof(symbolLocator));
-      TempPathProvider = tempPathProvider ?? throw new ArgumentNullException(nameof(tempPathProvider));
       FileLoader = new FileLoader(this);
 
       IsMinidump = dataReader.IsMinidump;
@@ -34,7 +33,6 @@ namespace Microsoft.Diagnostics.Runtime
     public IDataReader DataReader { get; }
     public ISymbolLocator SymbolLocator { get; }
     public IDacLocator DacLocator { get; }
-    public ITempPathProvider TempPathProvider { get; }
     internal FileLoader FileLoader { get; }
     
     
