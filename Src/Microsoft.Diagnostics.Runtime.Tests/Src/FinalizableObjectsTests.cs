@@ -4,31 +4,31 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
   [TestClass]
-  public class FinalizationQueueTests
+  public class FinalizableObjectsTests
   {
     [TestMethod]
     public void TestAllFinalizableObjects()
     {
-      using (var dt = TestTargets.FinalizationQueue.LoadFullDump())
+      using (var dt = TestTargets.FinalizableObjects.LoadFullDump())
       {
         var runtime = dt.CreateSingleRuntime();
         var stats = GetStats(runtime.Heap, runtime.Heap.EnumerateFinalizableObjectAddresses());
 
         Assert.AreEqual(0, stats.A);
-        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountB, stats.B);
-        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountC, stats.C);
+        Assert.AreEqual(FinalizableObjectsTarget.ObjectsCountB, stats.B);
+        Assert.AreEqual(FinalizableObjectsTarget.ObjectsCountC, stats.C);
       }
     }
 
     [TestMethod]
     public void TestFinalizerQueueObjects()
     {
-      using (var dt = TestTargets.FinalizationQueue.LoadFullDump())
+      using (var dt = TestTargets.FinalizableObjects.LoadFullDump())
       {
         var runtime = dt.CreateSingleRuntime();
         var stats = GetStats(runtime.Heap, runtime.EnumerateFinalizerQueueObjectAddresses());
 
-        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountA, stats.A);
+        Assert.AreEqual(FinalizableObjectsTarget.ObjectsCountA, stats.A);
         Assert.AreEqual(0, stats.B);
         Assert.AreEqual(0, stats.C);
       }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-public class FinalizationQueueTarget
+public class FinalizableObjectsTarget
 {
   public const int ObjectsCountA = 42;
   public const int ObjectsCountB = 13;
