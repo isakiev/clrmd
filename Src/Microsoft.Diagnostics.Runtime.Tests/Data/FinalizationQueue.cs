@@ -6,22 +6,40 @@ public class FinalizationQueueTarget
 {
   public const int ObjectsCountA = 42;
   public const int ObjectsCountB = 13;
-  
+  public const int ObjectsCountC = 25;
+
   private static readonly ICollection<object> _objects = new List<object>();
-  
+
   public static void Main(params string[] args)
   {
-    for (var i = 0; i < ObjectsCountA; i++)
-      _objects.Add(new DieFastA());
-
     Console.WriteLine(new DieHard());
     GC.Collect();
-    
-    for (var i = 0; i < ObjectsCountB; i++)
-      Console.WriteLine(new DieFastB());
+
+    CreateA();
     GC.Collect();
 
+    CreateB();
+    CreateC();
+
     throw new Exception();
+  }
+
+  private static void CreateA()
+  {
+    for (var i = 0; i < ObjectsCountA; i++)
+      Console.WriteLine(new SampleA());
+  }
+
+  private static void CreateB()
+  {
+    for (var i = 0; i < ObjectsCountB; i++)
+      _objects.Add(new SampleB());
+  }
+
+  private static void CreateC()
+  {
+    for (var i = 0; i < ObjectsCountC; i++)
+      Console.WriteLine(new SampleC());
   }
 }
 
@@ -35,17 +53,25 @@ public class DieHard
   }
 }
 
-public class DieFastA
+public class SampleA
 {
-  ~DieFastA()
+  ~SampleA()
   {
     Console.WriteLine(GetHashCode());
   }
 }
 
-public class DieFastB
+public class SampleB
 {
-  ~DieFastB()
+  ~SampleB()
+  {
+    Console.WriteLine(GetHashCode());
+  }
+}
+
+public class SampleC
+{
+  ~SampleC()
   {
     Console.WriteLine(GetHashCode());
   }

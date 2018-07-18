@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
@@ -11,16 +12,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       using (var dt = TestTargets.FinalizationQueue.LoadFullDump())
       {
         var runtime = dt.CreateSingleRuntime();
-        var targetObjectsCount = 0;
+        var stats = GetStats(runtime.Heap, runtime.Heap.EnumerateFinalizableObjectAddresses());
 
-        foreach (var address in runtime.Heap.EnumerateFinalizableObjectAddresses())
-        {
-          var type = runtime.Heap.GetObjectType(address);
-          if (type.Name == typeof(DieFastA).FullName)
-            targetObjectsCount++;
-        }
-
-        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountA, targetObjectsCount);
+        Assert.AreEqual(0, stats.A);
+        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountB, stats.B);
+        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountC, stats.C);
       }
     }
 
@@ -30,17 +26,36 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       using (var dt = TestTargets.FinalizationQueue.LoadFullDump())
       {
         var runtime = dt.CreateSingleRuntime();
-        var targetObjectsCount = 0;
+        var stats = GetStats(runtime.Heap, runtime.EnumerateFinalizerQueueObjectAddresses());
 
-        foreach (var address in runtime.EnumerateFinalizerQueueObjectAddresses())
-        {
-          var type = runtime.Heap.GetObjectType(address);
-          if (type.Name == typeof(DieFastB).FullName)
-            targetObjectsCount++;
-        }
-
-        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountB, targetObjectsCount);
+        Assert.AreEqual(FinalizationQueueTarget.ObjectsCountA, stats.A);
+        Assert.AreEqual(0, stats.B);
+        Assert.AreEqual(0, stats.C);
       }
+    }
+
+    private static Stats GetStats(ClrHeap heap, IEnumerable<ulong> addresses)
+    {
+      var stats = new Stats();
+      foreach (var address in addresses)
+      {
+        var type = heap.GetObjectType(address);
+        if (type.Name == typeof(SampleA).FullName)
+          stats.A++;
+        else if (type.Name == typeof(SampleB).FullName)
+          stats.B++;
+        else if (type.Name == typeof(SampleC).FullName)
+          stats.C++;
+      }
+
+      return stats;
+    }
+
+    private class Stats
+    {
+      public int A;
+      public int B;
+      public int C;
     }
   }
 }
