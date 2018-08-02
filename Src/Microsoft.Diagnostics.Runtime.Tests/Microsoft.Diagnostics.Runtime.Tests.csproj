@@ -44,7 +44,9 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\DumpDebug.cs" />
     <Compile Include="Data\FinalizableObjects.cs" />
+    <Compile Include="Src\DumpDebugTests.cs" />
     <Compile Include="Src\FinalizableObjectsTests.cs" />
     <Compile Include="Src\TypeTests.cs" />
     <Compile Include="Src\AppDomainTests.cs" />
