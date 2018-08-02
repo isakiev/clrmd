@@ -39,22 +39,12 @@ namespace Microsoft.Diagnostics.Runtime
       return Runtime.ReadPointer(addr, out value);
     }
 
-    internal int Revision { get; set; }
-
-    protected abstract int GetRuntimeRevision();
-
     public override int PointerSize => _pointerSize;
 
     public override bool CanWalkHeap => _canWalkHeap;
 
-    public override IList<ClrSegment> Segments
-    {
-      get
-      {
-        RevisionValidator.Validate(Revision, GetRuntimeRevision());
-        return _segments;
-      }
-    }
+    public override IList<ClrSegment> Segments => _segments;
+    
     public override ulong TotalHeapSize => _totalHeapSize;
 
     public override ulong GetSizeByGen(int gen)
@@ -159,8 +149,6 @@ namespace Microsoft.Diagnostics.Runtime
 
     public override IEnumerable<ClrObject> EnumerateObjects()
     {
-      RevisionValidator.Validate(Revision, GetRuntimeRevision());
-
       for (var i = 0; i < _segments.Length; ++i)
       {
         var seg = _segments[i];
@@ -175,8 +163,6 @@ namespace Microsoft.Diagnostics.Runtime
 
     public override IEnumerable<ulong> EnumerateObjectAddresses()
     {
-      RevisionValidator.Validate(Revision, GetRuntimeRevision());
-
       for (var i = 0; i < _segments.Length; ++i)
       {
         var seg = _segments[i];

@@ -17,8 +17,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return null;
     }
 
-    public int Revision { get; set; }
-
     public DesktopBaseModule(DesktopRuntimeBase runtime)
     {
       _runtime = runtime;

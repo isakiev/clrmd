@@ -14,7 +14,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     {
       DesktopRuntime = runtime;
       _types = new List<ClrType>(1000);
-      Revision = runtime.Revision;
 
       // Prepopulate a few important method tables.
       _arrayType = new Lazy<ClrType>(CreateArrayType);
@@ -53,11 +52,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       var type = GetTypeByMethodTable(DesktopRuntime.ArrayMethodTable, DesktopRuntime.ObjectMethodTable, 0);
       type.ComponentType = ObjectType;
       return type;
-    }
-
-    protected override int GetRuntimeRevision()
-    {
-      return DesktopRuntime.Revision;
     }
 
     public override ClrRuntime Runtime => DesktopRuntime;
@@ -1186,8 +1180,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override IEnumerable<ClrObject> EnumerateObjects()
     {
-      RevisionValidator.Validate(Revision, GetRuntimeRevision());
-
       if (IsHeapCached)
         return _objectMap.Enumerate().Select(item => ClrObject.Create(item.Key, _objects[item.Value].Type));
 
@@ -1196,8 +1188,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override IEnumerable<ulong> EnumerateObjectAddresses()
     {
-      RevisionValidator.Validate(Revision, GetRuntimeRevision());
-
       if (IsHeapCached)
         return _objectMap.Enumerate().Select(item => item.Key);
 
