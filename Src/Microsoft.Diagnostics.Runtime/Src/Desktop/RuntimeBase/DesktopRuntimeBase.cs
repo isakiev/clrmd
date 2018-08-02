@@ -474,7 +474,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         : "mscorlib";
 
       foreach (var module in _modules.Values)
-        if (module.Name.ToLowerInvariant().Contains(moduleName))
+        if (module.Name != null && module.Name.ToLowerInvariant().Contains(moduleName))
         {
           mscorlib = module;
           break;
@@ -487,7 +487,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         foreach (var assembly in GetAssemblyList(ads.SharedDomain, sharedDomain.AssemblyCount))
         {
           var name = GetAssemblyName(assembly);
-          if (name.ToLowerInvariant().Contains(moduleName))
+          if (name != null && name.ToLowerInvariant().Contains(moduleName))
           {
             var assemblyData = GetAssemblyData(ads.SharedDomain, assembly);
             var module = GetModuleList(assembly, assemblyData.ModuleCount).Single();
