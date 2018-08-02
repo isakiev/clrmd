@@ -26,15 +26,15 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         protected CommonMethodTables _commonMTs;
         private Dictionary<uint, ICorDebugThread> _corDebugThreads;
         private ClrModule[] _moduleList;
-        private Lazy<List<ClrThread>> _threads;
-        private Lazy<DesktopGCHeap> _heap;
-        private Lazy<DesktopThreadPool> _threadpool;
+        private readonly Lazy<List<ClrThread>> _threads;
+        private readonly Lazy<DesktopGCHeap> _heap;
+        private readonly Lazy<DesktopThreadPool> _threadpool;
         private ErrorModule _errorModule;
-        private Lazy<DomainContainer> _appDomains;
+        private readonly Lazy<DomainContainer> _appDomains;
         private readonly Lazy<Dictionary<ulong, uint>> _moduleSizes;
-        private Dictionary<ulong, DesktopModule> _modules = new Dictionary<ulong, DesktopModule>();
-        private Dictionary<string, DesktopModule> _moduleFiles = new Dictionary<string, DesktopModule>();
-        private Lazy<ClrModule> _mscorlib;
+        private readonly Dictionary<ulong, DesktopModule> _modules = new Dictionary<ulong, DesktopModule>();
+        private readonly Dictionary<string, DesktopModule> _moduleFiles = new Dictionary<string, DesktopModule>();
+        private readonly Lazy<ClrModule> _mscorlib;
 
         internal DesktopRuntimeBase(ClrInfo info, DataTarget dt, DacLibrary lib)
             : base(info, dt, lib)
@@ -47,36 +47,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             _mscorlib = new Lazy<ClrModule>(GetMscorlib);
         }
 
-        /// <summary>
-        /// Flushes the dac cache.  This function MUST be called any time you expect to call the same function
-        /// but expect different results.  For example, after walking the heap, you need to call Flush before
-        /// attempting to walk the heap again.
-        /// </summary>
-        public override void Flush()
-        {
-            OnRuntimeFlushed();
-
-            Revision++;
-            _dacInterface.Flush();
-
-            MemoryReader = null;
-            _moduleList = null;
-            _modules = new Dictionary<ulong, DesktopModule>();
-            _moduleFiles = new Dictionary<string, DesktopModule>();
-            _threads = new Lazy<List<ClrThread>>(CreateThreadList);
-            _appDomains = new Lazy<DomainContainer>(CreateAppDomainList);
-            _heap = new Lazy<DesktopGCHeap>(CreateHeap);
-            _threadpool = new Lazy<DesktopThreadPool>(CreateThreadPoolData);
-            _mscorlib = new Lazy<ClrModule>(GetMscorlib);
-        }
-
         internal ulong GetModuleSize(ulong address)
         {
             _moduleSizes.Value.TryGetValue(address, out uint size);
             return size;
         }
-
-        internal int Revision { get; set; }
 
         public ErrorModule ErrorModule
         {
