@@ -16,7 +16,6 @@ namespace Microsoft.Diagnostics.Runtime
     protected readonly IXCLRDataProcess _dacInterface;
     private MemoryReader _cache;
     protected readonly IDataReader _dataReader;
-    protected readonly DataTarget _dataTarget;
 
     protected ICorDebugProcess _corDebugProcess;
     internal ICorDebugProcess CorDebugProcess
@@ -24,7 +23,7 @@ namespace Microsoft.Diagnostics.Runtime
       get
       {
         if (_corDebugProcess == null)
-          _corDebugProcess = CLRDebugging.CreateICorDebugProcess(ClrInfo.ModuleInfo.ImageBase, _library.DacDataTarget, _dataTarget.FileLoader);
+          _corDebugProcess = CLRDebugging.CreateICorDebugProcess(ClrInfo.ModuleInfo.ImageBase, _library.DacDataTarget, DataTarget.FileLoader);
 
         return _corDebugProcess;
       }
@@ -32,13 +31,11 @@ namespace Microsoft.Diagnostics.Runtime
 
     public RuntimeBase(ClrInfo info, DataTarget dataTarget, DacLibrary lib)
     {
-      Debug.Assert(lib != null);
-      Debug.Assert(lib.DacInterface != null);
-
-      ClrInfo = info;
-      _dataTarget = dataTarget;
-      _library = lib;
-      _dacInterface = _library.DacInterface;
+      ClrInfo = info ?? throw new ArgumentNullException(nameof(info));
+      DataTarget = dataTarget ?? throw new ArgumentNullException(nameof(dataTarget));
+      _library = lib ?? throw new ArgumentNullException(nameof(lib));
+      _dacInterface = lib.DacInterface ?? throw new ArgumentNullException(nameof(lib.DacInterface));
+      
       InitApi();
 
       _dacInterface.Flush();
@@ -54,7 +51,8 @@ namespace Microsoft.Diagnostics.Runtime
       _dataReader = dataTarget.DataReader;
     }
 
-    public override DataTarget DataTarget => _dataTarget;
+    public override ClrInfo ClrInfo { get; }
+    public override DataTarget DataTarget { get; }
 
     public void RegisterForRelease(object o)
     {

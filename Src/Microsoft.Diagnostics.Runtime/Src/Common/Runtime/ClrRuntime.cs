@@ -15,7 +15,8 @@ namespace Microsoft.Diagnostics.Runtime
     /// <summary>
     ///   The ClrInfo of the current runtime.
     /// </summary>
-    public ClrInfo ClrInfo { get; protected set; }
+    [NotNull]
+    public abstract ClrInfo ClrInfo { get; }
 
     /// <summary>
     ///   Returns the DataTarget associated with this runtime.
