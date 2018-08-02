@@ -18,10 +18,10 @@ namespace Microsoft.Diagnostics.Runtime
         private const int c_maxStackDepth = 1024 * 1024 * 1024; // 1gb
 
         private static readonly ulong[] s_emptyPointerArray = new ulong[0];
-        protected ClrDataProcess _dacInterface;
+        protected readonly ClrDataProcess _dacInterface;
         private MemoryReader _cache;
-        protected IDataReader _dataReader;
-        protected DataTarget _dataTarget;
+        protected readonly IDataReader _dataReader;
+        protected readonly DataTarget _dataTarget;
 
         protected ICorDebugProcess _corDebugProcess;
         internal ICorDebugProcess CorDebugProcess

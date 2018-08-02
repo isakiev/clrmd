@@ -30,7 +30,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             : base(runtime)
         {
             _address = address;
-            Revision = runtime.Revision;
             ImageBase = data.ImageBase;
             AssemblyName = assemblyName;
             _isPE = data.IsPEFile;
@@ -178,8 +177,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
         internal override MetaDataImport GetMetadataImport()
         {
-            RevisionValidator.Validate(Revision, _runtime.Revision);
-
             if (_metadata != null)
                 return _metadata;
 
