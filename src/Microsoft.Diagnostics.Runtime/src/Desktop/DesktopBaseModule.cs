@@ -8,7 +8,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
     internal abstract class DesktopBaseModule : ClrModule
     {
-        protected DesktopRuntimeBase _runtime;
+        protected readonly DesktopRuntimeBase _runtime;
 
         public override ClrRuntime Runtime => _runtime;
 
@@ -20,8 +20,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         {
             return null;
         }
-
-        public int Revision { get; set; }
 
         public DesktopBaseModule(DesktopRuntimeBase runtime)
         {

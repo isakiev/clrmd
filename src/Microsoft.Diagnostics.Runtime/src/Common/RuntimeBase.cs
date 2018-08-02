@@ -16,10 +16,10 @@ namespace Microsoft.Diagnostics.Runtime
     internal abstract class RuntimeBase : ClrRuntime
     {
         private static readonly ulong[] s_emptyPointerArray = new ulong[0];
-        protected ClrDataProcess _dacInterface;
+        protected readonly ClrDataProcess _dacInterface;
         private MemoryReader _cache;
-        protected IDataReader _dataReader;
-        protected DataTarget _dataTarget;
+        protected readonly IDataReader _dataReader;
+        protected readonly DataTarget _dataTarget;
 
         protected ICorDebugProcess _corDebugProcess;
         internal ICorDebugProcess CorDebugProcess

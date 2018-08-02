@@ -151,36 +151,6 @@ namespace Microsoft.Diagnostics.Runtime
         public abstract IList<ClrModule> Modules { get; }
 
         /// <summary>
-        /// Flushes the dac cache.  This function MUST be called any time you expect to call the same function
-        /// but expect different results.  For example, after walking the heap, you need to call Flush before
-        /// attempting to walk the heap again.  After calling this function, you must discard ALL ClrMD objects
-        /// you have cached other than DataTarget and ClrRuntime and re-request the objects and data you need.
-        /// (E.G. if you want to use the ClrHeap object after calling flush, you must call ClrRuntime.GetHeap
-        /// again after Flush to get a new instance.)
-        /// </summary>
-        public abstract void Flush();
-
-        /// <summary>
-        /// Delegate called when the RuntimeFlushed event is triggered.
-        /// </summary>
-        /// <param name="runtime">Which runtime was flushed.</param>
-        public delegate void RuntimeFlushedCallback(ClrRuntime runtime);
-
-        /// <summary>
-        /// Called whenever the runtime is being flushed.  All references to ClrMD objects need to be released
-        /// and not used for the given runtime after this call.
-        /// </summary>
-        public event RuntimeFlushedCallback RuntimeFlushed;
-
-        /// <summary>
-        /// Call when flushing the runtime.
-        /// </summary>
-        protected void OnRuntimeFlushed()
-        {
-            RuntimeFlushed?.Invoke(this);
-        }
-
-        /// <summary>
         /// Whether or not the runtime has component method tables for arrays.  This is an extra field in
         /// array objects on the heap, which was removed in v4.6 of desktop clr.
         /// </summary>
