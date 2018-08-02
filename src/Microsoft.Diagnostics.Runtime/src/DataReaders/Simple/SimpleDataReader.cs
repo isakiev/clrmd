@@ -287,8 +287,7 @@ namespace Microsoft.Diagnostics.Runtime
 
         private DumpMemoryChunk GetChunkContainingAddress(ulong address)
         {
-            var targetChunk = new MinidumpMemoryChunk {TargetStartAddress = address};
-            var index = Array.BinarySearch(myChunks, targetChunk);
+            var index = myChunks.BinarySearch(address, chunk => chunk.TargetStartAddress);
             if (index >= 0)
             {
                 Debug.Assert(myChunks[index].TargetStartAddress == address);
