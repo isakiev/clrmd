@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Src\Annotations\Annotations.cs" />
     <Compile Include="Src\Common\ClrAppDomain.cs" />
     <Compile Include="Src\Common\ClrDiagnosticsException.cs" />
     <Compile Include="Src\Common\ClrDiagnosticsExceptionKind.cs" />
@@ -527,8 +528,10 @@
     <Compile Include="Src\DataReaders\Dump\VsFixedFileInfo.cs" />
     <Compile Include="Src\DataReaders\IDataReader.cs" />
     <Compile Include="Src\DataReaders\Live\LiveDataReader.cs" />
+    <Compile Include="Src\Utilities\BinarySearchUtil.cs" />
     <Compile Include="Src\Utilities\Command\Command.cs" />
     <Compile Include="Src\Utilities\Command\CommandOptions.cs" />
+    <Compile Include="Src\Utilities\FuncUtil.cs" />
     <Compile Include="Src\Utilities\Logging\DefaultLogger.cs" />
     <Compile Include="Src\Utilities\Logging\IExternalLogger.cs" />
     <Compile Include="Src\Utilities\PDB\BitAccess.cs" />
@@ -572,6 +575,7 @@
     <Compile Include="Src\Utilities\PEFile\PEFile.cs" />
     <Compile Include="Src\Utilities\PEFile\PEHeader.cs" />
     <Compile Include="Src\Utilities\PEFile\ResourceNode.cs" />
+    <Compile Include="Src\Utilities\Runtime\ClrRuntimeUtil.cs" />
     <Compile Include="Src\Utilities\SigParser\SigParser.cs" />
     <Compile Include="Src\Utilities\SymbolLocator\DefaultSymbolLocator.cs" />
     <Compile Include="Src\Utilities\SymbolLocator\FileEntry.cs" />

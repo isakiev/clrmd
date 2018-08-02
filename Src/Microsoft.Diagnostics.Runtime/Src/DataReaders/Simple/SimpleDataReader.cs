@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Diagnostics.Runtime.DataReaders.Dump;
+using Microsoft.Diagnostics.Runtime.Utilities;
 
 // This provides a managed wrapper over the unmanaged dump-reading APIs in DbgHelp.dll.
 // 
@@ -287,8 +288,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 
     private DumpMemoryChunk GetChunkContainingAddress(ulong address)
     {
-      var targetChunk = new MinidumpMemoryChunk {TargetStartAddress = address};
-      var index = Array.BinarySearch(myChunks, targetChunk);
+      var index = myChunks.BinarySearch(address, chunk => chunk.TargetStartAddress);
       if (index >= 0)
       {
         Debug.Assert(myChunks[index].TargetStartAddress == address);
