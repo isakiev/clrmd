@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.Diagnostics.Runtime.Desktop;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
@@ -13,8 +11,6 @@ namespace Microsoft.Diagnostics.Runtime
 {
   public class DataTarget : IDisposable
   {
-    private static readonly Regex InvalidChars = new Regex($"[{Regex.Escape(new string(Path.GetInvalidPathChars()))}]");
-
     public DataTarget(IDataReader dataReader, IDacLocator dacLocator, ISymbolLocator symbolLocator)
     {
       DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
@@ -25,8 +21,8 @@ namespace Microsoft.Diagnostics.Runtime
       IsMinidump = dataReader.IsMinidump;
       Architecture = dataReader.GetArchitecture();
       PointerSize = dataReader.GetPointerSize();
-      Modules = InitModules(dataReader);
-      ClrVersions = InitVersions(Modules, Architecture, out var hasNativeRuntimes);
+      Modules = dataReader.GetSortedModules();
+      ClrVersions = Modules.GetVersions(Architecture, out var hasNativeRuntimes);
       HasNativeRuntimes = hasNativeRuntimes;
     }
 
@@ -43,30 +39,6 @@ namespace Microsoft.Diagnostics.Runtime
     public IReadOnlyCollection<ClrInfo> ClrVersions { get; }
     public bool HasNativeRuntimes { get; }
     
-    
-    private static IReadOnlyCollection<ModuleInfo> InitModules(IDataReader dataReader)
-    {
-      var sortedModules = new List<ModuleInfo>(dataReader.EnumerateModules().Where(m => !InvalidChars.IsMatch(m.FileName)));
-      sortedModules.Sort((a, b) => a.ImageBase.CompareTo(b.ImageBase));
-      return sortedModules.ToArray();
-    }
-    
-    private static IReadOnlyCollection<ClrInfo> InitVersions(IReadOnlyCollection<ModuleInfo> modules, Architecture architecture, out bool hasNativeRuntimes)
-    {
-      var versions = new List<ClrInfo>();
-      hasNativeRuntimes = false;
-      
-      foreach (var module in modules)
-      {
-        if (ClrInfoProvider.IsSupportedRuntime(module, out var flavor)) 
-          versions.Add(new ClrInfo(flavor, module, architecture));
-        else if (ClrInfoProvider.IsNativeRuntime(module))
-          hasNativeRuntimes = true;
-      }
-
-      return versions;
-    }
-
     public void Dispose()
     {
       DataReader.Close();

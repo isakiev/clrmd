@@ -531,9 +531,11 @@
     <Compile Include="Src\Utilities\BinarySearchUtil.cs" />
     <Compile Include="Src\Utilities\Command\Command.cs" />
     <Compile Include="Src\Utilities\Command\CommandOptions.cs" />
+    <Compile Include="Src\Utilities\DataReaderUtil.cs" />
     <Compile Include="Src\Utilities\FuncUtil.cs" />
     <Compile Include="Src\Utilities\Logging\DefaultLogger.cs" />
     <Compile Include="Src\Utilities\Logging\IExternalLogger.cs" />
+    <Compile Include="Src\Utilities\ModuleUtil.cs" />
     <Compile Include="Src\Utilities\PDB\BitAccess.cs" />
     <Compile Include="Src\Utilities\PDB\BitSet.cs" />
     <Compile Include="Src\Utilities\PDB\CvInfo.cs" />
