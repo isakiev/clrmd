@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using JetBrains.Annotations;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
 // This provides a managed wrapper over the unmanaged dump-reading APIs in DbgHelp.dll.
@@ -106,6 +107,23 @@ namespace Microsoft.Diagnostics.Runtime
                 throw new ClrDiagnosticsException("Dump doesn't contain MemoryList stream");
 
             myChunks = DumpMemoryChunkAggregator.MergeAndValidate(chunks, isList64).ToArray();
+        }
+
+        public static bool IsCorrectDumpFormat([NotNull] string file)
+        {
+            if (!File.Exists(file))
+                throw new FileNotFoundException(file);      
+      
+            using (var reader = new BinaryReader(File.OpenRead(file)))
+            {
+                var header = reader.ReadStructure<DumpHeader>();
+                if (header.Singature != DumpSignature)
+                    return false;
+                if ((header.Version & DumpVersionMask) != DumpVersion)
+                    return false;
+            }
+
+            return true;
         }
 
         private DumpStreamDetails GetStreamDetails(DumpStreamType type)
