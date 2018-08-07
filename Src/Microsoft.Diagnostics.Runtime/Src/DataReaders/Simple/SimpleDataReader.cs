@@ -110,6 +110,23 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       myChunks = DumpMemoryChunkAggregator.MergeAndValidate(chunks, isList64).ToArray();
     }
 
+    public static bool IsCorrectDumpFormat([NotNull] string file)
+    {
+      if (File.Exists(file))
+        throw new FileNotFoundException(file);      
+      
+      using (var reader = new BinaryReader(File.OpenRead(file)))
+      {
+        var header = reader.ReadStructure<DumpHeader>();
+        if (header.Singature != DumpSignature)
+          return false;
+        if ((header.Version & DumpVersionMask) != DumpVersion)
+          return false;
+      }
+
+      return true;
+    }
+
     private DumpStreamDetails GetStreamDetails(DumpStreamType type)
     {
       if (!myStreamDictionary.TryGetValue(type, out var details))
