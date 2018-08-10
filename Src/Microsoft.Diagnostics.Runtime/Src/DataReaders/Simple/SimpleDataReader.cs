@@ -112,7 +112,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 
     public static bool IsCorrectDumpFormat([NotNull] string file)
     {
-      if (File.Exists(file))
+      if (!File.Exists(file))
         throw new FileNotFoundException(file);      
       
       using (var reader = new BinaryReader(File.OpenRead(file)))
