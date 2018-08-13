@@ -7,7 +7,7 @@ using System.IO;
 
 namespace Microsoft.Diagnostics.Runtime
 {
-    internal static class ClrInfoProvider
+    public static class ClrInfoProvider
     {
         private const string c_desktopModuleName1 = "clr";
         private const string c_desktopModuleName2 = "mscorwks";
