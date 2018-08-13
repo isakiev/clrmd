@@ -2,7 +2,7 @@
 
 namespace Microsoft.Diagnostics.Runtime
 {
-  internal static class ClrInfoProvider
+  public static class ClrInfoProvider
   {
     private const string DesktopModuleName1 = "clr";
     private const string DesktopModuleName2 = "mscorwks";
