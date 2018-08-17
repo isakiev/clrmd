@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Annotations;
 
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
@@ -7,7 +8,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// <summary>
     /// Identity function that always returns the same value that was used as its argument.
     /// </summary>
-    [NotNull] public static readonly Func<T, T> Identity = t => t;
-    
+    [NotNull]
+    public static readonly Func<T, T> Identity = t => t;
   }
 }

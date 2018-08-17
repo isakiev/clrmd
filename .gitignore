@@ -3,6 +3,7 @@ syntax: glob
 [Bb]in
 [Bb]inRelease
 [Oo]bj
+[Pp]ackages
 
 .idea/
 .vs/
