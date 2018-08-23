@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Diagnostics.Runtime</RootNamespace>
-    <AssemblyName>Microsoft.Diagnostics.Runtime</AssemblyName>
+    <AssemblyName>JetBrains.Microsoft.Diagnostics.Runtime</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\Bin\</OutputPath>
-    <DocumentationFile>..\..\Bin\Microsoft.Diagnostics.Runtime.xml</DocumentationFile>
+    <DocumentationFile>..\..\Bin\JetBrains.Microsoft.Diagnostics.Runtime.xml</DocumentationFile>
     <BaseIntermediateOutputPath>..\..\Obj\</BaseIntermediateOutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -33,7 +33,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\BinRelease\</OutputPath>
-    <DocumentationFile>..\..\BinRelease\Microsoft.Diagnostics.Runtime.xml</DocumentationFile>
+    <DocumentationFile>..\..\BinRelease\JetBrains.Microsoft.Diagnostics.Runtime.xml</DocumentationFile>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
