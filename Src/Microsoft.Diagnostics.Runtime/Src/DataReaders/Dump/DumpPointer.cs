@@ -74,7 +74,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     // that we can't pinvoke to.
     private static void RawCopy(IntPtr src, IntPtr dest, uint numBytes)
     {
-      NativeMethods.RtlMoveMemory(dest, src, new IntPtr(numBytes));
+      DumpReader.RtlMoveMemory(dest, src, new IntPtr(numBytes));
     }
 
     internal ulong GetUlong()

@@ -16,8 +16,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public uint bIsReflection;
     public uint bIsPEFile;
     public IntPtr dwBaseClassIndex;
-    [MarshalAs(UnmanagedType.IUnknown)]
-    public object ModuleDefinition;
+    public IntPtr ModuleDefinition;
     public IntPtr dwModuleID;
 
     public uint dwTransientFlags;
@@ -45,7 +44,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public ulong ThunkHeap => pThunkHeap;
 
-    public object LegacyMetaDataImport => ModuleDefinition;
+    public IntPtr LegacyMetaDataImport => ModuleDefinition;
 
     public ulong ModuleId => (ulong)dwModuleID.ToInt64();
 

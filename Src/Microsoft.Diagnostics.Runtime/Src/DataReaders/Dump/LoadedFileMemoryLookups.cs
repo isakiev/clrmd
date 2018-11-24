@@ -39,7 +39,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
         // to the OS before mdbg loads it subsequently to execute it.
         // Also, note that rebasing will not be correct, so raw assembly addresses will be relative
         // to the base address of the module in mdbg's process, not the base address in the dump.
-        file = NativeMethods.LoadLibraryEx(fileName, 0, NativeMethods.LoadLibraryFlags.DontResolveDllReferences);
+        file = WindowsFunctions.NativeMethods.LoadLibraryEx(fileName, 0, WindowsFunctions.NativeMethods.LoadLibraryFlags.DontResolveDllReferences);
         _files[fileName] = new SafeLoadLibraryHandle(file);
         //TODO: Attempted file load order is NOT guaranteed, so the uncertainty will make output order non-deterministic.
         // Find/create an appropriate global verbosity setting.

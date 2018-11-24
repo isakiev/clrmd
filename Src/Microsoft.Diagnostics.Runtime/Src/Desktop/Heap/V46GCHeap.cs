@@ -41,8 +41,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         mt = DesktopRuntime.DataReader.ReadPointerUnsafe(objRef);
       }
 
-      if (((int)mt & 3) != 0)
-        mt &= ~3UL;
+      unchecked
+      {
+        if ((((byte)mt) & 3) != 0)
+          mt &= ~3UL;
+      }
 
       var type = GetTypeByMethodTable(mt, 0, objRef);
       _lastObject = ClrObject.Create(objRef, type);
@@ -81,7 +84,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         // Dynamic functions/modules
         var tokenEnt = token;
         if (!isFree && (module == null || module.IsDynamic))
-          tokenEnt = (uint)mt;
+          tokenEnt = unchecked((uint)mt);
 
         var modEnt = new ModuleEntry(module, tokenEnt);
 

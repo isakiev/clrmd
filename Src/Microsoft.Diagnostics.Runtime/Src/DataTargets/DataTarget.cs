@@ -11,6 +11,18 @@ namespace Microsoft.Diagnostics.Runtime
 {
   public class DataTarget : IDisposable
   {
+    internal static PlatformFunctions PlatformFunctions { get; }
+
+    static DataTarget()
+    {
+#if !NET45
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        PlatformFunctions = new LinuxFunctions();
+      else
+#endif
+        PlatformFunctions = new WindowsFunctions();
+    }
+
     public DataTarget(IDataReader dataReader, IDacLocator dacLocator, ISymbolLocator symbolLocator)
     {
       DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
@@ -30,27 +42,26 @@ namespace Microsoft.Diagnostics.Runtime
     public ISymbolLocator SymbolLocator { get; }
     public IDacLocator DacLocator { get; }
     internal FileLoader FileLoader { get; }
-    
-    
+
     public bool IsMinidump { get; }
     public Architecture Architecture { get; }
     public uint PointerSize { get; }
     public IReadOnlyCollection<ModuleInfo> Modules { get; }
     public IReadOnlyCollection<ClrInfo> ClrVersions { get; }
     public bool HasNativeRuntimes { get; }
-    
+
     public void Dispose()
     {
       DataReader.Close();
     }
-   
+
     /// <summary>
     ///   Creates a runtime from the given Dac file on disk.
     /// </summary>
     public ClrRuntime CreateRuntime(ClrInfo clrInfo)
     {
       if (clrInfo == null) throw new ArgumentNullException(nameof(clrInfo));
-      
+
       if (IntPtr.Size != PointerSize)
         throw new InvalidOperationException("Mismatched architecture between this process and the dac.");
 

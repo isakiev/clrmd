@@ -1,4 +1,5 @@
-﻿using Microsoft.Diagnostics.Runtime.ICorDebug;
+﻿using Microsoft.Diagnostics.Runtime.ComWrappers;
+using Microsoft.Diagnostics.Runtime.ICorDebug;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
 {
@@ -12,7 +13,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal ulong ModuleId { get; set; }
 
-    internal virtual IMetadataImport GetMetadataImport()
+    internal virtual MetaDataImport GetMetadataImport()
     {
       return null;
     }

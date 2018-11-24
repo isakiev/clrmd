@@ -44,8 +44,8 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Live
 
       using (var p = Process.GetCurrentProcess())
       {
-        if (NativeMethods.TryGetWow64(p.Handle, out var wow64) &&
-          NativeMethods.TryGetWow64(_process, out var targetWow64) &&
+        if (DataTarget.PlatformFunctions.TryGetWow64(p.Handle, out bool wow64) &&
+          DataTarget.PlatformFunctions.TryGetWow64(_process, out bool targetWow64) &&
           wow64 != targetWow64)
           throw new ClrDiagnosticsException("Dac architecture mismatch!");
       }
@@ -138,7 +138,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Live
       var filename = new StringBuilder(1024);
       GetModuleFileNameExA(_process, new IntPtr((long)addr), filename, filename.Capacity);
 
-      if (NativeMethods.GetFileVersion(filename.ToString(), out var major, out var minor, out var revision, out var patch))
+      if (DataTarget.PlatformFunctions.GetFileVersion(filename.ToString(), out int major, out int minor, out int revision, out int patch))
         version = new VersionInfo(major, minor, revision, patch);
       else
         version = new VersionInfo();

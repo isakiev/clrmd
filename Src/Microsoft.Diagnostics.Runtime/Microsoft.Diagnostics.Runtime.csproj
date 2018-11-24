@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -89,7 +90,6 @@
     <Compile Include="Src\Common\Internal\ContextHelper.cs" />
     <Compile Include="Src\Common\Internal\GCDesc.cs" />
     <Compile Include="Src\Common\Internal\MemoryReader.cs" />
-    <Compile Include="Src\Common\Internal\NativeMethods.cs" />
     <Compile Include="Src\Common\Internal\ReadVirtualStream.cs" />
     <Compile Include="Src\Common\Internal\SafeLoadLibraryHandle.cs" />
     <Compile Include="Src\Common\Internal\SafeMapViewHandle.cs" />
@@ -134,6 +134,21 @@
     <Compile Include="Src\Common\Types\ILToNativeMap.cs" />
     <Compile Include="Src\Common\Types\MethodCompilationType.cs" />
     <Compile Include="Src\Common\Types\RcwData.cs" />
+    <Compile Include="Src\ComWrappers\CallableComWrapper.cs" />
+    <Compile Include="Src\ComWrappers\ClrDataMethod.cs" />
+    <Compile Include="Src\ComWrappers\ClrDataProcess.cs" />
+    <Compile Include="Src\ComWrappers\ClrDataTask.cs" />
+    <Compile Include="Src\ComWrappers\ClrStackWalk.cs" />
+    <Compile Include="Src\ComWrappers\ComCallableIUnknown.cs" />
+    <Compile Include="Src\ComWrappers\ComHelper.cs" />
+    <Compile Include="Src\ComWrappers\IDacDataTarget.cs" />
+    <Compile Include="Src\ComWrappers\IUnknownVTable.cs" />
+    <Compile Include="Src\ComWrappers\MetaDataImport.cs" />
+    <Compile Include="Src\ComWrappers\SosDac.cs" />
+    <Compile Include="Src\ComWrappers\SosHandleEnum.cs" />
+    <Compile Include="Src\ComWrappers\SosStackRefEnum.cs" />
+    <Compile Include="Src\ComWrappers\VTableBuilder.cs" />
+    <Compile Include="Src\DataReaders\Core\CoreDumpReader.cs" />
     <Compile Include="Src\DataReaders\DbgEng\AttachFlag.cs" />
     <Compile Include="Src\DataReaders\Dump\MinidumpHeader.cs" />
     <Compile Include="Src\DataReaders\Live\MemoryBasicInformation.cs" />
@@ -531,6 +546,15 @@
     <Compile Include="Src\DataReaders\Dump\VsFixedFileInfo.cs" />
     <Compile Include="Src\DataReaders\IDataReader.cs" />
     <Compile Include="Src\DataReaders\Live\LiveDataReader.cs" />
+    <Compile Include="Src\Linux\AddressSpaces.cs" />
+    <Compile Include="Src\Linux\ElfCoreFile.cs" />
+    <Compile Include="Src\Linux\ElfFile.cs" />
+    <Compile Include="Src\Linux\ElfLoadedImage.cs" />
+    <Compile Include="Src\Linux\ElfNote.cs" />
+    <Compile Include="Src\Linux\ElfProgramHeader.cs" />
+    <Compile Include="Src\Linux\ElfStructures.cs" />
+    <Compile Include="Src\Linux\HelperExtensions.cs" />
+    <Compile Include="Src\Linux\Reader.cs" />
     <Compile Include="Src\Utilities\BinarySearchUtil.cs" />
     <Compile Include="Src\Utilities\Command\Command.cs" />
     <Compile Include="Src\Utilities\Command\CommandOptions.cs" />
@@ -580,6 +604,7 @@
     <Compile Include="Src\Utilities\PEFile\PEFile.cs" />
     <Compile Include="Src\Utilities\PEFile\PEHeader.cs" />
     <Compile Include="Src\Utilities\PEFile\ResourceNode.cs" />
+    <Compile Include="Src\Utilities\PlatformAbstraction.cs" />
     <Compile Include="Src\Utilities\Runtime\ClrRuntimeUtil.cs" />
     <Compile Include="Src\Utilities\SigParser\SigParser.cs" />
     <Compile Include="Src\Utilities\SymbolLocator\DefaultSymbolLocator.cs" />

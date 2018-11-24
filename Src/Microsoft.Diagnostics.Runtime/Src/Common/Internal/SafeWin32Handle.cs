@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Diagnostics.Runtime
@@ -22,7 +23,11 @@ namespace Microsoft.Diagnostics.Runtime
 
     protected override bool ReleaseHandle()
     {
-      return NativeMethods.CloseHandle(handle);
+      return CloseHandle(handle);
     }
+    
+    [DllImport("kernel32.dll", SetLastError = true, PreserveSig = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool CloseHandle(IntPtr handle);
   }
 }

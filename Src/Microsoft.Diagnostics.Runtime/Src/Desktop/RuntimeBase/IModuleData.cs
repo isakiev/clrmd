@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Diagnostics.Runtime.Desktop
+﻿using System;
+
+namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal interface IModuleData
   {
@@ -6,7 +8,7 @@
     ulong PEFile { get; }
     ulong LookupTableHeap { get; }
     ulong ThunkHeap { get; }
-    object LegacyMetaDataImport { get; }
+    IntPtr LegacyMetaDataImport { get; }
     ulong ModuleId { get; }
     ulong ModuleIndex { get; }
     ulong Assembly { get; }

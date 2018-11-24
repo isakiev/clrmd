@@ -145,14 +145,18 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
       try
       {
-        using (var pefile = new PEFile(fullPath))
+        using (var fs = File.OpenRead(fullPath))
+        using (var pefile = PEFile.TryLoad(fs, false))
         {
-          var header = pefile.Header;
-          if (header.TimeDateStampSec == buildTimeStamp && header.SizeOfImage == imageSize)
-            return true;
+          if (pefile != null)
+          {
+            var header = pefile.Header;
+            if (header.TimeDateStampSec == buildTimeStamp && header.SizeOfImage == imageSize)
+              return true;
 
-          Trace("Rejected file '{0}' because file size and time stamp did not match.", fullPath);
-          return false;
+            Trace("Rejected file '{0}' because file size and time stamp did not match.", fullPath);
+            return false;
+          }
         }
       }
       catch (Exception e)
@@ -160,6 +164,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         Trace("Encountered exception {0} while attempting to inspect file '{1}'.", e.GetType().Name, fullPath);
         return false;
       }
+      return false;
     }
     
     private void Trace(string format, params object[] parameters)

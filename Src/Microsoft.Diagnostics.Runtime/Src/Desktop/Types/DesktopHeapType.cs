@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Diagnostics.Runtime.ComWrappers;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
@@ -366,41 +367,19 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         throw new InvalidOperationException("Type is not an Enum.");
 
       _enumData = new EnumData();
-      IMetadataImport import = null;
-      if (DesktopModule != null)
-        import = DesktopModule.GetMetadataImport();
+      MetaDataImport import = DesktopModule?.GetMetadataImport();
 
       if (import == null)
-      {
-        _enumData = new EnumData();
         return;
-      }
 
       var hnd = IntPtr.Zero;
-      int tokens;
-
       var names = new List<string>();
-      var fields = new int[64];
-      do
+      
+      foreach (int token in import.EnumerateFields((int)_token))
       {
-        var res = import.EnumFields(ref hnd, (int)_token, fields, fields.Length, out tokens);
-        for (var i = 0; i < tokens; ++i)
+        if (import.GetFieldProps(token, out string name, out FieldAttributes attr, out IntPtr ppvSigBlob, out int pcbSigBlob, out int pdwCPlusTypeFlag, out IntPtr ppValue))
         {
-          var builder = new StringBuilder(256);
-          res = import.GetFieldProps(
-            fields[i],
-            out var mdTypeDef,
-            builder,
-            builder.Capacity,
-            out var pchField,
-            out var attr,
-            out var ppvSigBlob,
-            out var pcbSigBlob,
-            out var pdwCPlusTypeFlag,
-            out var ppValue,
-            out var pcchValue);
-
-          if ((int)attr == 0x606 && builder.ToString() == "value__")
+          if ((int)attr == 0x606 && name == "value__")
           {
             var parser = new SigParser(ppvSigBlob, pcbSigBlob);
 
@@ -412,7 +391,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           var intAttr = (int)attr;
           if ((int)attr == 0x8056)
           {
-            var name = builder.ToString();
             names.Add(name);
 
             var parser = new SigParser(ppvSigBlob, pcbSigBlob);
@@ -428,9 +406,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             }
           }
         }
-      } while (fields.Length == tokens);
-
-      import.CloseEnum(hnd);
+      }
     }
 
     public override bool IsEnum
@@ -571,6 +547,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     {
       if (_fields != null)
         return;
+      
+      if (IsFree)
+      {
+        _fields = new List<ClrInstanceField>();
+        return;
+      }
 
       var runtime = DesktopHeap.DesktopRuntime;
       var fieldInfo = runtime.GetFieldInfo(_constructedMT);
@@ -593,7 +575,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       var nextField = fieldInfo.FirstField;
       var i = 0;
 
-      IMetadataImport import = null;
+      MetaDataImport import = null;
       if (nextField != 0 && DesktopModule != null)
         import = DesktopModule.GetMetadataImport();
 
@@ -613,31 +595,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         // Get the name of the field.
         string name = null;
         var attr = FieldAttributes.PrivateScope;
-        int pcchValue = 0, sigLen = 0;
+        int sigLen = 0;
         var ppValue = IntPtr.Zero;
         var fieldSig = IntPtr.Zero;
 
         if (import != null)
-        {
-          var builder = new StringBuilder(256);
-
-          var res = import.GetFieldProps(
-            (int)field.FieldToken,
-            out var mdTypeDef,
-            builder,
-            builder.Capacity,
-            out var pchField,
-            out attr,
-            out fieldSig,
-            out sigLen,
-            out var pdwCPlusTypeFlab,
-            out ppValue,
-            out pcchValue);
-          if (res >= 0)
-            name = builder.ToString();
-          else
-            fieldSig = IntPtr.Zero;
-        }
+          import.GetFieldProps((int)field.FieldToken, out name, out attr, out fieldSig, out sigLen, out int pdwCPlusTypeFlab, out ppValue);
 
         // If we couldn't figure out the name, at least give the token.
         if (import == null || name == null) name = string.Format("<ERROR:{0:X}>", field.FieldToken);
@@ -691,7 +654,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         if (_methods != null)
           return _methods;
 
-        IMetadataImport metadata = null;
+        MetaDataImport metadata = null;
         if (DesktopModule != null)
           metadata = DesktopModule.GetMetadataImport();
 
@@ -1030,7 +993,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     private void InitFlags()
     {
-      if ((int)_attributes != 0 || DesktopModule == null)
+      if (_attributes != 0 || DesktopModule == null)
         return;
 
       var import = DesktopModule.GetMetadataImport();
@@ -1040,8 +1003,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         return;
       }
 
-      var i = import.GetTypeDefProps((int)_token, null, 0, out var tdef, out _attributes, out var extends);
-      if (i < 0 || (int)_attributes == 0)
+      if (!import.GetTypeDefAttributes((int)_token, out _attributes) || _attributes == 0)
         _attributes = (TypeAttributes)0x70000000;
     }
 

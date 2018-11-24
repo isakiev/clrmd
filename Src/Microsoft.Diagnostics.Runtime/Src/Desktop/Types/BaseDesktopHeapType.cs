@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
+using Microsoft.Diagnostics.Runtime.ComWrappers;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -95,30 +97,18 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         return null;
       }
 
-      var hnd = IntPtr.Zero;
-      var mdTokens = new int[32];
-      int count;
-
-      do
+      foreach (int token in import.EnumerateInterfaceImpls((int)_token))
       {
-        var res = import.EnumInterfaceImpls(ref hnd, (int)_token, mdTokens, mdTokens.Length, out count);
-        if (res < 0)
-          break;
-
-        for (var i = 0; i < count; ++i)
+        if (import.GetInterfaceImplProps(token, out int mdClass, out int mdIFace))
         {
-          res = import.GetInterfaceImplProps(mdTokens[i], out var mdClass, out var mdIFace);
-
           if (interfaces == null)
-            interfaces = new List<ClrInterface>(count == mdTokens.Length ? 64 : count);
+            interfaces = new List<ClrInterface>();
 
           var result = GetInterface(import, mdIFace);
           if (result != null && !interfaces.Contains(result))
             interfaces.Add(result);
         }
-      } while (count == mdTokens.Length);
-
-      import.CloseEnum(hnd);
+      }
 
       if (interfaces == null)
         _interfaces = DesktopHeap.EmptyInterfaceList;
@@ -128,31 +118,13 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return interfaces;
     }
 
-    private ClrInterface GetInterface(IMetadataImport import, int mdIFace)
+    private ClrInterface GetInterface(MetaDataImport import, int mdIFace)
     {
-      var builder = new StringBuilder(1024);
-      var res = import.GetTypeDefProps(mdIFace, builder, builder.Capacity, out var count, out var attr, out var extends);
-
-      string name = null;
       ClrInterface result = null;
-      if (res == 0)
-      {
-        name = builder.ToString();
-      }
-      else if (res == 1)
-      {
-        res = import.GetTypeRefProps(mdIFace, out var scope, builder, builder.Capacity, out count);
-        if (res == 0)
-        {
-          name = builder.ToString();
-        }
-        else if (res == 1)
-        {
-        }
-      }
+      if (!import.GetTypeDefProperties(mdIFace, out string name, out TypeAttributes attrs, out int extends))
+        name = import.GetTypeRefName(mdIFace);
 
       // TODO:  Handle typespec case.
-
       if (name != null && !DesktopHeap.Interfaces.TryGetValue(name, out result))
       {
         ClrInterface type = null;

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
+using Microsoft.Diagnostics.Runtime.ComWrappers;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
 {
@@ -156,37 +158,29 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return result;
     }
 
-    protected static StringBuilder GetTypeNameFromToken(DesktopModule module, uint token)
+    protected static string GetTypeNameFromToken(DesktopModule module, uint token)
     {
       if (module == null)
         return null;
 
-      var meta = module.GetMetadataImport();
+      MetaDataImport meta = module.GetMetadataImport();
       if (meta == null)
         return null;
 
       // Get type name.
-      var typeBuilder = new StringBuilder(256);
-      var res = meta.GetTypeDefProps((int)token, typeBuilder, typeBuilder.Capacity, out var typeDefLen, out var typeAttrs, out var ptkExtends);
-      if (res < 0)
+      if (!meta.GetTypeDefProperties((int)token, out string name, out TypeAttributes attrs, out int parent))
         return null;
-
-      res = meta.GetNestedClassProps((int)token, out var enclosing);
-      if (res == 0 && token != enclosing)
+            
+      if (meta.GetNestedClassProperties((int)token, out int enclosing) && token != enclosing)
       {
-        var inner = GetTypeNameFromToken(module, (uint)enclosing);
+        string inner = GetTypeNameFromToken(module, (uint)enclosing);
         if (inner == null)
-        {
-          inner = new StringBuilder(typeBuilder.Capacity + 16);
-          inner.Append("<UNKNOWN>");
-        }
+          inner = "<UNKNOWN>";
 
-        inner.Append('+');
-        inner.Append(typeBuilder);
-        return inner;
+        return $"{inner}+{name}";
       }
 
-      return typeBuilder;
+      return name;
     }
 
     public override IEnumerable<ulong> EnumerateFinalizableObjectAddresses()

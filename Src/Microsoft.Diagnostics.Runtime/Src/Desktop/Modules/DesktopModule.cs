@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Diagnostics.Runtime.ComWrappers;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
@@ -14,9 +15,9 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     private readonly bool _reflection;
     private readonly bool _isPE;
-    private readonly string _name;
+    private string _name;
     private readonly string _assemblyName;
-    private IMetadataImport _metadata;
+    private MetaDataImport _metadata;
     private readonly Dictionary<ClrAppDomain, ulong> _mapping = new Dictionary<ClrAppDomain, ulong>();
     private readonly ulong _address;
     private readonly ulong _imageBase;
@@ -45,7 +46,10 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       _assemblyAddress = data.Assembly;
       _size = new Lazy<ulong>(() => runtime.GetModuleSize(address));
 
-      if (!runtime.DataReader.IsMinidump) _metadata = data.LegacyMetaDataImport as IMetadataImport;
+      // This is very expensive in the minidump case, as we may be heading out to the symbol server or
+      // reading multiple files from disk. Only optimistically fetch this data if we have full memory.
+      if (!runtime.DataReader.IsMinidump && data.LegacyMetaDataImport != IntPtr.Zero)
+        _metadata = new MetaDataImport(data.LegacyMetaDataImport);
     }
 
     internal override ulong Address => _address;
@@ -176,7 +180,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return 0;
     }
 
-    internal override IMetadataImport GetMetadataImport()
+    internal override MetaDataImport GetMetadataImport()
     {
       if (_metadata != null)
         return _metadata;
@@ -207,7 +211,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       }
     }
 
-    private void InitDebugAttributes()
+    private unsafe void InitDebugAttributes()
     {
       var metadata = GetMetadataImport();
       if (metadata == null)
@@ -218,14 +222,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
       try
       {
-        var hr = metadata.GetCustomAttributeByName(0x20000001, "System.Diagnostics.DebuggableAttribute", out var data, out var cbData);
-        if (hr != 0 || cbData <= 4)
-        {
-          _debugMode = DebuggableAttribute.DebuggingModes.None;
-          return;
-        }
-
-        unsafe
+        if (metadata.GetCustomAttributeByName(0x20000001, "System.Diagnostics.DebuggableAttribute", out IntPtr data, out uint cbData) && cbData >= 4)
         {
           var b = (byte*)data.ToPointer();
           ushort opt = b[2];
@@ -233,6 +230,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
           _debugMode = (DebuggableAttribute.DebuggingModes)((dbg << 8) | opt);
         }
+        else
+        {
+          _debugMode = DebuggableAttribute.DebuggingModes.None;
+        }
+        
       }
       catch (SEHException)
       {

@@ -32,5 +32,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public bool Shared => isShared != 0;
     public uint NumMethods => wNumMethods;
     public ulong ElementTypeHandle => throw new NotImplementedException();
+    public uint Token => token;
+    public ulong Module => module;
   }
 }

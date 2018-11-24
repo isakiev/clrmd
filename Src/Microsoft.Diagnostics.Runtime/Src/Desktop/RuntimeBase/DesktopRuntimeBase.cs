@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.Diagnostics.Runtime.ComWrappers;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -145,7 +146,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       {
         threads.Add(new DesktopThread(this, thread, addr, addr == finalizer));
         addr = thread.Next;
-        if (seen.Contains(addr))
+        if (seen.Contains(addr) || addr == 0)
           break;
 
         seen.Add(addr);
@@ -645,38 +646,20 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return GetNameForMT(id.MethodTable);
     }
 
-    protected IXCLRDataProcess GetClrDataProcess()
-    {
-      return _dacInterface;
-    }
-
     internal IEnumerable<ClrStackFrame> EnumerateStackFrames(DesktopThread thread)
     {
-      var proc = GetClrDataProcess();
-
-      var res = proc.GetTaskByOSThreadID(thread.OSThreadId, out var tmp);
-      if (res < 0)
-        yield break;
-
-      IXCLRDataTask task = null;
-      IXCLRDataStackWalk stackwalk = null;
-
-      try
+      using (ClrStackWalk stackwalk = _dacInterface.CreateStackWalk(thread.OSThreadId, 0xf))
       {
-        task = (IXCLRDataTask)tmp;
-        res = task.CreateStackWalk(0xf, out tmp);
-        if (res < 0)
+        if (stackwalk == null)
           yield break;
 
-        stackwalk = (IXCLRDataStackWalk)tmp;
-        var ulongBuffer = new byte[8];
-        var context = ContextHelper.Context;
+        byte[] ulongBuffer = new byte[8];
+        byte[] context = ContextHelper.Context;
         do
         {
-          res = stackwalk.GetContext(ContextHelper.ContextFlags, ContextHelper.Length, out var size, context);
-          if (res < 0 || res == 1)
+          if (!stackwalk.GetContext(ContextHelper.ContextFlags, ContextHelper.Length, out uint size, context))
             break;
-
+                    
           ulong ip, sp;
 
           if (PointerSize == 4)
@@ -689,88 +672,50 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             ip = BitConverter.ToUInt64(context, ContextHelper.InstructionPointerOffset);
             sp = BitConverter.ToUInt64(context, ContextHelper.StackPointerOffset);
           }
-
-          res = stackwalk.Request(0xf0000000, 0, null, (uint)ulongBuffer.Length, ulongBuffer);
-
-          ulong frameVtbl = 0;
-          if (res >= 0)
+                    
+          ulong frameVtbl = stackwalk.GetFrameVtable();
+          if (frameVtbl != 0)
           {
-            frameVtbl = BitConverter.ToUInt64(ulongBuffer, 0);
-            if (frameVtbl != 0)
-            {
-              sp = frameVtbl;
-              ReadPointer(sp, out frameVtbl);
-            }
+            sp = frameVtbl;
+            ReadPointer(sp, out frameVtbl);
           }
 
-          var frame = GetStackFrame(thread, res, ip, sp, frameVtbl);
+          DesktopStackFrame frame = GetStackFrame(thread, ip, sp, frameVtbl);
           yield return frame;
-        } while (stackwalk.Next() == 0);
-      }
-      finally
-      {
-        if (task != null)
-          Marshal.FinalReleaseComObject(task);
-
-        if (stackwalk != null)
-          Marshal.FinalReleaseComObject(stackwalk);
+        } while (stackwalk.Next());
       }
     }
 
     internal ILToNativeMap[] GetILMap(ulong ip)
     {
-      List<ILToNativeMap> list = null;
-      ILToNativeMap[] tmp = null;
+      List<ILToNativeMap> list = new List<ILToNativeMap>();
 
-      var res = _dacInterface.StartEnumMethodInstancesByAddress(ip, null, out var handle);
-      if (res < 0)
-        return null;
-
-      res = _dacInterface.EnumMethodInstanceByAddress(ref handle, out var objMethod);
-
-      while (res == 0)
+      foreach (ClrDataMethod method in _dacInterface.EnumerateMethodInstancesByAddress(ip))
       {
-        var method = (IXCLRDataMethodInstance)objMethod;
-        res = method.GetILAddressMap(0, out var needed, null);
-        if (res == 0)
+        ILToNativeMap[] map = method.GetILToNativeMap();
+        if (map != null)
         {
-          tmp = new ILToNativeMap[needed];
-          res = method.GetILAddressMap(needed, out needed, tmp);
-
-          for (var i = 0; i < tmp.Length; i++)
+          for (int i = 0; i < map.Length; i++)
+          {
             // There seems to be a bug in IL to native mappings where a throw statement
             // may end up with an end address lower than the start address.  This is a
             // workaround for that issue.
-            if (tmp[i].StartAddress > tmp[i].EndAddress)
+            if (map[i].StartAddress > map[i].EndAddress)
             {
-              if (i + 1 == tmp.Length)
-                tmp[i].EndAddress = tmp[i].StartAddress + 0x20;
+              if (i + 1 == map.Length)
+                map[i].EndAddress = map[i].StartAddress + 0x20;
               else
-                tmp[i].EndAddress = tmp[i + 1].StartAddress - 1;
+                map[i].EndAddress = map[i + 1].StartAddress - 1;
             }
+          }
 
-          if (res != 0)
-            tmp = null;
+          list.AddRange(map);
         }
 
-        res = _dacInterface.EnumMethodInstanceByAddress(ref handle, out objMethod);
-        if (res == 0 && tmp != null)
-        {
-          if (list == null)
-            list = new List<ILToNativeMap>();
-
-          list.AddRange(tmp);
-        }
+        method.Dispose();
       }
 
-      if (list != null)
-      {
-        list.AddRange(tmp);
-        return list.ToArray();
-      }
-
-      _dacInterface.EndEnumMethodInstancesByAddress(handle);
-      return tmp;
+      return list.ToArray();
     }
 
     internal abstract Dictionary<ulong, List<ulong>> GetDependentHandleMap(CancellationToken cancelToken);
@@ -779,7 +724,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     internal delegate void LoaderHeapTraverse(ulong address, IntPtr size, int isCurrent);
 
-    internal abstract IList<ulong> GetAppDomainList(int count);
+    internal abstract ulong[] GetAppDomainList(int count);
     internal abstract ulong[] GetAssemblyList(ulong appDomain, int count);
     internal abstract ulong[] GetModuleList(ulong assembly, int count);
     internal abstract IAssemblyData GetAssemblyData(ulong domain, ulong assembly);
@@ -796,7 +741,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     internal abstract ulong GetModuleForMT(ulong mt);
     internal abstract IFieldInfo GetFieldInfo(ulong mt);
     internal abstract IFieldData GetFieldData(ulong fieldDesc);
-    internal abstract IMetadataImport GetMetadataImport(ulong module);
+    internal abstract MetaDataImport GetMetadataImport(ulong module);
     internal abstract IObjectData GetObjectData(ulong objRef);
     internal abstract ulong GetMethodTableByEEClass(ulong eeclass);
     internal abstract IList<MethodTableTokenPair> GetMethodTableList(ulong module);
@@ -811,7 +756,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     internal abstract string GetNameForMD(ulong md);
     internal abstract IMethodDescData GetMethodDescData(ulong md);
     internal abstract uint GetMetadataToken(ulong mt);
-    protected abstract DesktopStackFrame GetStackFrame(DesktopThread thread, int res, ulong ip, ulong sp, ulong frameVtbl);
+    protected abstract DesktopStackFrame GetStackFrame(DesktopThread thread, ulong ip, ulong sp, ulong frameVtbl);
     internal abstract IList<ClrStackFrame> GetExceptionStackTrace(ulong obj, ClrType type);
     internal abstract string GetAssemblyName(ulong assembly);
     internal abstract string GetAppBase(ulong appDomain);

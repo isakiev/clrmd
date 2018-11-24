@@ -1,11 +1,12 @@
-﻿namespace Microsoft.Diagnostics.Runtime.Desktop
+﻿using Microsoft.Diagnostics.Runtime.ComWrappers;
+
+namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class V45MethodDescDataWrapper : IMethodDescData
   {
-    public bool Init(ISOSDac sos, ulong md)
+    public bool Init(SOSDac sos, ulong md)
     {
-      var data = new V45MethodDescData();
-      if (sos.GetMethodDescData(md, 0, out data, 0, null, out var count) < 0)
+      if (!sos.GetMethodDescData(md, 0, out V45MethodDescData data))
         return false;
 
       _md = data.MethodDescPtr;
@@ -14,7 +15,7 @@
       _token = data.MDToken;
       _mt = data.MethodTablePtr;
 
-      if (sos.GetCodeHeaderData(data.NativeCodeAddr, out var header) >= 0)
+      if (sos.GetCodeHeaderData(data.NativeCodeAddr, out CodeHeaderData header))
       {
         if (header.JITType == 1)
           _jitType = MethodCompilationType.Jit;

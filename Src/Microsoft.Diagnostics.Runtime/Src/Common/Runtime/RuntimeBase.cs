@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Diagnostics.Runtime.ComWrappers;
 using Microsoft.Diagnostics.Runtime.DataReaders;
 using Microsoft.Diagnostics.Runtime.Desktop;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
@@ -13,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime
   {
     private static readonly ulong[] s_emptyPointerArray = new ulong[0];
     protected readonly DacLibrary _library;
-    protected readonly IXCLRDataProcess _dacInterface;
+    protected readonly ClrDataProcess _dacInterface;
     private MemoryReader _cache;
     protected readonly IDataReader _dataReader;
 
@@ -54,15 +55,10 @@ namespace Microsoft.Diagnostics.Runtime
     public override ClrInfo ClrInfo { get; }
     public override DataTarget DataTarget { get; }
 
-    public void RegisterForRelease(object o)
-    {
-      if (o != null)
-        _library.AddToReleaseList(o);
-    }
-
     public void RegisterForRelease(IModuleData module)
     {
-      RegisterForRelease(module?.LegacyMetaDataImport);
+      if (module != null)
+        COMHelper.Release(module.LegacyMetaDataImport);
     }
 
     public IDataReader DataReader => _dataReader;

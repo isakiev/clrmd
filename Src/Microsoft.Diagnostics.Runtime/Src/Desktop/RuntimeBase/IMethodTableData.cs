@@ -2,6 +2,7 @@
 {
   internal interface IMethodTableData
   {
+    uint Token { get; }
     bool Shared { get; }
     bool Free { get; }
     bool ContainsPointers { get; }
@@ -11,5 +12,6 @@
     ulong Parent { get; }
     uint NumMethods { get; }
     ulong ElementTypeHandle { get; }
+    ulong Module { get; }
   }
 }

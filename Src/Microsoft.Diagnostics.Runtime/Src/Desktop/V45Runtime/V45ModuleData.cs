@@ -1,4 +1,6 @@
-﻿#pragma warning disable 0649
+﻿using System;
+
+#pragma warning disable 0649
 #pragma warning disable 0169
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -33,7 +35,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public ulong LookupTableHeap => pLookupTableHeap;
     public ulong ThunkHeap => pThunkHeap;
 
-    public object LegacyMetaDataImport => null;
+    public IntPtr LegacyMetaDataImport => IntPtr.Zero;
 
     public ulong ModuleId => dwModuleID;
 

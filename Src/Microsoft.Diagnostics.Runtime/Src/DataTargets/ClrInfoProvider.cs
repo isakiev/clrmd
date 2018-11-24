@@ -6,7 +6,8 @@ namespace Microsoft.Diagnostics.Runtime
   {
     private const string DesktopModuleName1 = "clr";
     private const string DesktopModuleName2 = "mscorwks";
-    private const string CoreModuleName = "coreclr";
+    private const string WindowsCoreModuleName = "coreclr";
+    private const string LinuxCoreModuleName = "libcoreclr"; //TODO
     private const string NativeModuleName = "mrt100_app";
 
     private static bool TryGetModuleName(ModuleInfo moduleInfo, out string moduleName)
@@ -33,7 +34,7 @@ namespace Microsoft.Diagnostics.Runtime
           flavor = ClrFlavor.Desktop;
           return true;
 
-        case CoreModuleName:
+        case WindowsCoreModuleName:
           flavor = ClrFlavor.Core;
           return true;
 
@@ -52,6 +53,7 @@ namespace Microsoft.Diagnostics.Runtime
     
     public static string GetDacFileName(ClrFlavor flavor)
     {
+      //TODO: .so in case of Linux
       return flavor == ClrFlavor.Core ? "mscordaccore.dll" : "mscordacwks.dll";
     }
     

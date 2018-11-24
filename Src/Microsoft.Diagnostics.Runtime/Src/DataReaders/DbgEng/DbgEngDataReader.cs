@@ -157,11 +157,15 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
     private static IDebugClient CreateIDebugClient()
     {
       var guid = new Guid("27fe5639-8407-4f47-8364-ee118fb08ac8");
-      NativeMethods.DebugCreate(ref guid, out var obj);
+      DebugCreate(ref guid, out object obj);
 
       var client = (IDebugClient)obj;
       return client;
     }
+    
+    [DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
+    [DllImport("dbgeng.dll")]
+    public static extern uint DebugCreate(ref Guid interfaceId, [MarshalAs(UnmanagedType.IUnknown)] out object Interface);
 
     public void Close()
     {

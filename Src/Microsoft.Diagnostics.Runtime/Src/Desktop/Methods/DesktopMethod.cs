@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Diagnostics.Runtime.ComWrappers;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -20,14 +21,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private ILInfo _il;
     private readonly HotColdRegions _hotColdInfo;
     
-    internal static DesktopMethod Create(DesktopRuntimeBase runtime, IMetadataImport metadata, IMethodDescData mdData)
+    internal static DesktopMethod Create(DesktopRuntimeBase runtime, MetaDataImport metadata, IMethodDescData mdData)
     {
       if (mdData == null)
         return null;
 
-      MethodAttributes attrs = 0;
-      if (metadata?.GetMethodProps(mdData.MDToken, out var pClass, null, 0, out var methodLength, out attrs, out var blob, out var blobLen, out var codeRva, out var implFlags) < 0)
-        attrs = 0;
+      MethodAttributes attrs = metadata.GetMethodAttributes((int)mdData.MDToken);
 
       return new DesktopMethod(runtime, mdData.MethodDesc, mdData, attrs);
     }
@@ -119,8 +118,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public override int GetILOffset(ulong addr)
     {
       var map = ILOffsetMap;
-      if (map == null)
-        return -1;
 
       var ilOffset = 0;
       if (map.Length > 1)
