@@ -612,7 +612,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       try
       {
         var source = handle.AddrOfPinnedObject();
-        NativeMethods.RtlMoveMemory(destination, source, new IntPtr(bytesToCopy));
+        DumpReader.RtlMoveMemory(destination, source, new IntPtr(bytesToCopy));
       }
       finally
       {

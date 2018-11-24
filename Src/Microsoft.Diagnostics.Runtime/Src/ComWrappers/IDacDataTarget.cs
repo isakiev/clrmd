@@ -18,17 +18,17 @@ namespace Microsoft.Diagnostics.Runtime.ComWrappers
         private static readonly Guid IID_IDacDataTarget = new Guid("3E11CCEE-D08B-43e5-AF01-32717A64DA03");
         private static readonly Guid IID_IMetadataLocator = new Guid("aa8fa804-bc05-4642-b2c5-c353ed22fc63");
 
-        private readonly DataTargetImpl _dataTarget;
+        private readonly DataTarget _dataTarget;
         private readonly IDataReader _dataReader;
         private readonly ModuleInfo[] _modules;
 
         public IntPtr IDacDataTarget { get; }
 
-        public DacDataTargetWrapper(DataTargetImpl dataTarget)
+        public DacDataTargetWrapper(DataTarget dataTarget)
         {
             _dataTarget = dataTarget;
             _dataReader = _dataTarget.DataReader;
-            _modules = dataTarget.EnumerateModules().ToArray();
+            _modules = dataTarget.Modules.ToArray();
             Array.Sort(_modules, delegate (ModuleInfo a, ModuleInfo b) { return a.ImageBase.CompareTo(b.ImageBase); });
 
             VtableBuilder builder = AddInterface(IID_IDacDataTarget);
@@ -150,7 +150,7 @@ namespace Microsoft.Diagnostics.Runtime.ComWrappers
                     return E_NOTIMPL;
                 }
 
-                string filePath = _dataTarget.SymbolLocator.FindBinary(info.FileName, info.TimeStamp, info.FileSize, true);
+                string filePath = _dataTarget.SymbolLocator.FindBinary(info.FileName, (int)info.TimeStamp, (int)info.FileSize, true);
                 if (filePath == null)
                 {
                     bytesRead = 0;
@@ -247,7 +247,7 @@ namespace Microsoft.Diagnostics.Runtime.ComWrappers
         
         public int GetMetadata(IntPtr self, string filename, uint imageTimestamp, uint imageSize, IntPtr mvid, uint mdRva, uint flags, uint bufferSize, byte[] buffer, IntPtr dataSize)
         {
-            string filePath = _dataTarget.SymbolLocator.FindBinary(filename, imageTimestamp, imageSize, true);
+            string filePath = _dataTarget.SymbolLocator.FindBinary(filename, (int)imageTimestamp, (int)imageSize, true);
             if (filePath == null)
                 return E_FAIL;
 
@@ -318,7 +318,6 @@ namespace Microsoft.Diagnostics.Runtime.ComWrappers
                 throw new Exception();
         }
 
-        #region Delegates
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         delegate int GetMetadataDelegate(IntPtr self, string filename, uint imageTimestamp, uint imageSize, IntPtr mvid, uint mdRva, uint flags, uint bufferSize, byte[] buffer, IntPtr dataSize);
 
@@ -375,7 +374,5 @@ namespace Microsoft.Diagnostics.Runtime.ComWrappers
                     IntPtr inBuffer,
                     IntPtr outBufferSize,
                     out IntPtr outBuffer);
-
-        #endregion
     }
 }

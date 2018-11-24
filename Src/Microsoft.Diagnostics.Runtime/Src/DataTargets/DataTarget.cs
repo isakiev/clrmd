@@ -15,11 +15,12 @@ namespace Microsoft.Diagnostics.Runtime
 
     static DataTarget()
     {
-#if !NET45
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        PlatformFunctions = new LinuxFunctions();
-      else
-#endif
+      //TODO: revisit for Linux
+//#if !NET45
+//      if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+//        PlatformFunctions = new LinuxFunctions();
+//      else
+//#endif
         PlatformFunctions = new WindowsFunctions();
     }
 

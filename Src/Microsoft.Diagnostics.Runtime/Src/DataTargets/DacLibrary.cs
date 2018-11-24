@@ -27,7 +27,7 @@ namespace Microsoft.Diagnostics.Runtime
             }
         }
 
-        public DacLibrary(DataTargetImpl dataTarget, object ix)
+        public DacLibrary(DataTarget dataTarget, object ix)
         {
             if (!(ix is IntPtr pUnk))
             {
@@ -43,7 +43,7 @@ namespace Microsoft.Diagnostics.Runtime
             DacInterface = new ClrDataProcess(pUnk);
         }
 
-        public DacLibrary(DataTargetImpl dataTarget, string dacDll)
+        public DacLibrary(DataTarget dataTarget, string dacDll)
         {
             if (dataTarget.ClrVersions.Count == 0)
                 throw new ClrDiagnosticsException(String.Format("Process is not a CLR process!"));
@@ -69,7 +69,7 @@ namespace Microsoft.Diagnostics.Runtime
             int res = func(ref guid, DacDataTarget.IDacDataTarget, out IntPtr iUnk);
 
             if (res != 0)
-                throw new ClrDiagnosticsException("Failure loading DAC: CreateDacInstance failed 0x" + res.ToString("x"), ClrDiagnosticsException.HR.DacError);
+                throw new ClrDiagnosticsException("Failure loading DAC: CreateDacInstance failed 0x" + res.ToString("x"), ClrDiagnosticsExceptionKind.DacError);
 
 
             DacInterface = new ClrDataProcess(iUnk);
