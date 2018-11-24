@@ -68,15 +68,8 @@
     <Compile Include="Src\Common\ClrDiagnosticsExceptionKind.cs" />
     <Compile Include="Src\Common\ClrModule.cs" />
     <Compile Include="Src\Common\ClrObject.cs" />
-    <Compile Include="Src\Common\DacInterfaces\ClrDataModuleExtent.cs" />
     <Compile Include="Src\Common\DacInterfaces\IDacDataTarget.cs" />
     <Compile Include="Src\Common\DacInterfaces\IMetadataLocator.cs" />
-    <Compile Include="Src\Common\DacInterfaces\IXCLRDataMethodInstance.cs" />
-    <Compile Include="Src\Common\DacInterfaces\IXCLRDataModule.cs" />
-    <Compile Include="Src\Common\DacInterfaces\IXCLRDataProcess.cs" />
-    <Compile Include="Src\Common\DacInterfaces\IXCLRDataStackWalk.cs" />
-    <Compile Include="Src\Common\DacInterfaces\IXCLRDataTask.cs" />
-    <Compile Include="Src\Common\DacInterfaces\ModuleExtentType.cs" />
     <Compile Include="Src\Common\ExceptionExtensions.cs" />
     <Compile Include="Src\Common\Heap\ClrHeap.cs" />
     <Compile Include="Src\Common\Heap\ClrRoot.cs" />
