@@ -408,7 +408,7 @@ namespace Microsoft.Diagnostics.Runtime.Interop
 
     [PreserveSig]
     int SetOutputCallbacksWide(
-      [In] IDebugOutputCallbacks2 Callbacks);
+      [In] IDebugOutputCallbacksWide Callbacks);
 
     [PreserveSig]
     int GetOutputLinePrefixWide(
