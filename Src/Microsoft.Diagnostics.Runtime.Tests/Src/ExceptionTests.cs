@@ -1,12 +1,11 @@
 ﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  [TestClass]
   public class ExceptionTests
   {
-    [TestMethod]
+    [Fact]
     public void ExceptionPropertyTest()
     {
       using (var dt = TestTargets.NestedException.LoadFullDump())
@@ -20,12 +19,12 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       var thread = runtime.Threads.Where(t => !t.IsFinalizer).Single();
       var ex = thread.CurrentException;
-      Assert.IsNotNull(ex);
+      Assert.NotNull(ex);
 
       var testData = TestTargets.NestedExceptionData;
-      Assert.AreEqual(testData.OuterExceptionMessage, ex.Message);
-      Assert.AreEqual(testData.OuterExceptionType, ex.Type.Name);
-      Assert.IsNotNull(ex.Inner);
+      Assert.Equal(testData.OuterExceptionMessage, ex.Message);
+      Assert.Equal(testData.OuterExceptionType, ex.Type.Name);
+      Assert.NotNull(ex.Inner);
     }
   }
 }

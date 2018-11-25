@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  [TestClass]
   public class FinalizableObjectsTests
   {
-    [TestMethod]
+    [Fact]
     public void TestAllFinalizableObjects()
     {
       using (var dt = TestTargets.FinalizableObjects.LoadFullDump())
@@ -14,13 +13,13 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var runtime = dt.CreateSingleRuntime();
         var stats = GetStats(runtime.Heap, runtime.Heap.EnumerateFinalizableObjectAddresses());
 
-        Assert.AreEqual(0, stats.A);
-        Assert.AreEqual(FinalizableObjectsTarget.ObjectsCountB, stats.B);
-        Assert.AreEqual(FinalizableObjectsTarget.ObjectsCountC, stats.C);
+        Assert.Equal(0, stats.A);
+        Assert.Equal(FinalizableObjectsTarget.ObjectsCountB, stats.B);
+        Assert.Equal(FinalizableObjectsTarget.ObjectsCountC, stats.C);
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void TestFinalizerQueueObjects()
     {
       using (var dt = TestTargets.FinalizableObjects.LoadFullDump())
@@ -28,9 +27,9 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var runtime = dt.CreateSingleRuntime();
         var stats = GetStats(runtime.Heap, runtime.EnumerateFinalizerQueueObjectAddresses());
 
-        Assert.AreEqual(FinalizableObjectsTarget.ObjectsCountA, stats.A);
-        Assert.AreEqual(0, stats.B);
-        Assert.AreEqual(0, stats.C);
+        Assert.Equal(FinalizableObjectsTarget.ObjectsCountA, stats.A);
+        Assert.Equal(0, stats.B);
+        Assert.Equal(0, stats.C);
       }
     }
 

@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  [TestClass]
   public class RuntimeTests
   {
-    [TestMethod]
+    [Fact]
     public void RuntimeClrInfo()
     {
       using (var dt = TestTargets.NestedException.LoadFullDump())
@@ -17,11 +16,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var info = dt.ClrVersions.Single();
         var runtime = dt.CreateRuntime(info);
 
-        Assert.AreEqual(info, runtime.ClrInfo);
+        Assert.Equal(info, runtime.ClrInfo);
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void ModuleEnumerationTest()
     {
       // This test ensures that we enumerate all modules in the process exactly once.
@@ -35,8 +34,8 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
         foreach (var module in runtime.Modules)
         {
-          Assert.IsTrue(expected.Contains(Path.GetFileName(module.FileName)));
-          Assert.IsFalse(modules.Contains(module));
+          Assert.Contains(Path.GetFileName(module.FileName), expected);
+          Assert.DoesNotContain(module, modules);
           modules.Add(module);
         }
       }

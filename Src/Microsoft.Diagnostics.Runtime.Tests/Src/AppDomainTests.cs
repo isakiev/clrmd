@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  [TestClass]
   public class AppDomainTests
   {
-    [TestMethod]
+    [Fact]
     public void ModuleDomainTest()
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
@@ -44,7 +43,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       var moduleDomains = module.AppDomains;
 
       foreach (var domain in domainList)
-        Assert.IsFalse(moduleDomains.Contains(domain));
+        Assert.False(moduleDomains.Contains(domain));
     }
 
     private void AssertModuleContainsDomains(ClrModule module, params ClrAppDomain[] domainList)
@@ -52,12 +51,12 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       var moduleDomains = module.AppDomains;
 
       foreach (var domain in domainList)
-        Assert.IsTrue(moduleDomains.Contains(domain));
+        Assert.True(moduleDomains.Contains(domain));
 
-      Assert.AreEqual(domainList.Length, moduleDomains.Count);
+      Assert.Equal(domainList.Length, moduleDomains.Count);
     }
 
-    [TestMethod]
+    [Fact]
     public void AppDomainPropertyTest()
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
@@ -65,27 +64,27 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var runtime = dt.CreateSingleRuntime();
 
         var systemDomain = runtime.SystemDomain;
-        Assert.AreEqual("System Domain", systemDomain.Name);
-        Assert.AreNotEqual(0, systemDomain.Address);
+        Assert.Equal("System Domain", systemDomain.Name);
+        Assert.NotEqual(0ul, systemDomain.Address);
 
         var sharedDomain = runtime.SharedDomain;
-        Assert.AreEqual("Shared Domain", sharedDomain.Name);
-        Assert.AreNotEqual(0, sharedDomain.Address);
+        Assert.Equal("Shared Domain", sharedDomain.Name);
+        Assert.NotEqual(0ul, sharedDomain.Address);
 
-        Assert.AreNotEqual(systemDomain.Address, sharedDomain.Address);
+        Assert.NotEqual(systemDomain.Address, sharedDomain.Address);
 
-        Assert.AreEqual(2, runtime.AppDomains.Count);
+        Assert.Equal(2, runtime.AppDomains.Count);
         var AppDomainsExe = runtime.AppDomains[0];
-        Assert.AreEqual("AppDomains.exe", AppDomainsExe.Name);
-        Assert.AreEqual(1, AppDomainsExe.Id);
+        Assert.Equal("AppDomains.exe", AppDomainsExe.Name);
+        Assert.Equal(1, AppDomainsExe.Id);
 
         var NestedExceptionExe = runtime.AppDomains[1];
-        Assert.AreEqual("Second AppDomain", NestedExceptionExe.Name);
-        Assert.AreEqual(2, NestedExceptionExe.Id);
+        Assert.Equal("Second AppDomain", NestedExceptionExe.Name);
+        Assert.Equal(2, NestedExceptionExe.Id);
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void SystemAndSharedLibraryModulesTest()
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
@@ -93,17 +92,17 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var runtime = dt.CreateSingleRuntime();
 
         var systemDomain = runtime.SystemDomain;
-        Assert.AreEqual(0, systemDomain.Modules.Count);
+        Assert.Equal(0, systemDomain.Modules.Count);
 
         var sharedDomain = runtime.SharedDomain;
-        Assert.AreEqual(1, sharedDomain.Modules.Count);
+        Assert.Equal(1, sharedDomain.Modules.Count);
 
         var mscorlib = sharedDomain.Modules.Single();
-        Assert.IsTrue(Path.GetFileName(mscorlib.FileName).Equals("mscorlib.dll", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("mscorlib.dll", Path.GetFileName(mscorlib.FileName), true);
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void ModuleAppDomainEqualityTest()
     {
       using (var dt = TestTargets.AppDomains.LoadFullDump())
@@ -115,23 +114,23 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
         var appDomainsModules = GetDomainModuleDictionary(appDomainsExe);
 
-        Assert.IsTrue(appDomainsModules.ContainsKey("appdomains.exe"));
-        Assert.IsTrue(appDomainsModules.ContainsKey("mscorlib.dll"));
-        Assert.IsTrue(appDomainsModules.ContainsKey("sharedlibrary.dll"));
+        Assert.True(appDomainsModules.ContainsKey("appdomains.exe"));
+        Assert.True(appDomainsModules.ContainsKey("mscorlib.dll"));
+        Assert.True(appDomainsModules.ContainsKey("sharedlibrary.dll"));
 
-        Assert.IsFalse(appDomainsModules.ContainsKey("nestedexception.exe"));
+        Assert.False(appDomainsModules.ContainsKey("nestedexception.exe"));
 
         var nestedExceptionModules = GetDomainModuleDictionary(nestedExceptionExe);
 
-        Assert.IsTrue(nestedExceptionModules.ContainsKey("nestedexception.exe"));
-        Assert.IsTrue(nestedExceptionModules.ContainsKey("mscorlib.dll"));
-        Assert.IsTrue(nestedExceptionModules.ContainsKey("sharedlibrary.dll"));
+        Assert.True(nestedExceptionModules.ContainsKey("nestedexception.exe"));
+        Assert.True(nestedExceptionModules.ContainsKey("mscorlib.dll"));
+        Assert.True(nestedExceptionModules.ContainsKey("sharedlibrary.dll"));
 
-        Assert.IsFalse(nestedExceptionModules.ContainsKey("appdomains.exe"));
+        Assert.False(nestedExceptionModules.ContainsKey("appdomains.exe"));
 
         // Ensure that we use the same ClrModule in each AppDomain.
-        Assert.AreEqual(appDomainsModules["mscorlib.dll"], nestedExceptionModules["mscorlib.dll"]);
-        Assert.AreEqual(appDomainsModules["sharedlibrary.dll"], nestedExceptionModules["sharedlibrary.dll"]);
+        Assert.Equal(appDomainsModules["mscorlib.dll"], nestedExceptionModules["mscorlib.dll"]);
+        Assert.Equal(appDomainsModules["sharedlibrary.dll"], nestedExceptionModules["sharedlibrary.dll"]);
       }
     }
 

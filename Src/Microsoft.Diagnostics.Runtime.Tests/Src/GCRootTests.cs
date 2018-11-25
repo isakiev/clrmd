@@ -2,17 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  /// <summary>
-  ///   Summary description for GCRootTests
-  /// </summary>
-  [TestClass]
   public class GCRootTests
   {
-    [TestMethod]
+    [Fact]
     public void EnumerateGCRefs()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -31,19 +27,19 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     private void ValidateRefs(ClrObject[] refs)
     {
       // Should contain one SingleRef and one TripleRef object.
-      Assert.AreEqual(2, refs.Length);
+      Assert.Equal(2, refs.Length);
 
-      Assert.AreEqual(1, refs.Count(r => r.Type.Name == "SingleRef"));
-      Assert.AreEqual(1, refs.Count(r => r.Type.Name == "TripleRef"));
+      Assert.Equal(1, refs.Count(r => r.Type.Name == "SingleRef"));
+      Assert.Equal(1, refs.Count(r => r.Type.Name == "TripleRef"));
 
       foreach (var obj in refs)
       {
-        Assert.AreNotEqual(0, obj.Address);
-        Assert.AreEqual(obj.Type.Heap.GetObjectType(obj.Address), obj.Type);
+        Assert.NotEqual(0ul, obj.Address);
+        Assert.Equal(obj.Type.Heap.GetObjectType(obj.Address), obj.Type);
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void EnumerateGCRefsArray()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -57,15 +53,15 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var obj = mainType.GetStaticObjectValue("TheRoot");
         obj = obj.GetObjectField("Item1");
 
-        Assert.AreEqual("System.Object[]", obj.Type.Name);
+        Assert.Equal("System.Object[]", obj.Type.Name);
 
         var refs = obj.EnumerateObjectReferences(false).ToArray();
-        Assert.AreEqual(1, refs.Length);
-        Assert.AreEqual("DoubleRef", refs[0].Type.Name);
+        Assert.Equal(1, refs.Length);
+        Assert.Equal("DoubleRef", refs[0].Type.Name);
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void ObjectSetAddRemove()
     {
       using (var dataTarget = TestTargets.Types.LoadFullDump())
@@ -76,21 +72,21 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var hash = new ObjectSet(heap);
         foreach (var obj in heap.EnumerateObjectAddresses())
         {
-          Assert.IsFalse(hash.Contains(obj));
+          Assert.False(hash.Contains(obj));
           hash.Add(obj);
-          Assert.IsTrue(hash.Contains(obj));
+          Assert.True(hash.Contains(obj));
         }
 
         foreach (var obj in heap.EnumerateObjectAddresses())
         {
-          Assert.IsTrue(hash.Contains(obj));
+          Assert.True(hash.Contains(obj));
           hash.Remove(obj);
-          Assert.IsFalse(hash.Contains(obj));
+          Assert.False(hash.Contains(obj));
         }
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void ObjectSetTryAdd()
     {
       using (var dataTarget = TestTargets.Types.LoadFullDump())
@@ -101,16 +97,16 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var hash = new ObjectSet(heap);
         foreach (var obj in heap.EnumerateObjectAddresses())
         {
-          Assert.IsFalse(hash.Contains(obj));
-          Assert.IsTrue(hash.Add(obj));
-          Assert.IsTrue(hash.Contains(obj));
-          Assert.IsFalse(hash.Add(obj));
-          Assert.IsTrue(hash.Contains(obj));
+          Assert.False(hash.Contains(obj));
+          Assert.True(hash.Add(obj));
+          Assert.True(hash.Contains(obj));
+          Assert.False(hash.Add(obj));
+          Assert.True(hash.Contains(obj));
         }
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void BuildCacheCancel()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -128,7 +124,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         try
         {
           gcroot.BuildCache(source.Token);
-          Assert.Fail("Should have been cancelled!");
+          Assert.True(false, "Should have been cancelled!");
         }
         catch (OperationCanceledException)
         {
@@ -136,7 +132,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void EnumerateGCRootsCancel()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -154,7 +150,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         try
         {
           gcroot.EnumerateGCRoots(target, false, source.Token).ToArray();
-          Assert.Fail("Should have been cancelled!");
+          Assert.True(false, "Should have been cancelled!");
         }
         catch (OperationCanceledException)
         {
@@ -162,7 +158,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void FindSinglePathCancel()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -179,7 +175,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         try
         {
           gcroot.FindSinglePath(source, target, cancelSource.Token);
-          Assert.Fail("Should have been cancelled!");
+          Assert.True(false, "Should have been cancelled!");
         }
         catch (OperationCanceledException)
         {
@@ -187,7 +183,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void EnumerateAllPathshCancel()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -204,7 +200,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         try
         {
           gcroot.EnumerateAllPaths(source, target, false, cancelSource.Token).ToArray();
-          Assert.Fail("Should have been cancelled!");
+          Assert.True(false, "Should have been cancelled!");
         }
         catch (OperationCanceledException)
         {
@@ -212,7 +208,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       }
     }
 
-    [TestMethod]
+    [Fact]
     public void GCStaticRoots()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -223,17 +219,17 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var gcroot = new GCRoot(runtime.Heap);
 
         gcroot.ClearCache();
-        Assert.IsFalse(gcroot.IsFullyCached);
+        Assert.False(gcroot.IsFullyCached);
         GCStaticRootsImpl(gcroot);
 
         gcroot.BuildCache(CancellationToken.None);
 
         gcroot.AllowParallelSearch = false;
-        Assert.IsTrue(gcroot.IsFullyCached);
+        Assert.True(gcroot.IsFullyCached);
         GCStaticRootsImpl(gcroot);
 
         gcroot.AllowParallelSearch = true;
-        Assert.IsTrue(gcroot.IsFullyCached);
+        Assert.True(gcroot.IsFullyCached);
         GCStaticRootsImpl(gcroot);
       }
     }
@@ -242,13 +238,13 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       var target = gcroot.Heap.GetObjectsOfType("TargetType").Single();
       var paths = gcroot.EnumerateGCRoots(target, false, CancellationToken.None).ToArray();
-      Assert.AreEqual(1, paths.Length);
+      Assert.Equal(1, paths.Length);
       var rootPath = paths[0];
 
       AssertPathIsCorrect(gcroot.Heap, rootPath.Path.ToArray(), rootPath.Path.First().Address, target);
     }
 
-    [TestMethod]
+    [Fact]
     public void GCRoots()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -257,17 +253,17 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var gcroot = new GCRoot(runtime.Heap);
 
         gcroot.ClearCache();
-        Assert.IsFalse(gcroot.IsFullyCached);
+        Assert.False(gcroot.IsFullyCached);
         GCRootsImpl(gcroot);
 
         gcroot.BuildCache(CancellationToken.None);
 
         gcroot.AllowParallelSearch = false;
-        Assert.IsTrue(gcroot.IsFullyCached);
+        Assert.True(gcroot.IsFullyCached);
         GCRootsImpl(gcroot);
 
         gcroot.AllowParallelSearch = true;
-        Assert.IsTrue(gcroot.IsFullyCached);
+        Assert.True(gcroot.IsFullyCached);
         GCRootsImpl(gcroot);
       }
     }
@@ -278,7 +274,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       var target = heap.GetObjectsOfType("TargetType").Single();
       var rootPaths = gcroot.EnumerateGCRoots(target, false, CancellationToken.None).ToArray();
 
-      Assert.IsTrue(rootPaths.Length >= 2);
+      Assert.True(rootPaths.Length >= 2);
 
       foreach (var rootPath in rootPaths)
         AssertPathIsCorrect(heap, rootPath.Path.ToArray(), rootPath.Path.First().Address, target);
@@ -290,11 +286,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         else if (rootPath.Root.Kind == GCRootKind.LocalVar)
           hasThread = true;
 
-      Assert.IsTrue(hasThread);
-      Assert.IsTrue(hasStatic);
+      Assert.True(hasThread);
+      Assert.True(hasStatic);
     }
 
-    [TestMethod]
+    [Fact]
     public void FindPath()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -303,11 +299,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var gcroot = new GCRoot(runtime.Heap);
 
         gcroot.ClearCache();
-        Assert.IsFalse(gcroot.IsFullyCached);
+        Assert.False(gcroot.IsFullyCached);
         FindPathImpl(gcroot);
 
         gcroot.BuildCache(CancellationToken.None);
-        Assert.IsTrue(gcroot.IsFullyCached);
+        Assert.True(gcroot.IsFullyCached);
         FindPathImpl(gcroot);
       }
     }
@@ -322,7 +318,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       AssertPathIsCorrect(heap, path.ToArray(), source, target);
     }
 
-    [TestMethod]
+    [Fact]
     public void FindAllPaths()
     {
       using (var dataTarget = TestTargets.GCRoot.LoadFullDump())
@@ -331,11 +327,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         var gcroot = new GCRoot(runtime.Heap);
 
         gcroot.ClearCache();
-        Assert.IsFalse(gcroot.IsFullyCached);
+        Assert.False(gcroot.IsFullyCached);
         FindAllPathsImpl(gcroot);
 
         gcroot.BuildCache(CancellationToken.None);
-        Assert.IsTrue(gcroot.IsFullyCached);
+        Assert.True(gcroot.IsFullyCached);
         FindAllPathsImpl(gcroot);
       }
     }
@@ -348,7 +344,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       var paths = gcroot.EnumerateAllPaths(source, target, false, CancellationToken.None).ToArray();
 
       // There are exactly three paths to the object in the test target
-      Assert.AreEqual(3, paths.Length);
+      Assert.Equal(3, paths.Length);
 
       foreach (var path in paths)
         AssertPathIsCorrect(heap, path.ToArray(), source, target);
@@ -365,27 +361,27 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     private void AssertPathIsCorrect(ClrHeap heap, ClrObject[] path, ulong source, ulong target)
     {
-      Assert.IsNotNull(path);
-      Assert.IsTrue(path.Length > 0);
+      Assert.NotNull(path);
+      Assert.True(path.Length > 0);
 
       var first = path.First();
-      Assert.AreEqual(source, first.Address);
+      Assert.Equal(source, first.Address);
 
       for (var i = 0; i < path.Length - 1; i++)
       {
         var curr = path[i];
-        Assert.AreEqual(curr.Type, heap.GetObjectType(curr.Address));
+        Assert.Equal(curr.Type, heap.GetObjectType(curr.Address));
 
         var refs = new List<ulong>();
         curr.Type.EnumerateRefsOfObject(curr.Address, (obj, offs) => refs.Add(obj));
 
         var next = path[i + 1].Address;
-        Assert.IsTrue(refs.Contains(next));
+        Assert.True(refs.Contains(next));
       }
 
       var last = path.Last();
-      Assert.AreEqual(last.Type, heap.GetObjectType(last.Address));
-      Assert.AreEqual(target, last.Address);
+      Assert.Equal(last.Type, heap.GetObjectType(last.Address));
+      Assert.Equal(target, last.Address);
     }
   }
 }

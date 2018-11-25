@@ -5,7 +5,7 @@ using Microsoft.CSharp;
 using Microsoft.Diagnostics.Runtime.DataReaders.DbgEng;
 using Microsoft.Diagnostics.Runtime.Interop;
 using Microsoft.Diagnostics.Runtime.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
@@ -165,7 +165,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       if (cr.Errors.Count > 0 && System.Diagnostics.Debugger.IsAttached)
         System.Diagnostics.Debugger.Break();
 
-      Assert.AreEqual(0, cr.Errors.Count);
+      Assert.Equal(0, cr.Errors.Count);
 
       return cr.PathToAssembly;
     }
@@ -194,8 +194,8 @@ namespace Microsoft.Diagnostics.Runtime.Tests
           status = dbg.ProcessEvents(0xffffffff);
         } while (status != DEBUG_STATUS.NO_DEBUGGEE);
 
-        Assert.IsNotNull(_miniDumpPath[(int)gc]);
-        Assert.IsNotNull(_fullDumpPath[(int)gc]);
+        Assert.NotNull(_miniDumpPath[(int)gc]);
+        Assert.NotNull(_fullDumpPath[(int)gc]);
       }
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
+using Assert = Xunit.Assert;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
@@ -11,10 +12,9 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     public string MethodName { get; set; }
   }
 
-  [TestClass]
   public class MinidumpTests
   {
-    [TestMethod]
+    [Fact]
     public void MinidumpCallstackTest()
     {
       using (var dt = TestTargets.NestedException.LoadMiniDump())
@@ -29,17 +29,17 @@ namespace Microsoft.Diagnostics.Runtime.Tests
         foreach (var frame in thread.StackTrace)
           if (frame.Kind == ClrStackFrameType.Runtime)
           {
-            Assert.AreEqual(0ul, frame.InstructionPointer);
-            Assert.AreNotEqual(0ul, frame.StackPointer);
+            Assert.Equal(0ul, frame.InstructionPointer);
+            Assert.NotEqual(0ul, frame.StackPointer);
           }
           else
           {
-            Assert.AreNotEqual(0ul, frame.InstructionPointer);
-            Assert.AreNotEqual(0ul, frame.StackPointer);
-            Assert.IsNotNull(frame.Method);
-            Assert.IsNotNull(frame.Method.Type);
-            Assert.IsNotNull(frame.Method.Type.Module);
-            Assert.AreEqual(frames[i++], frame.Method.Name);
+            Assert.NotEqual(0ul, frame.InstructionPointer);
+            Assert.NotEqual(0ul, frame.StackPointer);
+            Assert.NotNull(frame.Method);
+            Assert.NotNull(frame.Method.Type);
+            Assert.NotNull(frame.Method.Type.Module);
+            Assert.Equal(frames[i++], frame.Method.Name);
           }
       }
     }

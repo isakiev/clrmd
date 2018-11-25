@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
@@ -93,10 +91,8 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     }
   }
 
-  [TestClass]
   public class GlobalCleanup
   {
-    [AssemblyCleanup]
     public static void AssemblyCleanup()
     {
       GC.Collect();

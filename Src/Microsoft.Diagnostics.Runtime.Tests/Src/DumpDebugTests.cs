@@ -1,25 +1,24 @@
 using Microsoft.Diagnostics.Runtime.Utilities.Runtime;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  [TestClass]
   public class DumpDebugTests
   {
-    [TestMethod]
+    [Fact]
     public void SimpleCrashDumpDebugTest()
     {
       using (var dt = TestTargets.DumpDebug.LoadFullDump())
       {
         var runtime = dt.CreateSingleRuntime();
         var corDebugProcess = runtime.TryGetCorDebugProcess();
-        Assert.IsNotNull(corDebugProcess, "Failed to create ICorDebugProcess");
+        Assert.NotNull(corDebugProcess);
 
         corDebugProcess.EnumerateAppDomains(out var appDomains);
-        Assert.IsNotNull(appDomains, "Failed to enumerate AppDomains");
+        Assert.NotNull(appDomains);
         
         corDebugProcess.EnumerateThreads(out var threads);
-        Assert.IsNotNull(threads, "Failed to enumerate Threads");
+        Assert.NotNull(threads);
       }
     }
   }

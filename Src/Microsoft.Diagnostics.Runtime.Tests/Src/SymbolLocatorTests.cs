@@ -1,10 +1,9 @@
 ﻿using System.IO;
 using Microsoft.Diagnostics.Runtime.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  [TestClass]
   public class SymbolLocatorTests
   {
     private static readonly string WellKnownDac = "mscordacwks_X86_X86_4.6.96.00.dll";
@@ -18,30 +17,30 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       return new DefaultSymbolLocator(DefaultLogger.Instance, cacheLocation);
     }
 
-    [TestMethod]
+    [Fact]
     public void TestSymbolLocatorTimeout()
     {
       var locator = GetLocator();
       locator.Timeout = 10000;
       var dac = locator.FindBinary(WellKnownDac, WellKnownDacTimeStamp, WellKnownDacImageSize, false);
-      Assert.IsNotNull(dac);
+      Assert.NotNull(dac);
     }
 
-    [TestMethod]
+    [Fact]
     public void TestNegativeFindBinary()
     {
       var locator = GetLocator();
       var dac = locator.FindBinary(WellKnownDac, WellKnownDacTimeStamp + 1, WellKnownDacImageSize + 1, false);
-      Assert.IsNull(dac);
+      Assert.Null(dac);
     }
 
-    [TestMethod]
+    [Fact]
     public void TestFindBinary()
     {
       var locator = GetLocator();
       var dac = locator.FindBinary(WellKnownDac, WellKnownDacTimeStamp, WellKnownDacImageSize, false);
-      Assert.IsNotNull(dac);
-      Assert.IsTrue(File.Exists(dac));
+      Assert.NotNull(dac);
+      Assert.True(File.Exists(dac));
     }
   }
 }

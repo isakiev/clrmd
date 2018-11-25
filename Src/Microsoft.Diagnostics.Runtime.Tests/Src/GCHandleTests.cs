@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
+using Assert = Xunit.Assert;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  [TestClass]
   public class GCHandleTests
   {
-    [TestMethod]
+    [Fact]
     public void EnsureEnumerationStability()
     {
       // I made some changes to v4.5 handle enumeration to enumerate handles out faster.
@@ -16,31 +16,14 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       {
         var runtime = dt.CreateSingleRuntime();
 
-        var handles = new List<ClrHandle>();
-
-        bool cont;
-        do
-        {
-          cont = false;
-          var i = 0;
-          foreach (var hnd in runtime.EnumerateHandles())
-          {
-            if (i > handles.Count)
-              break;
-
-            if (i == handles.Count)
-            {
-              cont = true;
-              handles.Add(hnd);
-              break;
-            }
-
-            Assert.AreEqual(handles[i++], hnd);
-          }
-        } while (cont);
+        List<ClrHandle> handles = new List<ClrHandle>(runtime.EnumerateHandles());
+                
+        int i = 0;
+        foreach (var hnd in runtime.EnumerateHandles())
+          Assert.Equal(handles[i++], hnd);
 
         // We create at least this many handles in the test, plus the runtime uses some.
-        Assert.IsTrue(handles.Count > 4);
+        Assert.True(handles.Count > 4);
       }
     }
 
@@ -54,10 +37,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       {
         var runtime = dt.CreateSingleRuntime();
 
-        foreach (var handle in runtime.EnumerateHandles()) Assert.IsTrue(handles.Add(handle));
+        foreach (var handle in runtime.EnumerateHandles())
+          Assert.True(handles.Add(handle));
 
         // Make sure we had at least one AsyncPinned handle
-        Assert.IsTrue(handles.Any(h => h.HandleType == HandleType.AsyncPinned));
+        Assert.Contains(handles, h => h.HandleType == HandleType.AsyncPinned);
       }
     }
   }

@@ -1,26 +1,23 @@
-﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
 {
-  [TestClass]
   public class ModuleTests
   {
-    [TestMethod]
+    [Fact]
     public void TestGetTypeByName()
     {
       using (var dt = TestTargets.Types.LoadFullDump())
       {
         var runtime = dt.CreateSingleRuntime();
-        var heap = runtime.Heap;
 
         var shared = runtime.GetModule("sharedlibrary.dll");
-        Assert.IsNotNull(shared.GetTypeByName("Foo"));
-        Assert.IsNull(shared.GetTypeByName("Types"));
+        Assert.NotNull(shared.GetTypeByName("Foo"));
+        Assert.Null(shared.GetTypeByName("Types"));
 
         var types = runtime.GetModule("types.exe");
-        Assert.IsNotNull(types.GetTypeByName("Types"));
-        Assert.IsNull(types.GetTypeByName("Foo"));
+        Assert.NotNull(types.GetTypeByName("Types"));
+        Assert.Null(types.GetTypeByName("Foo"));
       }
     }
   }
