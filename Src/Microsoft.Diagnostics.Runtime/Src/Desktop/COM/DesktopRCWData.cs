@@ -60,7 +60,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           if (interfaces[i].MethodTable != 0)
             type = _heap.GetTypeByMethodTable(interfaces[i].MethodTable, 0);
 
-          _interfaces.Add(new DesktopInterfaceData(type, interfaces[i].InterfacePtr));
+          _interfaces.Add(new DesktopInterfaceData(type, interfaces[i].InterfacePointer));
         }
 
         return _interfaces;

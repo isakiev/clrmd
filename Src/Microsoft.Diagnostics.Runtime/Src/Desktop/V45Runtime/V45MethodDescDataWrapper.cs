@@ -9,11 +9,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (!sos.GetMethodDescData(md, 0, out MethodDescData data))
         return false;
 
-      _md = data.MethodDescPtr;
+      _md = data.MethodDesc;
       _ip = data.NativeCodeAddr;
-      _module = data.ModulePtr;
+      _module = data.Module;
       _token = data.MDToken;
-      _mt = data.MethodTablePtr;
+      _mt = data.MethodTable;
 
       if (sos.GetCodeHeaderData(data.NativeCodeAddr, out CodeHeaderData header))
       {

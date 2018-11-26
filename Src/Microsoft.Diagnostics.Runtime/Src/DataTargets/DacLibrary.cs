@@ -27,7 +27,7 @@ namespace Microsoft.Diagnostics.Runtime
             }
         }
 
-        internal DacLibrary(DataTarget dataTarget, object ix)
+        internal static IntPtr TryGetDacPtr(object ix)
         {
             if (!(ix is IntPtr pUnk))
             {
@@ -40,10 +40,15 @@ namespace Microsoft.Diagnostics.Runtime
             if (pUnk == IntPtr.Zero)
                 throw new ArgumentException("clrDataProcess not an instance of IXCLRDataProcess");
 
-            DacPrivateInterface = new ClrDataProcess(this, pUnk);
+            return pUnk;
+        }
+        
+        internal DacLibrary(DataTarget dataTarget, IntPtr pUnk)
+        {
+          DacPrivateInterface = new ClrDataProcess(this, pUnk);
         }
 
-        internal DacLibrary(DataTarget dataTarget, string dacDll)
+        public DacLibrary(DataTarget dataTarget, string dacDll)
         {
             if (dataTarget.ClrVersions.Count == 0)
                 throw new ClrDiagnosticsException(String.Format("Process is not a CLR process!"));
