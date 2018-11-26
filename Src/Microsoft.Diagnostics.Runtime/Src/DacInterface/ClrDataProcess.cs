@@ -207,7 +207,8 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     void GetAddressType_do_not_use( /*[in] CLRDATA_ADDRESS address, [out] CLRDataAddressType* type*/);
 
     void GetRuntimeNameByAddress_do_not_use(
- /*[in] CLRDATA_ADDRESS address, [in] ULONG32 flags, [in] ULONG32 bufLen, [out] ULONG32 *nameLen, [out, size_is(bufLen)] WCHAR nameBuf[], [out] CLRDATA_ADDRESS* displacement*/);
+
+      /*[in] CLRDATA_ADDRESS address, [in] ULONG32 flags, [in] ULONG32 bufLen, [out] ULONG32 *nameLen, [out, size_is(bufLen)] WCHAR nameBuf[], [out] CLRDATA_ADDRESS* displacement*/);
 
     void StartEnumAppDomains_do_not_use( /*[out] CLRDATA_ENUM* handle*/);
     void EnumAppDomain_do_not_use( /*[in, out] CLRDATA_ENUM* handle, [out] IXCLRDataAppDomain** appDomain*/);
@@ -238,7 +239,8 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     int EndEnumMethodInstancesByAddress(ulong handle);
 
     void GetDataByAddress_do_not_use(
- /*[in] CLRDATA_ADDRESS address, [in] ULONG32 flags, [in] IXCLRDataAppDomain* appDomain, [in] IXCLRDataTask* tlsTask, [in] ULONG32 bufLen, [out] ULONG32 *nameLen, [out, size_is(bufLen)] WCHAR nameBuf[], [out] IXCLRDataValue** value, [out] CLRDATA_ADDRESS* displacement*/);
+
+      /*[in] CLRDATA_ADDRESS address, [in] ULONG32 flags, [in] IXCLRDataAppDomain* appDomain, [in] IXCLRDataTask* tlsTask, [in] ULONG32 bufLen, [out] ULONG32 *nameLen, [out, size_is(bufLen)] WCHAR nameBuf[], [out] IXCLRDataValue** value, [out] CLRDATA_ADDRESS* displacement*/);
 
     void GetExceptionStateByExceptionRecord_do_not_use( /*[in] EXCEPTION_RECORD64* record, [out] IXCLRDataExceptionState **exState*/);
     void TranslateExceptionRecordToNotification_do_not_use();
