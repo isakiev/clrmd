@@ -80,8 +80,8 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     }
 
     /// <summary>
-    ///   This test tests a patch in v45runtime.GetNameForMD(ulong md) that
-    ///   corrects an error from sos
+    /// This test tests a patch in v45runtime.GetNameForMD(ulong md) that
+    /// corrects an error from sos
     /// </summary>
     [Fact]
     public void CompleteSignatureIsRetrievedForMethodsWithGenericParameters()

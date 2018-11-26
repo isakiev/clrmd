@@ -6,41 +6,31 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
   {
     private readonly DesktopRuntimeBase _runtime;
     private ClrHeap _heap;
-    private readonly int _totalThreads;
-    private readonly int _runningThreads;
-    private readonly int _idleThreads;
-    private readonly int _minThreads;
-    private readonly int _maxThreads;
-    private readonly int _minCP;
-    private readonly int _maxCP;
-    private readonly int _cpu;
-    private readonly int _freeCP;
-    private readonly int _maxFreeCP;
 
     public DesktopThreadPool(DesktopRuntimeBase runtime, IThreadPoolData data)
     {
       _runtime = runtime;
-      _totalThreads = data.TotalThreads;
-      _runningThreads = data.RunningThreads;
-      _idleThreads = data.IdleThreads;
-      _minThreads = data.MinThreads;
-      _maxThreads = data.MaxThreads;
-      _minCP = data.MinCP;
-      _maxCP = data.MaxCP;
-      _cpu = data.CPU;
-      _freeCP = data.NumFreeCP;
-      _maxFreeCP = data.MaxFreeCP;
+      TotalThreads = data.TotalThreads;
+      RunningThreads = data.RunningThreads;
+      IdleThreads = data.IdleThreads;
+      MinThreads = data.MinThreads;
+      MaxThreads = data.MaxThreads;
+      MinCompletionPorts = data.MinCP;
+      MaxCompletionPorts = data.MaxCP;
+      CpuUtilization = data.CPU;
+      FreeCompletionPortCount = data.NumFreeCP;
+      MaxFreeCompletionPorts = data.MaxFreeCP;
     }
 
-    public override int TotalThreads => _totalThreads;
+    public override int TotalThreads { get; }
 
-    public override int RunningThreads => _runningThreads;
+    public override int RunningThreads { get; }
 
-    public override int IdleThreads => _idleThreads;
+    public override int IdleThreads { get; }
 
-    public override int MinThreads => _minThreads;
+    public override int MinThreads { get; }
 
-    public override int MaxThreads => _maxThreads;
+    public override int MaxThreads { get; }
 
     public override IEnumerable<NativeWorkItem> EnumerateNativeWorkItems()
     {
@@ -179,14 +169,14 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return valueType != null;
     }
 
-    public override int MinCompletionPorts => _minCP;
+    public override int MinCompletionPorts { get; }
 
-    public override int MaxCompletionPorts => _maxCP;
+    public override int MaxCompletionPorts { get; }
 
-    public override int CpuUtilization => _cpu;
+    public override int CpuUtilization { get; }
 
-    public override int FreeCompletionPortCount => _freeCP;
+    public override int FreeCompletionPortCount { get; }
 
-    public override int MaxFreeCompletionPorts => _maxFreeCP;
+    public override int MaxFreeCompletionPorts { get; }
   }
 }

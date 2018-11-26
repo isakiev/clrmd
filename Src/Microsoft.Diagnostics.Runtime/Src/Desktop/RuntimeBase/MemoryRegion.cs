@@ -175,7 +175,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     }
 
     /// <summary>
-    ///   Equivalent to GetDisplayString(false).
+    /// Equivalent to GetDisplayString(false).
     /// </summary>
     public override string ToString()
     {

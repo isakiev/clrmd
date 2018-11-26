@@ -2,16 +2,13 @@
 {
   internal class DesktopManagedWorkItem : ManagedWorkItem
   {
-    private readonly ClrType _type;
-    private readonly ulong _addr;
-
     public DesktopManagedWorkItem(ClrType type, ulong addr)
     {
-      _type = type;
-      _addr = addr;
+      Type = type;
+      Object = addr;
     }
 
-    public override ulong Object => _addr;
-    public override ClrType Type => _type;
+    public override ulong Object { get; }
+    public override ClrType Type { get; }
   }
 }

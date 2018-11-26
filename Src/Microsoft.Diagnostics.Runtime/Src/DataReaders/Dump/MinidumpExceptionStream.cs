@@ -3,8 +3,8 @@
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   The struct that holds contents of a dump's MINIDUMP_STREAM_TYPE.ExceptionStream
-  ///   which is a MINIDUMP_EXCEPTION_STREAM.
+  /// The struct that holds contents of a dump's MINIDUMP_STREAM_TYPE.ExceptionStream
+  /// which is a MINIDUMP_EXCEPTION_STREAM.
   /// </summary>
   [StructLayout(LayoutKind.Sequential)]
   internal class MINIDUMP_EXCEPTION_STREAM

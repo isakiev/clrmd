@@ -1,17 +1,17 @@
 ﻿namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   Represents a path of objects from a root to an object.
+  /// Represents a path of objects from a root to an object.
   /// </summary>
   public struct RootPath
   {
     /// <summary>
-    ///   The location that roots the object.
+    /// The location that roots the object.
     /// </summary>
     public ClrRoot Root { get; set; }
 
     /// <summary>
-    ///   The path from Root to a given target object.
+    /// The path from Root to a given target object.
     /// </summary>
     public ClrObject[] Path { get; set; }
   }

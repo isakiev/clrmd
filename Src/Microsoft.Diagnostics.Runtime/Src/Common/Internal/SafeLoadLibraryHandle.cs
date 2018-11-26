@@ -23,7 +23,7 @@ namespace Microsoft.Diagnostics.Runtime
 
     [DllImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
-    static extern bool FreeLibrary(IntPtr hModule);
+    private static extern bool FreeLibrary(IntPtr hModule);
 
     // This is technically equivalent to DangerousGetHandle, but it's safer for loaded
     // libraries where the HMODULE is also the base address the module is loaded at.

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Diagnostics.Runtime.DacInterface
 {
@@ -23,11 +19,11 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     {
       InitDelegate(ref _getILAddressMap, VTable->GetILAddressMap);
 
-      int hr = _getILAddressMap(Self, 0, out uint needed, null);
+      var hr = _getILAddressMap(Self, 0, out var needed, null);
       if (hr != S_OK)
         return null;
 
-      ILToNativeMap[] map = new ILToNativeMap[needed];
+      var map = new ILToNativeMap[needed];
       hr = _getILAddressMap(Self, needed, out needed, map);
 
       return hr == S_OK ? map : null;
@@ -38,7 +34,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       IntPtr self,
       uint mapLen,
       out uint mapNeeded,
-      [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
+      [Out][MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
       ILToNativeMap[] map);
   }
 

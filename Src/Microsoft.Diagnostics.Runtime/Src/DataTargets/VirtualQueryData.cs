@@ -3,23 +3,23 @@
 namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   The result of a VirtualQuery.
+  /// The result of a VirtualQuery.
   /// </summary>
   [Serializable]
   public struct VirtualQueryData
   {
     /// <summary>
-    ///   The base address of the allocation.
+    /// The base address of the allocation.
     /// </summary>
     public ulong BaseAddress;
 
     /// <summary>
-    ///   The size of the allocation.
+    /// The size of the allocation.
     /// </summary>
     public ulong Size;
 
     /// <summary>
-    ///   Constructor.
+    /// Constructor.
     /// </summary>
     /// <param name="addr">Base address of the memory range.</param>
     /// <param name="size">The size of the memory range.</param>

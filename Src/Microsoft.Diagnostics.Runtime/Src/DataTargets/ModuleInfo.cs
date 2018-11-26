@@ -4,34 +4,34 @@ using Microsoft.Diagnostics.Runtime.Utilities;
 namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   Provides information about loaded modules in a DataTarget
+  /// Provides information about loaded modules in a DataTarget
   /// </summary>
   [Serializable]
   public class ModuleInfo
   {
     /// <summary>
-    ///   The base address of the object.
+    /// The base address of the object.
     /// </summary>
     public virtual ulong ImageBase { get; set; }
 
     /// <summary>
-    ///   The filesize of the image.
+    /// The filesize of the image.
     /// </summary>
     public virtual uint FileSize { get; set; }
 
     /// <summary>
-    ///   The build timestamp of the image.
+    /// The build timestamp of the image.
     /// </summary>
     public virtual uint TimeStamp { get; set; }
 
     /// <summary>
-    ///   The filename of the module on disk.
+    /// The filename of the module on disk.
     /// </summary>
     public virtual string FileName { get; set; }
 
     /// <summary>
-    ///   Returns a PEFile from a stream constructed using instance fields of this object.
-    ///   If the PEFile cannot be constructed correctly, null is returned
+    /// Returns a PEFile from a stream constructed using instance fields of this object.
+    /// If the PEFile cannot be constructed correctly, null is returned
     /// </summary>
     /// <returns></returns>
     public PEFile GetPEFile()
@@ -40,7 +40,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Whether the module is managed or not.
+    /// Whether the module is managed or not.
     /// </summary>
     public virtual bool IsManaged
     {
@@ -52,7 +52,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   To string.
+    /// To string.
     /// </summary>
     /// <returns>The filename of the module.</returns>
     public override string ToString()
@@ -61,7 +61,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   The PDB associated with this module.
+    /// The PDB associated with this module.
     /// </summary>
     public PdbInfo Pdb
     {
@@ -113,7 +113,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   The version information for this file.
+    /// The version information for this file.
     /// </summary>
     public VersionInfo Version
     {
@@ -135,15 +135,15 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Empty constructor for serialization.
+    /// Empty constructor for serialization.
     /// </summary>
     public ModuleInfo()
     {
     }
 
     /// <summary>
-    ///   Creates a ModuleInfo object with an IDataReader instance.  This is used when
-    ///   lazily evaluating VersionInfo.
+    /// Creates a ModuleInfo object with an IDataReader instance.  This is used when
+    /// lazily evaluating VersionInfo.
     /// </summary>
     /// <param name="reader"></param>
     public ModuleInfo(IDataReader reader)

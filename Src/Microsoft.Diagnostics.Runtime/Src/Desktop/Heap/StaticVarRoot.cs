@@ -2,25 +2,21 @@
 {
   internal class StaticVarRoot : ClrRoot
   {
-    private readonly string _name;
-    private readonly ClrAppDomain _domain;
-    private readonly ClrType _type;
-
     public StaticVarRoot(ulong addr, ulong obj, ClrType type, string typeName, string variableName, ClrAppDomain appDomain)
     {
       Address = addr;
       Object = obj;
-      _name = string.Format("static var {0}.{1}", typeName, variableName);
-      _domain = appDomain;
-      _type = type;
+      Name = string.Format("static var {0}.{1}", typeName, variableName);
+      AppDomain = appDomain;
+      Type = type;
     }
 
-    public override ClrAppDomain AppDomain => _domain;
+    public override ClrAppDomain AppDomain { get; }
 
     public override GCRootKind Kind => GCRootKind.StaticVar;
 
-    public override string Name => _name;
+    public override string Name { get; }
 
-    public override ClrType Type => _type;
+    public override ClrType Type { get; }
   }
 }

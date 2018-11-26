@@ -1,18 +1,18 @@
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   /// <summary>
-  ///   FileVersionInfo reprents the extended version formation that is optionally placed in the PE file resource area.
+  /// FileVersionInfo reprents the extended version formation that is optionally placed in the PE file resource area.
   /// </summary>
   public sealed unsafe class FileVersionInfo
   {
     // TODO incomplete, but this is all I need.  
     /// <summary>
-    ///   The verison string
+    /// The verison string
     /// </summary>
     public string FileVersion { get; }
 
     /// <summary>
-    ///   Comments to supplement the file version
+    /// Comments to supplement the file version
     /// </summary>
     public string Comments { get; }
 

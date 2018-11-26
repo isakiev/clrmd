@@ -1,27 +1,27 @@
 ﻿namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   A method's mapping from IL to native offsets.
+  /// A method's mapping from IL to native offsets.
   /// </summary>
   public struct ILToNativeMap
   {
     /// <summary>
-    ///   The IL offset for this entry.
+    /// The IL offset for this entry.
     /// </summary>
     public int ILOffset;
 
     /// <summary>
-    ///   The native start offset of this IL entry.
+    /// The native start offset of this IL entry.
     /// </summary>
     public ulong StartAddress;
 
     /// <summary>
-    ///   The native end offset of this IL entry.
+    /// The native end offset of this IL entry.
     /// </summary>
     public ulong EndAddress;
 
     /// <summary>
-    ///   To string.
+    /// To string.
     /// </summary>
     /// <returns>A visual display of the map entry.</returns>
     public override string ToString()
@@ -31,7 +31,7 @@
 
 #pragma warning disable 0169
     /// <summary>
-    ///   Reserved.
+    /// Reserved.
     /// </summary>
     private int _reserved;
 #pragma warning restore 0169

@@ -32,7 +32,7 @@ namespace Microsoft.Diagnostics.Runtime
 
           while (ptr < stop)
           {
-            ulong ret = readPointer(ptr);
+            var ret = readPointer(ptr);
             if (ret != 0)
               refCallback(ret, (int)(ptr - addr));
 
@@ -55,7 +55,7 @@ namespace Microsoft.Diagnostics.Runtime
             var stop = ptr + (ulong)(nptrs * IntPtr.Size);
             do
             {
-              ulong ret = readPointer(ptr);
+              var ret = readPointer(ptr);
               if (ret != 0)
                 refCallback(ret, (int)(ptr - addr));
 

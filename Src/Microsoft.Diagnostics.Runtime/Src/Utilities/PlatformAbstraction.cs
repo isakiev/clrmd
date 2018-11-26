@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Diagnostics.Runtime
 {
@@ -18,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime
 
     public virtual bool IsEqualFileVersion(string file, VersionInfo version)
     {
-      if (!GetFileVersion(file, out int major, out int minor, out int revision, out int patch))
+      if (!GetFileVersion(file, out var major, out var minor, out var revision, out var patch))
         return false;
 
       return major == version.Major && minor == version.Minor && revision == version.Revision && patch == version.Patch;
@@ -41,44 +37,56 @@ namespace Microsoft.Diagnostics.Runtime
       return true;
     }
 
-    public override IntPtr LoadLibrary(string filename) => dlopen(filename, RTLD_NOW);
+    public override IntPtr LoadLibrary(string filename)
+    {
+      return dlopen(filename, RTLD_NOW);
+    }
 
-    public override bool FreeLibrary(IntPtr module) => dlclose(module) == 0;
+    public override bool FreeLibrary(IntPtr module)
+    {
+      return dlclose(module) == 0;
+    }
 
-    public override IntPtr GetProcAddress(IntPtr module, string method) => dlsym(module, method);
+    public override IntPtr GetProcAddress(IntPtr module, string method)
+    {
+      return dlsym(module, method);
+    }
 
     [DllImport("libdl.so")]
-    static extern IntPtr dlopen(string filename, int flags);
+    private static extern IntPtr dlopen(string filename, int flags);
 
     [DllImport("libdl.so")]
-    static extern int dlclose(IntPtr module);
+    private static extern int dlclose(IntPtr module);
 
     [DllImport("libdl.so")]
-    static extern IntPtr dlsym(IntPtr handle, string symbol);
+    private static extern IntPtr dlsym(IntPtr handle, string symbol);
 
-    const int RTLD_NOW = 2;
+    private const int RTLD_NOW = 2;
   }
 
   internal sealed class WindowsFunctions : PlatformFunctions
   {
-    public override bool FreeLibrary(IntPtr module) => NativeMethods.FreeLibrary(module);
+    public override bool FreeLibrary(IntPtr module)
+    {
+      return NativeMethods.FreeLibrary(module);
+    }
 
     public override bool GetFileVersion(string dll, out int major, out int minor, out int revision, out int patch)
     {
       major = minor = revision = patch = 0;
 
-      int len = NativeMethods.GetFileVersionInfoSize(dll, out int handle);
+      var len = NativeMethods.GetFileVersionInfoSize(dll, out var handle);
       if (len <= 0)
         return false;
 
-      byte[] data = new byte[len];
+      var data = new byte[len];
       if (!NativeMethods.GetFileVersionInfo(dll, handle, len, data))
         return false;
 
-      if (!NativeMethods.VerQueryValue(data, "\\", out IntPtr ptr, out len))
+      if (!NativeMethods.VerQueryValue(data, "\\", out var ptr, out len))
         return false;
 
-      byte[] vsFixedInfo = new byte[len];
+      var vsFixedInfo = new byte[len];
       Marshal.Copy(ptr, vsFixedInfo, 0, len);
 
       minor = (ushort)Marshal.ReadInt16(vsFixedInfo, 8);
@@ -89,17 +97,23 @@ namespace Microsoft.Diagnostics.Runtime
       return true;
     }
 
-    public override IntPtr GetProcAddress(IntPtr module, string method) => NativeMethods.GetProcAddress(module, method);
+    public override IntPtr GetProcAddress(IntPtr module, string method)
+    {
+      return NativeMethods.GetProcAddress(module, method);
+    }
 
-    public override IntPtr LoadLibrary(string lpFileName) => NativeMethods.LoadLibraryEx(lpFileName, 0, NativeMethods.LoadLibraryFlags.NoFlags);
+    public override IntPtr LoadLibrary(string lpFileName)
+    {
+      return NativeMethods.LoadLibraryEx(lpFileName, 0, NativeMethods.LoadLibraryFlags.NoFlags);
+    }
 
     internal class NativeMethods
     {
-      const string Kernel32LibraryName = "kernel32.dll";
+      private const string Kernel32LibraryName = "kernel32.dll";
 
       public const uint FILE_MAP_READ = 4;
 
-      [DllImportAttribute(Kernel32LibraryName)]
+      [DllImport(Kernel32LibraryName)]
       [return: MarshalAs(UnmanagedType.Bool)]
       public static extern bool FreeLibrary(IntPtr hModule);
 
@@ -136,7 +150,7 @@ namespace Microsoft.Diagnostics.Runtime
       [DllImport("version.dll")]
       public static extern bool VerQueryValue(byte[] pBlock, string pSubBlock, out IntPtr val, out int len);
 
-      const int VS_FIXEDFILEINFO_size = 0x34;
+      private const int VS_FIXEDFILEINFO_size = 0x34;
       public static short IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR = 14;
 
       [DllImport("kernel32.dll")]
@@ -146,15 +160,13 @@ namespace Microsoft.Diagnostics.Runtime
     public override bool TryGetWow64(IntPtr proc, out bool result)
     {
       if (Environment.OSVersion.Version.Major > 5 ||
-        (Environment.OSVersion.Version.Major == 5 && Environment.OSVersion.Version.Minor >= 1))
+        Environment.OSVersion.Version.Major == 5 && Environment.OSVersion.Version.Minor >= 1)
       {
         return NativeMethods.IsWow64Process(proc, out result);
       }
-      else
-      {
-        result = false;
-        return false;
-      }
+
+      result = false;
+      return false;
     }
   }
 
@@ -259,7 +271,7 @@ namespace Microsoft.Diagnostics.Runtime
 
     public VectorRegisterArea(VectorRegisterArea other) : this()
     {
-      for (int i = 0; i < VectorRegisterSize; ++i)
+      for (var i = 0; i < VectorRegisterSize; ++i)
         VectorRegister[i] = other.VectorRegister[i];
 
       VectorControl = other.VectorControl;
@@ -267,7 +279,7 @@ namespace Microsoft.Diagnostics.Runtime
 
     public void Clear()
     {
-      for (int i = 0; i < VectorRegisterSize; ++i)
+      for (var i = 0; i < VectorRegisterSize; ++i)
         VectorRegister[i].Clear();
 
       VectorControl = 0;

@@ -3,28 +3,28 @@
 namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   Represents the version of a DLL.
+  /// Represents the version of a DLL.
   /// </summary>
   [Serializable]
   public struct VersionInfo : IEquatable<VersionInfo>, IComparable<VersionInfo>
   {
     /// <summary>
-    ///   In a version 'A.B.C.D', this field represents 'A'.
+    /// In a version 'A.B.C.D', this field represents 'A'.
     /// </summary>
     public int Major;
 
     /// <summary>
-    ///   In a version 'A.B.C.D', this field represents 'B'.
+    /// In a version 'A.B.C.D', this field represents 'B'.
     /// </summary>
     public int Minor;
 
     /// <summary>
-    ///   In a version 'A.B.C.D', this field represents 'C'.
+    /// In a version 'A.B.C.D', this field represents 'C'.
     /// </summary>
     public int Revision;
 
     /// <summary>
-    ///   In a version 'A.B.C.D', this field represents 'D'.
+    /// In a version 'A.B.C.D', this field represents 'D'.
     /// </summary>
     public int Patch;
 

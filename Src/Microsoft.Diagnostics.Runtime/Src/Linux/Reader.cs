@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Microsoft.Diagnostics.Runtime.Linux
 {
-  class Reader : IDisposable
+  internal class Reader : IDisposable
   {
     public const int MaxHeldBuffer = 4096;
     public const int InitialBufferSize = 64;
@@ -26,28 +26,28 @@ namespace Microsoft.Diagnostics.Runtime.Linux
     public T Read<T>(long position)
       where T : struct
     {
-      int size = Marshal.SizeOf(typeof(T));
+      var size = Marshal.SizeOf(typeof(T));
       EnsureSize(size);
 
-      int read = DataSource.Read(position, _buffer, 0, size);
+      var read = DataSource.Read(position, _buffer, 0, size);
       if (read != size)
         throw new IOException();
 
-      T result = (T)Marshal.PtrToStructure(_handle.AddrOfPinnedObject(), typeof(T));
+      var result = (T)Marshal.PtrToStructure(_handle.AddrOfPinnedObject(), typeof(T));
       return result;
     }
 
     public T Read<T>(ref long position)
       where T : struct
     {
-      int size = Marshal.SizeOf(typeof(T));
+      var size = Marshal.SizeOf(typeof(T));
       EnsureSize(size);
 
-      int read = DataSource.Read(position, _buffer, 0, size);
+      var read = DataSource.Read(position, _buffer, 0, size);
       if (read != size)
         throw new IOException();
 
-      T result = (T)Marshal.PtrToStructure(_handle.AddrOfPinnedObject(), typeof(T));
+      var result = (T)Marshal.PtrToStructure(_handle.AddrOfPinnedObject(), typeof(T));
 
       position += size;
       return result;
@@ -55,8 +55,8 @@ namespace Microsoft.Diagnostics.Runtime.Linux
 
     public byte[] ReadBytes(long offset, int size)
     {
-      byte[] buffer = new byte[size];
-      int read = DataSource.Read(offset, buffer, 0, size);
+      var buffer = new byte[size];
+      var read = DataSource.Read(offset, buffer, 0, size);
 
       if (read != size)
         throw new IOException();
@@ -78,7 +78,10 @@ namespace Microsoft.Diagnostics.Runtime.Linux
       }
     }
 
-    ~Reader() => Dispose(false);
+    ~Reader()
+    {
+      Dispose(false);
+    }
 
     protected virtual void Dispose(bool disposing)
     {
@@ -91,11 +94,11 @@ namespace Microsoft.Diagnostics.Runtime.Linux
 
     public string ReadNullTerminatedAscii(long position, int len)
     {
-      byte[] buffer = _buffer;
+      var buffer = _buffer;
       if (len > _buffer.Length)
         buffer = new byte[len];
 
-      int read = DataSource.Read(position, buffer, 0, len);
+      var read = DataSource.Read(position, buffer, 0, len);
       if (read == 0)
         return "";
 

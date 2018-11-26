@@ -8,7 +8,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
   /// Class to represent chunks of memory from the target.
   /// To add support for mapping files in and pretending they were part
   /// of the dump, say for a MinidumpNormal when you can find the module
-  /// image on disk, you'd fall back on the image contents when 
+  /// image on disk, you'd fall back on the image contents when
   /// ReadPartialMemory failed checking the chunks from the dump.
   /// Practically speaking, that fallback could be in the
   /// implementation of ICorDebugDataTarget.ReadVirtual.
@@ -16,7 +16,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
   /// </summary>
   internal class MinidumpMemoryChunks
   {
-    private ulong _count;
     private MinidumpMemory64List _memory64List;
     private MinidumpMemoryList _memoryList;
     private MinidumpMemoryChunk[] _chunks;
@@ -66,7 +65,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 
     public MinidumpMemoryChunks(DumpPointer rawStream, MINIDUMP_STREAM_TYPE type)
     {
-      _count = 0;
+      Count = 0;
       _memory64List = null;
       _memoryList = null;
       _listType = MINIDUMP_STREAM_TYPE.UnusedStream;
@@ -111,7 +110,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       chunks.Sort();
       SplitAndMergeChunks(chunks);
       _chunks = chunks.ToArray();
-      _count = (ulong)chunks.Count;
+      Count = (ulong)chunks.Count;
 
       ValidateChunks();
     }
@@ -137,12 +136,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       chunks.Sort();
       SplitAndMergeChunks(chunks);
       _chunks = chunks.ToArray();
-      _count = (ulong)chunks.Count;
+      Count = (ulong)chunks.Count;
 
       ValidateChunks();
     }
 
-    public ulong Count => _count;
+    public ulong Count { get; private set; }
 
     private void SplitAndMergeChunks(List<MinidumpMemoryChunk> chunks)
     {
@@ -192,7 +191,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 
     private void ValidateChunks()
     {
-      for (ulong i = 0; i < _count; i++)
+      for (ulong i = 0; i < Count; i++)
       {
         if (_chunks[i].Size != _chunks[i].TargetEndAddress - _chunks[i].TargetStartAddress ||
           _chunks[i].TargetStartAddress > _chunks[i].TargetEndAddress)
@@ -204,7 +203,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
         // If there's a next to compare to, and it's a MinidumpWithFullMemory, then we expect
         // that the RVAs & addresses will all be sorted in the dump.
         // MinidumpWithFullMemory stores things in a Memory64ListStream.
-        if (i < _count - 1 && _listType == MINIDUMP_STREAM_TYPE.Memory64ListStream &&
+        if (i < Count - 1 && _listType == MINIDUMP_STREAM_TYPE.Memory64ListStream &&
           (_chunks[i].RVA >= _chunks[i + 1].RVA ||
           _chunks[i].TargetEndAddress > _chunks[i + 1].TargetStartAddress))
           throw new ClrDiagnosticsException(
@@ -213,7 +212,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
             ClrDiagnosticsExceptionKind.CrashDumpError);
 
         // Because we sorted and split/merged entries we can expect them to be increasing and non-overlapping
-        if (i < _count - 1 && _chunks[i].TargetEndAddress > _chunks[i + 1].TargetStartAddress)
+        if (i < Count - 1 && _chunks[i].TargetEndAddress > _chunks[i + 1].TargetStartAddress)
           throw new ClrDiagnosticsException("Unexpected overlap between memory chunks", ClrDiagnosticsExceptionKind.CrashDumpError);
       }
     }

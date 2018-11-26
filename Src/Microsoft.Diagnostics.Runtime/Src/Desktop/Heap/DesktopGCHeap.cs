@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading;
-using Microsoft.Diagnostics.Runtime.DacInterface;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
 {
@@ -30,11 +28,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
         ((DesktopHeapType)free).Shared = true;
         ((BaseDesktopHeapType)free).DesktopModule = ObjectType.Module as DesktopModule;
-        _free = free;
+        Free = free;
       }
       else
       {
-        _free = ErrorType;
+        Free = ErrorType;
       }
 
       InitSegments(runtime);
@@ -163,17 +161,17 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (module == null)
         return null;
 
-      MetaDataImport meta = module.GetMetadataImport();
+      var meta = module.GetMetadataImport();
       if (meta == null)
         return null;
 
       // Get type name.
-      if (!meta.GetTypeDefProperties((int)token, out string name, out TypeAttributes attrs, out int parent))
+      if (!meta.GetTypeDefProperties((int)token, out var name, out var attrs, out var parent))
         return null;
 
-      if (meta.GetNestedClassProperties((int)token, out int enclosing) && token != enclosing)
+      if (meta.GetNestedClassProperties((int)token, out var enclosing) && token != enclosing)
       {
-        string inner = GetTypeNameFromToken(module, (uint)enclosing);
+        var inner = GetTypeNameFromToken(module, (uint)enclosing);
         if (inner == null)
           inner = "<UNKNOWN>";
 
@@ -333,9 +331,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
                 list.Add(handle.DependentTarget);
               }
 
-              break;
-
-            default:
               break;
           }
       }
@@ -596,14 +591,14 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         yield return _types[i];
     }
 
-    internal bool TypesLoaded => _loadedTypes;
+    internal bool TypesLoaded { get; private set; }
 
     internal void LoadAllTypes()
     {
-      if (_loadedTypes)
+      if (TypesLoaded)
         return;
 
-      _loadedTypes = true;
+      TypesLoaded = true;
 
       // Walking a module is sloooow.  Ensure we only walk each module once.
       var modules = new HashSet<ulong>();
@@ -882,13 +877,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private ClrInstanceField _firstChar, _stringLength;
     private bool _initializedStringFields;
     private ClrType[] _basicTypes;
-    private bool _loadedTypes;
 
     internal readonly ClrInterface[] EmptyInterfaceList = new ClrInterface[0];
     internal Dictionary<string, ClrInterface> Interfaces = new Dictionary<string, ClrInterface>();
     private readonly Lazy<ClrType> _arrayType;
     private readonly Lazy<ClrType> _exceptionType;
-    private readonly ClrType _free;
 
     private DictionaryList _objectMap;
     private ExtendedArray<ObjectInfo> _objects;
@@ -900,7 +893,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     internal ClrType StringType { get; }
     internal ClrType ValueType { get; private set; }
     internal ClrType ArrayType => _arrayType.Value;
-    public override ClrType Free => _free;
+    public override ClrType Free { get; }
 
     internal ClrType ExceptionType => _exceptionType.Value;
     internal ClrType EnumType { get; set; }
@@ -1301,7 +1294,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (typeName == null || typeName == "<Unloaded Type>")
       {
         var builder = GetTypeNameFromToken(module, token);
-        var newName = builder?.ToString();
+        var newName = builder;
         if (newName != null && newName != "<UNKNOWN>")
           typeName = newName;
       }

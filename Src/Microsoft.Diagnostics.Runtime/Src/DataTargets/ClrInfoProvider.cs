@@ -22,7 +22,7 @@ namespace Microsoft.Diagnostics.Runtime
 
     public static bool IsSupportedRuntime(ModuleInfo moduleInfo, out ClrFlavor flavor)
     {
-      flavor = default(ClrFlavor);
+      flavor = default;
 
       if (!TryGetModuleName(moduleInfo, out var moduleName))
         return false;

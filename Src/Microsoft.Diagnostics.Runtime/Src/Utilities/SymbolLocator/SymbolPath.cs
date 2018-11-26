@@ -11,26 +11,26 @@ using System.Text.RegularExpressions;
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   /// <summary>
-  ///   SymPathElement represents the text between the semicolons in a symbol path.  It can be a symbol server specification or a simple directory path.
-  ///   SymPathElement follows functional conventions.  After construction everything is read-only.
+  /// SymPathElement represents the text between the semicolons in a symbol path.  It can be a symbol server specification or a simple directory path.
+  /// SymPathElement follows functional conventions.  After construction everything is read-only.
   /// </summary>
   public class SymPathElement
   {
     /// <summary>
-    ///   returns true if this element of the symbol server path a symbol server specification
+    /// returns true if this element of the symbol server path a symbol server specification
     /// </summary>
     public bool IsSymServer { get; }
     /// <summary>
-    ///   returns the local cache for a symbol server specifcation.  returns null if not specified
+    /// returns the local cache for a symbol server specifcation.  returns null if not specified
     /// </summary>
     public string Cache { get; set; }
     /// <summary>
-    ///   returns location to look for symbols.  This is either a directory specification or an URL (for symbol servers)
+    /// returns location to look for symbols.  This is either a directory specification or an URL (for symbol servers)
     /// </summary>
     public string Target { get; }
 
     /// <summary>
-    ///   IsRemote returns true if it looks like the target is not on the local machine.
+    /// IsRemote returns true if it looks like the target is not on the local machine.
     /// </summary>
     public bool IsRemote
     {
@@ -65,7 +65,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   returns the string repsentation for the symbol server path element (e.g. SRV*c:\temp*\\symbols\symbols)
+    /// returns the string repsentation for the symbol server path element (e.g. SRV*c:\temp*\\symbols\symbols)
     /// </summary>
     public override string ToString()
     {
@@ -83,7 +83,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Implements object interface
+    /// Implements object interface
     /// </summary>
     public override bool Equals(object obj)
     {
@@ -98,7 +98,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Implements object interface
+    /// Implements object interface
     /// </summary>
     public override int GetHashCode()
     {
@@ -128,7 +128,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   returns a new SymPathElement with the corresponding properties initialized
+    /// returns a new SymPathElement with the corresponding properties initialized
     /// </summary>
     public SymPathElement(bool isSymServer, string cache, string target)
     {

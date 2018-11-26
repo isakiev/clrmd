@@ -11,8 +11,8 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
   /// same implementation and will not work with this class.  Thus, although this class
   /// is generic, it's currently tightly bound to the implementation of those three streams.
   /// This is a var-args structure defined as:
-  ///   ULONG32 NumberOfNodesInList;
-  ///   T ListNodes[];
+  /// ULONG32 NumberOfNodesInList;
+  /// T ListNodes[];
   /// </summary>
   internal class MinidumpArray<T>
   {

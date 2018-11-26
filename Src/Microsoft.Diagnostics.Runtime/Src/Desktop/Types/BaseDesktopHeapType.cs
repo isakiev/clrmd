@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using Microsoft.Diagnostics.Runtime.DacInterface;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -95,9 +94,9 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         return null;
       }
 
-      foreach (int token in import.EnumerateInterfaceImpls((int)_token))
+      foreach (var token in import.EnumerateInterfaceImpls((int)_token))
       {
-        if (import.GetInterfaceImplProps(token, out int mdClass, out int mdIFace))
+        if (import.GetInterfaceImplProps(token, out var mdClass, out var mdIFace))
         {
           if (interfaces == null)
             interfaces = new List<ClrInterface>();
@@ -119,7 +118,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private ClrInterface GetInterface(MetaDataImport import, int mdIFace)
     {
       ClrInterface result = null;
-      if (!import.GetTypeDefProperties(mdIFace, out string name, out TypeAttributes attrs, out int extends))
+      if (!import.GetTypeDefProperties(mdIFace, out var name, out var attrs, out var extends))
         name = import.GetTypeRefName(mdIFace);
 
       // TODO:  Handle typespec case.

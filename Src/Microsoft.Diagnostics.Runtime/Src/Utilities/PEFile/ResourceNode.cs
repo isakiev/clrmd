@@ -9,7 +9,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     public bool IsLeaf { get; }
 
     // If IsLeaf is true
-    public int DataLength => _dataLen;
+    public int DataLength { get; }
 
     public byte* FetchData(int offsetInResourceData, int size, PEBuffer buff)
     {
@@ -120,9 +120,9 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         var buff = _file.AllocBuff();
         var dataDescr = (IMAGE_RESOURCE_DATA_ENTRY*)buff.Fetch(nodeFileOffset, sizeof(IMAGE_RESOURCE_DATA_ENTRY));
 
-        _dataLen = dataDescr->Size;
+        DataLength = dataDescr->Size;
         _dataFileOffset = file.Header.RvaToFileOffset(dataDescr->RvaToData);
-        var data = FetchData(0, _dataLen, buff);
+        var data = FetchData(0, DataLength, buff);
         _file.FreeBuff(buff);
       }
     }
@@ -131,7 +131,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     private readonly int _nodeFileOffset;
     private List<ResourceNode> _children;
     private readonly bool _isTop;
-    private readonly int _dataLen;
     private readonly int _dataFileOffset;
   }
 }

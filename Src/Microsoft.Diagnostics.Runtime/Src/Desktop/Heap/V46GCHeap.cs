@@ -43,7 +43,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
       unchecked
       {
-        if ((((byte)mt) & 3) != 0)
+        if (((byte)mt & 3) != 0)
           mt &= ~3UL;
       }
 

@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Diagnostics.Runtime.DacInterface;
-using Microsoft.Diagnostics.Runtime.ICorDebug;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
 {
@@ -134,7 +133,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (CLRVersion == DesktopVersion.v2)
         return Request<IThreadData, V2ThreadData>(DacRequests.THREAD_DATA, input);
 
-      ThreadData result = (ThreadData)Request<IThreadData, ThreadData>(DacRequests.THREAD_DATA, input);
+      var result = (ThreadData)Request<IThreadData, ThreadData>(DacRequests.THREAD_DATA, input);
       if (IntPtr.Size == 4)
         result = new ThreadData(ref result);
       return result;
@@ -145,7 +144,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (CLRVersion == DesktopVersion.v2)
         return Request<IHeapDetails, V2HeapDetails>(DacRequests.GCHEAPDETAILS_DATA, addr);
 
-      HeapDetails result = (HeapDetails)Request<IHeapDetails, HeapDetails>(DacRequests.GCHEAPDETAILS_DATA, addr);
+      var result = (HeapDetails)Request<IHeapDetails, HeapDetails>(DacRequests.GCHEAPDETAILS_DATA, addr);
       result = new HeapDetails(ref result);
       return result;
     }
@@ -155,7 +154,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (CLRVersion == DesktopVersion.v2)
         return Request<IHeapDetails, V2HeapDetails>(DacRequests.GCHEAPDETAILS_STATIC_DATA);
 
-      HeapDetails result = (HeapDetails)Request<IHeapDetails, HeapDetails>(DacRequests.GCHEAPDETAILS_STATIC_DATA);
+      var result = (HeapDetails)Request<IHeapDetails, HeapDetails>(DacRequests.GCHEAPDETAILS_STATIC_DATA);
       result = new HeapDetails(ref result);
       return result;
     }
@@ -202,7 +201,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (CLRVersion == DesktopVersion.v2)
         return Request<ISegmentData, V2SegmentData>(DacRequests.HEAPSEGMENT_DATA, segmentAddr);
 
-      SegmentData result = (SegmentData)Request<ISegmentData, SegmentData>(DacRequests.HEAPSEGMENT_DATA, segmentAddr);
+      var result = (SegmentData)Request<ISegmentData, SegmentData>(DacRequests.HEAPSEGMENT_DATA, segmentAddr);
       if (IntPtr.Size == 4)
         result = new SegmentData(ref result);
 
@@ -328,10 +327,10 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           if (Request(DacRequests.MANAGER_LIST, null, output))
           {
             var heapInfo = new MutableJitCodeHeapInfo();
-            int CodeHeapTypeOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "codeHeapType").ToInt32();
-            int AddressOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "address").ToInt32();
-            int CurrAddrOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "currentAddr").ToInt32();
-            int JitCodeHeapInfoSize = Marshal.SizeOf(typeof(JitCodeHeapInfo));
+            var CodeHeapTypeOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "codeHeapType").ToInt32();
+            var AddressOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "address").ToInt32();
+            var CurrAddrOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "currentAddr").ToInt32();
+            var JitCodeHeapInfoSize = Marshal.SizeOf(typeof(JitCodeHeapInfo));
 
             for (var i = 0; i < count; ++i)
             {
@@ -669,8 +668,8 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal override IThreadStoreData GetThreadStoreData()
     {
-      ThreadStoreData threadStore = new ThreadStoreData();
-      if (!RequestStruct<ThreadStoreData>(DacRequests.THREAD_STORE_DATA, ref threadStore))
+      var threadStore = new ThreadStoreData();
+      if (!RequestStruct(DacRequests.THREAD_STORE_DATA, ref threadStore))
         return null;
 
       return threadStore;

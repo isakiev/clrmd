@@ -7,7 +7,7 @@ using System.Collections;
 namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
 {
   /// <summary>
-  ///   Represents a single function in a module.
+  /// Represents a single function in a module.
   /// </summary>
   public class PdbFunction
   {
@@ -43,17 +43,17 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
       iteratorClass;
 
     /// <summary>
-    ///   Sequence points of this function.
+    /// Sequence points of this function.
     /// </summary>
     public PdbSequencePointCollection[] SequencePoints { get; internal set; }
 
     /// <summary>
-    ///   Metadata token of this function.
+    /// Metadata token of this function.
     /// </summary>
     public uint Token { get; internal set; }
 
     /// <summary>
-    ///   The scopes of this function.
+    /// The scopes of this function.
     /// </summary>
     public PdbScope[] Scopes { get; internal set; }
 
@@ -309,7 +309,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
                   unchecked
                   {
                     while (count-- > 0)
-                      this.ReadCustomMetadata(bits);
+                      ReadCustomMetadata(bits);
                   }
                 }
               }

@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Diagnostics.Runtime.Utilities
+﻿using System.Diagnostics;
+
+namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   public class DefaultLogger : IExternalLogger
   {
@@ -13,7 +15,7 @@
       if (parameters != null && parameters.Length > 0)
         format = string.Format(format, parameters);
 
-      System.Diagnostics.Trace.WriteLine(format, category);
+      Trace.WriteLine(format, category);
     }
   }
 }

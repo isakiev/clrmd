@@ -3,16 +3,16 @@ using System;
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   /// <summary>
-  ///   A PEHeader is a reader of the data at the begining of a PEFile.    If the header bytes of a
-  ///   PEFile are read or mapped into memory, this class can parse it when given a pointer to it.
-  ///   It can read both 32 and 64 bit PE files.
+  /// A PEHeader is a reader of the data at the begining of a PEFile.    If the header bytes of a
+  /// PEFile are read or mapped into memory, this class can parse it when given a pointer to it.
+  /// It can read both 32 and 64 bit PE files.
   /// </summary>
   public sealed unsafe class PEHeader
   {
     /// <summary>
-    ///   Parses the given buffer for the header of a PEFile. If it can be parsed correctly,
-    ///   a new PEHeader object is constructed from the buffer and returned. Otherwise, null
-    ///   is returned.
+    /// Parses the given buffer for the header of a PEFile. If it can be parsed correctly,
+    /// a new PEHeader object is constructed from the buffer and returned. Otherwise, null
+    /// is returned.
     /// </summary>
     internal static PEHeader FromBuffer(PEBuffer buffer, bool virt)
     {
@@ -56,12 +56,12 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   The total s,ize of the header,  including section array of the the PE header.
+    /// The total s,ize of the header,  including section array of the the PE header.
     /// </summary>
     public int PEHeaderSize => VirtualAddressToRva(_sections) + sizeof(IMAGE_SECTION_HEADER) * _ntHeader->FileHeader.NumberOfSections;
 
     /// <summary>
-    ///   Given a virtual address to data in a mapped PE file, return the relative virtual address (displacement from start of the image)
+    /// Given a virtual address to data in a mapped PE file, return the relative virtual address (displacement from start of the image)
     /// </summary>
     public int VirtualAddressToRva(void* ptr)
     {
@@ -69,7 +69,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Given a relative virtual address (displacement from start of the image) return the virtual address to data in a mapped PE file
+    /// Given a relative virtual address (displacement from start of the image) return the virtual address to data in a mapped PE file
     /// </summary>
     public void* RvaToVirtualAddress(int rva)
     {
@@ -77,7 +77,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Given a relative virtual address (displacement from start of the image) return a offset in the file data for that data.
+    /// Given a relative virtual address (displacement from start of the image) return a offset in the file data for that data.
     /// </summary>
     public int RvaToFileOffset(int rva)
     {
@@ -92,9 +92,9 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Given a relative virtual address (displacement from start of the image) return a offset in the file data for that data, if
-    ///   the RVA is valid. If the RVA is invalid, the method will return false. Otherwise, the method will return true and store the
-    ///   offset in the result parameter.
+    /// Given a relative virtual address (displacement from start of the image) return a offset in the file data for that data, if
+    /// the RVA is valid. If the RVA is invalid, the method will return false. Otherwise, the method will return true and store the
+    /// offset in the result parameter.
     /// </summary>
     public bool TryGetFileOffsetFromRva(int rva, out int result)
     {
@@ -122,92 +122,92 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Returns true if this is PE file for a 64 bit architecture.
+    /// Returns true if this is PE file for a 64 bit architecture.
     /// </summary>
     public bool IsPE64 => OptionalHeader32->Magic == 0x20b;
     /// <summary>
-    ///   Returns true if this file contains managed code (might also contain native code).
+    /// Returns true if this file contains managed code (might also contain native code).
     /// </summary>
     public bool IsManaged => ComDescriptorDirectory.VirtualAddress != 0;
 
     // fields of code:IMAGE_NT_HEADERS
     /// <summary>
-    ///   Returns the 'Signture' of the PE HEader PE\0\0 = 0x4550, used for sanity checking.
+    /// Returns the 'Signture' of the PE HEader PE\0\0 = 0x4550, used for sanity checking.
     /// </summary>
     public uint Signature => _ntHeader->Signature;
 
     // fields of code:IMAGE_FILE_HEADER
     /// <summary>
-    ///   The machine this PE file is intended to run on
+    /// The machine this PE file is intended to run on
     /// </summary>
     public MachineType Machine => (MachineType)_ntHeader->FileHeader.Machine;
     /// <summary>
-    ///   PE files have a number of sections that represent regions of memory with the access permisions.  This is the nubmer of such sections.
+    /// PE files have a number of sections that represent regions of memory with the access permisions.  This is the nubmer of such sections.
     /// </summary>
     public ushort NumberOfSections => _ntHeader->FileHeader.NumberOfSections;
     /// <summary>
-    ///   The the PE file was created represented as the number of seconds since Jan 1 1970
+    /// The the PE file was created represented as the number of seconds since Jan 1 1970
     /// </summary>
     public int TimeDateStampSec => (int)_ntHeader->FileHeader.TimeDateStamp;
     /// <summary>
-    ///   The the PE file was created represented as a DateTime object
+    /// The the PE file was created represented as a DateTime object
     /// </summary>
     public DateTime TimeDateStamp => TimeDateStampToDate(TimeDateStampSec);
 
     /// <summary>
-    ///   PointerToSymbolTable (see IMAGE_FILE_HEADER in PE File spec)
+    /// PointerToSymbolTable (see IMAGE_FILE_HEADER in PE File spec)
     /// </summary>
     public ulong PointerToSymbolTable => _ntHeader->FileHeader.PointerToSymbolTable;
     /// <summary>
-    ///   NumberOfSymbols (see IMAGE_FILE_HEADER PE File spec)
+    /// NumberOfSymbols (see IMAGE_FILE_HEADER PE File spec)
     /// </summary>
     public ulong NumberOfSymbols => _ntHeader->FileHeader.NumberOfSymbols;
     /// <summary>
-    ///   SizeOfOptionalHeader (see IMAGE_FILE_HEADER PE File spec)
+    /// SizeOfOptionalHeader (see IMAGE_FILE_HEADER PE File spec)
     /// </summary>
     public ushort SizeOfOptionalHeader => _ntHeader->FileHeader.SizeOfOptionalHeader;
     /// <summary>
-    ///   Characteristics (see IMAGE_FILE_HEADER PE File spec)
+    /// Characteristics (see IMAGE_FILE_HEADER PE File spec)
     /// </summary>
     public ushort Characteristics => _ntHeader->FileHeader.Characteristics;
 
     // fields of code:IMAGE_OPTIONAL_HEADER32 (or code:IMAGE_OPTIONAL_HEADER64)
     /// <summary>
-    ///   Magic (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// Magic (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort Magic => OptionalHeader32->Magic;
     /// <summary>
-    ///   MajorLinkerVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// MajorLinkerVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public byte MajorLinkerVersion => OptionalHeader32->MajorLinkerVersion;
     /// <summary>
-    ///   MinorLinkerVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// MinorLinkerVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public byte MinorLinkerVersion => OptionalHeader32->MinorLinkerVersion;
     /// <summary>
-    ///   SizeOfCode (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfCode (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint SizeOfCode => OptionalHeader32->SizeOfCode;
     /// <summary>
-    ///   SizeOfInitializedData (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfInitializedData (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint SizeOfInitializedData => OptionalHeader32->SizeOfInitializedData;
     /// <summary>
-    ///   SizeOfUninitializedData (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfUninitializedData (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint SizeOfUninitializedData => OptionalHeader32->SizeOfUninitializedData;
     /// <summary>
-    ///   AddressOfEntryPoint (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// AddressOfEntryPoint (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint AddressOfEntryPoint => OptionalHeader32->AddressOfEntryPoint;
     /// <summary>
-    ///   BaseOfCode (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// BaseOfCode (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint BaseOfCode => OptionalHeader32->BaseOfCode;
 
     // These depend on the whether you are PE32 or PE64
     /// <summary>
-    ///   ImageBase (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// ImageBase (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ulong ImageBase
     {
@@ -219,7 +219,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   SectionAlignment (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SectionAlignment (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint SectionAlignment
     {
@@ -231,7 +231,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   FileAlignment (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// FileAlignment (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint FileAlignment
     {
@@ -243,7 +243,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   MajorOperatingSystemVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// MajorOperatingSystemVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort MajorOperatingSystemVersion
     {
@@ -255,7 +255,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   MinorOperatingSystemVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// MinorOperatingSystemVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort MinorOperatingSystemVersion
     {
@@ -267,7 +267,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   MajorImageVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// MajorImageVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort MajorImageVersion
     {
@@ -279,7 +279,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   MinorImageVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// MinorImageVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort MinorImageVersion
     {
@@ -291,7 +291,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   MajorSubsystemVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// MajorSubsystemVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort MajorSubsystemVersion
     {
@@ -303,7 +303,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   MinorSubsystemVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// MinorSubsystemVersion (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort MinorSubsystemVersion
     {
@@ -315,7 +315,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   Win32VersionValue (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// Win32VersionValue (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint Win32VersionValue
     {
@@ -327,7 +327,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   SizeOfImage (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfImage (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint SizeOfImage
     {
@@ -339,7 +339,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   SizeOfHeaders (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfHeaders (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint SizeOfHeaders
     {
@@ -351,7 +351,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   CheckSum (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// CheckSum (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint CheckSum
     {
@@ -363,7 +363,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   Subsystem (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// Subsystem (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort Subsystem
     {
@@ -375,7 +375,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   DllCharacteristics (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// DllCharacteristics (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ushort DllCharacteristics
     {
@@ -387,7 +387,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   SizeOfStackReserve (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfStackReserve (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ulong SizeOfStackReserve
     {
@@ -399,7 +399,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   SizeOfStackCommit (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfStackCommit (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ulong SizeOfStackCommit
     {
@@ -411,7 +411,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   SizeOfHeapReserve (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfHeapReserve (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ulong SizeOfHeapReserve
     {
@@ -423,7 +423,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   SizeOfHeapCommit (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// SizeOfHeapCommit (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public ulong SizeOfHeapCommit
     {
@@ -435,7 +435,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   LoaderFlags (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// LoaderFlags (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint LoaderFlags
     {
@@ -447,7 +447,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       }
     }
     /// <summary>
-    ///   NumberOfRvaAndSizes (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
+    /// NumberOfRvaAndSizes (see IMAGE_OPTIONAL_HEADER32 or IMAGE_OPTIONAL_HEADER64 in PE File spec)
     /// </summary>
     public uint NumberOfRvaAndSizes
     {
@@ -461,7 +461,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
     // Well known data blobs (directories)  
     /// <summary>
-    ///   returns the data directory (virtual address an blob, of a data directory with index 'idx'.   14 are currently defined.
+    /// returns the data directory (virtual address an blob, of a data directory with index 'idx'.   14 are currently defined.
     /// </summary>
     public ImageDataDirectory Directory(int idx)
     {
@@ -472,63 +472,63 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Return the data directory for DLL Exports see PE file spec for more
+    /// Return the data directory for DLL Exports see PE file spec for more
     /// </summary>
     public ImageDataDirectory ExportDirectory => Directory(0);
     /// <summary>
-    ///   Return the data directory for DLL Imports see PE file spec for more
+    /// Return the data directory for DLL Imports see PE file spec for more
     /// </summary>
     public ImageDataDirectory ImportDirectory => Directory(1);
     /// <summary>
-    ///   Return the data directory for DLL Resources see PE file spec for more
+    /// Return the data directory for DLL Resources see PE file spec for more
     /// </summary>
     public ImageDataDirectory ResourceDirectory => Directory(2);
     /// <summary>
-    ///   Return the data directory for DLL Exceptions see PE file spec for more
+    /// Return the data directory for DLL Exceptions see PE file spec for more
     /// </summary>
     public ImageDataDirectory ExceptionDirectory => Directory(3);
     /// <summary>
-    ///   Return the data directory for DLL securiy certificates (Authenticode) see PE file spec for more
+    /// Return the data directory for DLL securiy certificates (Authenticode) see PE file spec for more
     /// </summary>
     public ImageDataDirectory CertificatesDirectory => Directory(4);
     /// <summary>
-    ///   Return the data directory Image Base Relocations (RELOCS) see PE file spec for more
+    /// Return the data directory Image Base Relocations (RELOCS) see PE file spec for more
     /// </summary>
     public ImageDataDirectory BaseRelocationDirectory => Directory(5);
     /// <summary>
-    ///   Return the data directory for Debug information see PE file spec for more
+    /// Return the data directory for Debug information see PE file spec for more
     /// </summary>
     public ImageDataDirectory DebugDirectory => Directory(6);
     /// <summary>
-    ///   Return the data directory for DLL Exports see PE file spec for more
+    /// Return the data directory for DLL Exports see PE file spec for more
     /// </summary>
     public ImageDataDirectory ArchitectureDirectory => Directory(7);
     /// <summary>
-    ///   Return the data directory for GlobalPointer (IA64) see PE file spec for more
+    /// Return the data directory for GlobalPointer (IA64) see PE file spec for more
     /// </summary>
     public ImageDataDirectory GlobalPointerDirectory => Directory(8);
     /// <summary>
-    ///   Return the data directory for THread local storage see PE file spec for more
+    /// Return the data directory for THread local storage see PE file spec for more
     /// </summary>
     public ImageDataDirectory ThreadStorageDirectory => Directory(9);
     /// <summary>
-    ///   Return the data directory for Load Configuration see PE file spec for more
+    /// Return the data directory for Load Configuration see PE file spec for more
     /// </summary>
     public ImageDataDirectory LoadConfigurationDirectory => Directory(10);
     /// <summary>
-    ///   Return the data directory for Bound Imports see PE file spec for more
+    /// Return the data directory for Bound Imports see PE file spec for more
     /// </summary>
     public ImageDataDirectory BoundImportDirectory => Directory(11);
     /// <summary>
-    ///   Return the data directory for the DLL Import Address Table (IAT) see PE file spec for more
+    /// Return the data directory for the DLL Import Address Table (IAT) see PE file spec for more
     /// </summary>
     public ImageDataDirectory ImportAddressTableDirectory => Directory(12);
     /// <summary>
-    ///   Return the data directory for Delayed Imports see PE file spec for more
+    /// Return the data directory for Delayed Imports see PE file spec for more
     /// </summary>
     public ImageDataDirectory DelayImportDirectory => Directory(13);
     /// <summary>
-    ///   see PE file spec for more .NET Runtime infomration.
+    /// see PE file spec for more .NET Runtime infomration.
     /// </summary>
     public ImageDataDirectory ComDescriptorDirectory => Directory(14);
 

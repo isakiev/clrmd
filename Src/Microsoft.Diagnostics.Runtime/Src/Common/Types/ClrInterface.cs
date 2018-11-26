@@ -1,22 +1,22 @@
 ﻿namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   An interface implementation in the target process.
+  /// An interface implementation in the target process.
   /// </summary>
   public abstract class ClrInterface
   {
     /// <summary>
-    ///   The typename of the interface.
+    /// The typename of the interface.
     /// </summary>
     public abstract string Name { get; }
 
     /// <summary>
-    ///   The interface that this interface inherits from.
+    /// The interface that this interface inherits from.
     /// </summary>
     public abstract ClrInterface BaseInterface { get; }
 
     /// <summary>
-    ///   Display string for this interface.
+    /// Display string for this interface.
     /// </summary>
     /// <returns>Display string for this interface.</returns>
     public override string ToString()
@@ -25,7 +25,7 @@
     }
 
     /// <summary>
-    ///   Equals override.
+    /// Equals override.
     /// </summary>
     /// <param name="obj">Object to compare to.</param>
     /// <returns>True if this interface equals another.</returns>
@@ -45,7 +45,7 @@
     }
 
     /// <summary>
-    ///   GetHashCode override.
+    /// GetHashCode override.
     /// </summary>
     /// <returns>A hashcode for this object.</returns>
     public override int GetHashCode()

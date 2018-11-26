@@ -7,11 +7,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class DesktopThread : ThreadBase
   {
-    internal DesktopRuntimeBase DesktopRuntime => _runtime;
+    internal DesktopRuntimeBase DesktopRuntime { get; }
 
     internal ICorDebugThread CorDebugThread => DesktopRuntime.GetCorDebugThread(OSThreadId);
 
-    public override ClrRuntime Runtime => _runtime;
+    public override ClrRuntime Runtime => DesktopRuntime;
 
     public override ClrException CurrentException
     {
@@ -21,10 +21,10 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         if (ex == 0)
           return null;
 
-        if (!_runtime.ReadPointer(ex, out ex) || ex == 0)
+        if (!DesktopRuntime.ReadPointer(ex, out ex) || ex == 0)
           return null;
 
-        return _runtime.Heap.GetExceptionObject(ex);
+        return DesktopRuntime.Heap.GetExceptionObject(ex);
       }
     }
 
@@ -36,7 +36,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           return 0;
 
         var ptr = _teb + (ulong)IntPtr.Size;
-        if (!_runtime.ReadPointer(ptr, out ptr))
+        if (!DesktopRuntime.ReadPointer(ptr, out ptr))
           return 0;
 
         return ptr;
@@ -51,7 +51,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           return 0;
 
         var ptr = _teb + (ulong)IntPtr.Size * 2;
-        if (!_runtime.ReadPointer(ptr, out ptr))
+        if (!DesktopRuntime.ReadPointer(ptr, out ptr))
           return 0;
 
         return ptr;
@@ -60,12 +60,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override IEnumerable<ClrRoot> EnumerateStackObjects()
     {
-      return _runtime.EnumerateStackReferences(this, true);
+      return DesktopRuntime.EnumerateStackReferences(this, true);
     }
 
     public override IEnumerable<ClrRoot> EnumerateStackObjects(bool includePossiblyDead)
     {
-      return _runtime.EnumerateStackReferences(this, includePossiblyDead);
+      return DesktopRuntime.EnumerateStackReferences(this, includePossiblyDead);
     }
 
     public override IList<ClrStackFrame> StackTrace
@@ -80,7 +80,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           var spCount = 0;
 
           var max = 4096;
-          foreach (var frame in _runtime.EnumerateStackFrames(this))
+          foreach (var frame in DesktopRuntime.EnumerateStackFrames(this))
           {
             // We only allow a maximum of 4096 frames to be enumerated out of this stack trace to
             // ensure we don't hit degenerate cases of stack unwind where we never make progress
@@ -147,16 +147,15 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override IEnumerable<ClrStackFrame> EnumerateStackTrace()
     {
-      return _runtime.EnumerateStackFrames(this);
+      return DesktopRuntime.EnumerateStackFrames(this);
     }
 
     internal DesktopThread(DesktopRuntimeBase clr, IThreadData thread, ulong address, bool finalizer)
       : base(thread, address, finalizer)
     {
-      _runtime = clr;
+      DesktopRuntime = clr;
     }
 
-    private readonly DesktopRuntimeBase _runtime;
     private bool _corDebugInit;
   }
 }

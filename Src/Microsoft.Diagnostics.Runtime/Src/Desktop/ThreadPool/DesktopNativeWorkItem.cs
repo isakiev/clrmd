@@ -4,51 +4,47 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class DesktopNativeWorkItem : NativeWorkItem
   {
-    private readonly WorkItemKind _kind;
-    private readonly ulong _callback;
-    private readonly ulong _data;
-
     public DesktopNativeWorkItem(DacpWorkRequestData result)
     {
-      _callback = result.Function;
-      _data = result.Context;
+      Callback = result.Function;
+      Data = result.Context;
 
       switch (result.FunctionType)
       {
         default:
         case WorkRequestFunctionTypes.UNKNOWNWORKITEM:
-          _kind = WorkItemKind.Unknown;
+          Kind = WorkItemKind.Unknown;
           break;
 
         case WorkRequestFunctionTypes.TIMERDELETEWORKITEM:
-          _kind = WorkItemKind.TimerDelete;
+          Kind = WorkItemKind.TimerDelete;
           break;
 
         case WorkRequestFunctionTypes.QUEUEUSERWORKITEM:
-          _kind = WorkItemKind.QueueUserWorkItem;
+          Kind = WorkItemKind.QueueUserWorkItem;
           break;
 
         case WorkRequestFunctionTypes.ASYNCTIMERCALLBACKCOMPLETION:
-          _kind = WorkItemKind.AsyncTimer;
+          Kind = WorkItemKind.AsyncTimer;
           break;
 
         case WorkRequestFunctionTypes.ASYNCCALLBACKCOMPLETION:
-          _kind = WorkItemKind.AsyncCallback;
+          Kind = WorkItemKind.AsyncCallback;
           break;
       }
     }
 
     public DesktopNativeWorkItem(WorkRequestData result)
     {
-      _callback = result.Function;
-      _data = result.Context;
-      _kind = WorkItemKind.Unknown;
+      Callback = result.Function;
+      Data = result.Context;
+      Kind = WorkItemKind.Unknown;
     }
 
-    public override WorkItemKind Kind => _kind;
+    public override WorkItemKind Kind { get; }
 
-    public override ulong Callback => _callback;
+    public override ulong Callback { get; }
 
-    public override ulong Data => _data;
+    public override ulong Data { get; }
   }
 }

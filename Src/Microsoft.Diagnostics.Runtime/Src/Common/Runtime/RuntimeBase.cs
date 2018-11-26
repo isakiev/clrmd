@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Diagnostics.Runtime.DacInterface;
-using Microsoft.Diagnostics.Runtime.DataReaders;
 using Microsoft.Diagnostics.Runtime.Desktop;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 
@@ -23,7 +22,7 @@ namespace Microsoft.Diagnostics.Runtime
       get
       {
         if (_corDebugProcess == null)
-          _corDebugProcess = ICorDebug.CLRDebugging.CreateICorDebugProcess(ClrInfo.ModuleInfo.ImageBase, DacLibrary.DacDataTarget, DataTarget.FileLoader);
+          _corDebugProcess = CLRDebugging.CreateICorDebugProcess(ClrInfo.ModuleInfo.ImageBase, DacLibrary.DacDataTarget, DataTarget.FileLoader);
 
         return _corDebugProcess;
       }

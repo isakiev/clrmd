@@ -4,18 +4,18 @@
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   /// <summary>
-  ///   Each directory contains the 32-bit Name of the entry and an offset,
-  ///   relative to the beginning of the resource directory of the data associated
-  ///   with this directory entry.  If the name of the entry is an actual text
-  ///   string instead of an integer Id, then the high order bit of the name field
-  ///   is set to one and the low order 31-bits are an offset, relative to the
-  ///   beginning of the resource directory of the string, which is of type
-  ///   IMAGE_RESOURCE_DIRECTORY_STRING.  Otherwise the high bit is clear and the
-  ///   low-order 16-bits are the integer Id that identify this resource directory
-  ///   entry. If the directory entry is yet another resource directory (i.e. a
-  ///   subdirectory), then the high order bit of the offset field will be
-  ///   set to indicate this.  Otherwise the high bit is clear and the offset
-  ///   field points to a resource data entry.
+  /// Each directory contains the 32-bit Name of the entry and an offset,
+  /// relative to the beginning of the resource directory of the data associated
+  /// with this directory entry.  If the name of the entry is an actual text
+  /// string instead of an integer Id, then the high order bit of the name field
+  /// is set to one and the low order 31-bits are an offset, relative to the
+  /// beginning of the resource directory of the string, which is of type
+  /// IMAGE_RESOURCE_DIRECTORY_STRING.  Otherwise the high bit is clear and the
+  /// low-order 16-bits are the integer Id that identify this resource directory
+  /// entry. If the directory entry is yet another resource directory (i.e. a
+  /// subdirectory), then the high order bit of the offset field will be
+  /// set to indicate this.  Otherwise the high bit is clear and the offset
+  /// field points to a resource data entry.
   /// </summary>
   internal unsafe struct IMAGE_RESOURCE_DIRECTORY_ENTRY
   {

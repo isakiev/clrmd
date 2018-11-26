@@ -6,7 +6,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
   internal class DesktopStackFrame : ClrStackFrame
   {
     private readonly ulong _ip;
-    private readonly ulong _sp;
     private readonly string _frameName;
     private readonly ClrStackFrameType _type;
     private ClrMethod _method;
@@ -18,7 +17,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       _runtime = runtime;
       _thread = thread;
       _ip = ip;
-      _sp = sp;
+      StackPointer = sp;
       _frameName = _runtime.GetNameForMD(md) ?? "Unknown";
       _type = ClrStackFrameType.ManagedMethod;
 
@@ -29,7 +28,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     {
       _runtime = runtime;
       _thread = thread;
-      _sp = sp;
+      StackPointer = sp;
       _frameName = _runtime.GetNameForMD(md) ?? "Unknown";
       _type = ClrStackFrameType.Runtime;
 
@@ -40,7 +39,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     {
       _runtime = runtime;
       _thread = thread;
-      _sp = sp;
+      StackPointer = sp;
       _frameName = method ?? "Unknown";
       _type = ClrStackFrameType.Runtime;
       _method = innerMethod;
@@ -63,7 +62,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     }
 
     public override ClrThread Thread => _thread;
-    public override ulong StackPointer => _sp;
+    public override ulong StackPointer { get; }
     public override ulong InstructionPointer => _ip;
     public override ClrStackFrameType Kind => _type;
     public override string DisplayString => _frameName;

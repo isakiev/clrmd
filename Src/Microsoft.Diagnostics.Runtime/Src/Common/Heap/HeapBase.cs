@@ -13,14 +13,12 @@ namespace Microsoft.Diagnostics.Runtime
     private ulong[] _sizeByGen = new ulong[4];
     private ulong _totalHeapSize;
     private int _lastSegmentIdx; // The last segment we looked at.
-    private readonly bool _canWalkHeap;
-    private readonly int _pointerSize;
 
     public HeapBase(RuntimeBase runtime)
     {
-      _canWalkHeap = runtime.CanWalkHeap;
+      CanWalkHeap = runtime.CanWalkHeap;
       MemoryReader = new MemoryReader(runtime.DataReader, 0x10000);
-      _pointerSize = runtime.PointerSize;
+      PointerSize = runtime.PointerSize;
     }
 
     public override ulong GetMethodTable(ulong obj)
@@ -39,9 +37,9 @@ namespace Microsoft.Diagnostics.Runtime
       return Runtime.ReadPointer(addr, out value);
     }
 
-    public override int PointerSize => _pointerSize;
+    public override int PointerSize { get; }
 
-    public override bool CanWalkHeap => _canWalkHeap;
+    public override bool CanWalkHeap { get; }
 
     public override IList<ClrSegment> Segments => _segments;
 
@@ -179,16 +177,16 @@ namespace Microsoft.Diagnostics.Runtime
       if (_minAddr <= objRef && objRef < _maxAddr)
       {
         // Start the segment search where you where last
-        int curIdx = _lastSegmentIdx;
+        var curIdx = _lastSegmentIdx;
         for (;;)
         {
           var segment = _segments[curIdx];
           unchecked
           {
-            long offsetInSegment = (long)(objRef - segment.Start);
+            var offsetInSegment = (long)(objRef - segment.Start);
             if (0 <= offsetInSegment)
             {
-              var intOffsetInSegment = (long)offsetInSegment;
+              var intOffsetInSegment = offsetInSegment;
               if (intOffsetInSegment < (long)segment.Length)
               {
                 _lastSegmentIdx = curIdx;
@@ -232,8 +230,8 @@ namespace Microsoft.Diagnostics.Runtime
       }
 
       var result = new List<ClrObject>();
-      MemoryReader reader = GetMemoryReaderForAddress(obj);
-      gcdesc.WalkObject(obj, size, (ptr) => ReadPointer(reader, ptr), (reference, offset) => result.Add(new ClrObject(reference, GetObjectType(reference))));
+      var reader = GetMemoryReaderForAddress(obj);
+      gcdesc.WalkObject(obj, size, ptr => ReadPointer(reader, ptr), (reference, offset) => result.Add(new ClrObject(reference, GetObjectType(reference))));
       return result;
     }
 
@@ -259,13 +257,13 @@ namespace Microsoft.Diagnostics.Runtime
           return;
       }
 
-      MemoryReader reader = GetMemoryReaderForAddress(obj);
-      gcdesc.WalkObject(obj, size, (ptr) => ReadPointer(reader, ptr), callback);
+      var reader = GetMemoryReaderForAddress(obj);
+      gcdesc.WalkObject(obj, size, ptr => ReadPointer(reader, ptr), callback);
     }
 
     private ulong ReadPointer(MemoryReader reader, ulong addr)
     {
-      if (reader.ReadPtr(addr, out ulong result))
+      if (reader.ReadPtr(addr, out var result))
         return result;
 
       return 0;

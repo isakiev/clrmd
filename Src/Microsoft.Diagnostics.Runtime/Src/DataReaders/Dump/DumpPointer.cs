@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   Immutable pointer into the dump file. Has associated size for runtime checking.
+  /// Immutable pointer into the dump file. Has associated size for runtime checking.
   /// </summary>
   internal unsafe struct DumpPointer
   {
@@ -22,7 +22,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Returns a DumpPointer to the same memory, but associated with a smaller size.
+    /// Returns a DumpPointer to the same memory, but associated with a smaller size.
     /// </summary>
     /// <param name="size">smaller size to shrink the pointer to.</param>
     /// <returns>new DumpPointer</returns>
@@ -53,7 +53,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Copy numberBytesToCopy from the DumpPointer into &amp;destinationBuffer[indexDestination].
+    /// Copy numberBytesToCopy from the DumpPointer into &amp;destinationBuffer[indexDestination].
     /// </summary>
     /// <param name="dest"></param>
     /// <param name="destinationBufferSizeInBytes"></param>
@@ -96,12 +96,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Copy raw bytes to buffer
+    /// Copy raw bytes to buffer
     /// </summary>
     /// <param name="destinationBuffer">buffer to copy to.</param>
     /// <param name="sizeBytes">
-    ///   number of bytes to copy. Caller ensures the destinationBuffer
-    ///   is large enough
+    /// number of bytes to copy. Caller ensures the destinationBuffer
+    /// is large enough
     /// </param>
     public void Copy(IntPtr destinationBuffer, uint sizeBytes)
     {
@@ -161,7 +161,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Marshal this into a managed structure, and do bounds checks.
+    /// Marshal this into a managed structure, and do bounds checks.
     /// </summary>
     /// <typeparam name="T">Type of managed structure to marshal as</typeparam>
     /// <returns>a managed copy of the structure</returns>

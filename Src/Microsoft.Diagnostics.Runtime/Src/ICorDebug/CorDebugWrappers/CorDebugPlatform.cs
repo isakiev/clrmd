@@ -1,7 +1,7 @@
 namespace Microsoft.Diagnostics.Runtime.ICorDebug
 {
   /// <summary>
-  ///   Constants to return from GetPlatform
+  /// Constants to return from GetPlatform
   /// </summary>
   public enum CorDebugPlatform
   {

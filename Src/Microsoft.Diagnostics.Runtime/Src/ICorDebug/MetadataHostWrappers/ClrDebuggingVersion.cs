@@ -1,7 +1,7 @@
 ﻿namespace Microsoft.Diagnostics.Runtime.ICorDebug
 {
   /// <summary>
-  ///   Represents a version of the CLR runtime
+  /// Represents a version of the CLR runtime
   /// </summary>
   public struct ClrDebuggingVersion
   {

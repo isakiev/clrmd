@@ -4,35 +4,35 @@ using System.IO;
 namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   Information about a specific PDB instance obtained from a PE image.
+  /// Information about a specific PDB instance obtained from a PE image.
   /// </summary>
   [Serializable]
   public class PdbInfo
   {
     /// <summary>
-    ///   The Guid of the PDB.
+    /// The Guid of the PDB.
     /// </summary>
     public Guid Guid { get; set; }
 
     /// <summary>
-    ///   The pdb revision.
+    /// The pdb revision.
     /// </summary>
     public int Revision { get; set; }
 
     /// <summary>
-    ///   The filename of the pdb.
+    /// The filename of the pdb.
     /// </summary>
     public string FileName { get; set; }
 
     /// <summary>
-    ///   Creates an instance of the PdbInfo class
+    /// Creates an instance of the PdbInfo class
     /// </summary>
     public PdbInfo()
     {
     }
 
     /// <summary>
-    ///   Creates an instance of the PdbInfo class with the corresponding properties initialized
+    /// Creates an instance of the PdbInfo class with the corresponding properties initialized
     /// </summary>
     public PdbInfo(string fileName, Guid guid, int rev)
     {
@@ -42,7 +42,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   GetHashCode implementation.
+    /// GetHashCode implementation.
     /// </summary>
     /// <returns></returns>
     public override int GetHashCode()
@@ -51,7 +51,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Override for Equals.  Returns true if the guid, age, and filenames equal.  Note that this compares only the
+    /// Override for Equals.  Returns true if the guid, age, and filenames equal.  Note that this compares only the
     /// </summary>
     /// <param name="obj"></param>
     /// <returns>True if the objects match, false otherwise.</returns>
@@ -75,7 +75,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   To string implementation.
+    /// To string implementation.
     /// </summary>
     /// <returns>Printing friendly version.</returns>
     public override string ToString()

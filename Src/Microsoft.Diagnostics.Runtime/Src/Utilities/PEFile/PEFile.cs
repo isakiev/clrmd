@@ -9,14 +9,14 @@ using System.IO;
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   /// <summary>
-  ///   PEFile is a reader for the information in a Portable Exectable (PE) FILE.   This is what EXEs and DLLs are.
-  ///   It can read both 32 and 64 bit PE files.
+  /// PEFile is a reader for the information in a Portable Exectable (PE) FILE.   This is what EXEs and DLLs are.
+  /// It can read both 32 and 64 bit PE files.
   /// </summary>
   public sealed unsafe class PEFile : IDisposable
   {
     /// <summary>
-    ///   Parses a PEFile from a given stream. If it is valid, a new PEFile object is
-    ///   constructed and returned. Otherwise, null is returned.
+    /// Parses a PEFile from a given stream. If it is valid, a new PEFile object is
+    /// constructed and returned. Otherwise, null is returned.
     /// </summary>
     public static PEFile TryLoad(Stream stream, bool virt)
     {
@@ -36,7 +36,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Create a new PEFile header reader.
+    /// Create a new PEFile header reader.
     /// </summary>
     /// <param name="filePath">The path to the file on disk.</param>
     public PEFile(string filePath)
@@ -45,12 +45,12 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Constructor which allows you to specify a stream instead of file on disk.
+    /// Constructor which allows you to specify a stream instead of file on disk.
     /// </summary>
     /// <param name="stream">The stream to read.</param>
     /// <param name="virt">
-    ///   Whether the stream is currently in virtual memory (true)
-    ///   or if this reading from disk (false).
+    /// Whether the stream is currently in virtual memory (true)
+    /// or if this reading from disk (false).
     /// </param>
     public PEFile(Stream stream, bool virt)
     {
@@ -74,15 +74,15 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   The Header for the PE file.  This contains the infor in a link /dump /headers
+    /// The Header for the PE file.  This contains the infor in a link /dump /headers
     /// </summary>
     public PEHeader Header { get; private set; }
 
     /// <summary>
-    ///   Looks up the debug signature information in the EXE.   Returns true and sets the parameters if it is found.
-    ///   If 'first' is true then the first entry is returned, otherwise (by default) the last entry is used
-    ///   (this is what debuggers do today).   Thus NGEN images put the IL PDB last (which means debuggers
-    ///   pick up that one), but we can set it to 'first' if we want the NGEN PDB.
+    /// Looks up the debug signature information in the EXE.   Returns true and sets the parameters if it is found.
+    /// If 'first' is true then the first entry is returned, otherwise (by default) the last entry is used
+    /// (this is what debuggers do today).   Thus NGEN images put the IL PDB last (which means debuggers
+    /// pick up that one), but we can set it to 'first' if we want the NGEN PDB.
     /// </summary>
     public bool GetPdbSignature(out string pdbName, out Guid pdbGuid, out int pdbAge, bool first = false)
     {
@@ -130,7 +130,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
     private PdbInfo _pdb;
     /// <summary>
-    ///   Holds information about the pdb for the current PEFile
+    /// Holds information about the pdb for the current PEFile
     /// </summary>
     public PdbInfo PdbInfo
     {
@@ -184,13 +184,13 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Whether this object has been disposed.
+    /// Whether this object has been disposed.
     /// </summary>
     public bool Disposed { get; private set; }
 
     /// <summary>
-    ///   Gets the File Version Information that is stored as a resource in the PE file.  (This is what the
-    ///   version tab a file's property page is populated with).
+    /// Gets the File Version Information that is stored as a resource in the PE file.  (This is what the
+    /// version tab a file's property page is populated with).
     /// </summary>
     public FileVersionInfo GetFileVersionInfo()
     {
@@ -211,8 +211,8 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   For side by side dlls, the manifest that decribes the binding information is stored as the RT_MANIFEST resource, and it
-    ///   is an XML string.   This routine returns this.
+    /// For side by side dlls, the manifest that decribes the binding information is stored as the RT_MANIFEST resource, and it
+    /// is an XML string.   This routine returns this.
     /// </summary>
     /// <returns></returns>
     public string GetSxSManfest()
@@ -239,7 +239,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Closes any file handles and cleans up resources.
+    /// Closes any file handles and cleans up resources.
     /// </summary>
     public void Dispose()
     {

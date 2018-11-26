@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   Describes system information about the system the dump was taken on.
-  ///   This is returned by the MINIDUMP_STREAM_TYPE.SystemInfoStream stream.
+  /// Describes system information about the system the dump was taken on.
+  /// This is returned by the MINIDUMP_STREAM_TYPE.SystemInfoStream stream.
   /// </summary>
   [StructLayout(LayoutKind.Sequential)]
   internal class MINIDUMP_SYSTEM_INFO

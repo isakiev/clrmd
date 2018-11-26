@@ -1,14 +1,9 @@
-﻿using Microsoft.Diagnostics.Runtime.Desktop;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Diagnostics.Runtime.DacInterface
 {
-  internal unsafe sealed class SOSStackRefEnum : CallableCOMWrapper
+  internal sealed unsafe class SOSStackRefEnum : CallableCOMWrapper
   {
     private static Guid IID_ISOSStackRefEnum = new Guid("8FA642BD-9F10-4799-9AA3-512AE78C77EE");
 
@@ -17,7 +12,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     public SOSStackRefEnum(DacLibrary library, IntPtr pUnk)
       : base(library.OwningLibrary, ref IID_ISOSStackRefEnum, pUnk)
     {
-      ISOSStackRefEnumVTable* vtable = (ISOSStackRefEnumVTable*)_vtable;
+      var vtable = (ISOSStackRefEnumVTable*)_vtable;
       InitDelegate(ref _next, vtable->Next);
     }
 
@@ -26,15 +21,15 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       if (stackRefs == null)
         throw new ArgumentNullException(nameof(stackRefs));
 
-      int hr = _next(Self, stackRefs.Length, stackRefs, out int read);
+      var hr = _next(Self, stackRefs.Length, stackRefs, out var read);
       return hr >= S_OK ? read : 0;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int Next(
+    private delegate int Next(
       IntPtr self,
       int count,
-      [Out, MarshalAs(UnmanagedType.LPArray)]
+      [Out][MarshalAs(UnmanagedType.LPArray)]
       StackRefData[] stackRefs,
       out int pNeeded);
   }

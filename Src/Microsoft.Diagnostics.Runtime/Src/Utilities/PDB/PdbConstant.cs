@@ -4,23 +4,23 @@
 namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
 {
   /// <summary>
-  ///   This class represents a constant value in source code, such as:
-  ///   const int Foo = 3;
+  /// This class represents a constant value in source code, such as:
+  /// const int Foo = 3;
   /// </summary>
   public class PdbConstant
   {
     /// <summary>
-    ///   The variable name of the constant.
+    /// The variable name of the constant.
     /// </summary>
     public string Name { get; }
 
     /// <summary>
-    ///   The metadata token of this constant.
+    /// The metadata token of this constant.
     /// </summary>
     public uint Token { get; }
 
     /// <summary>
-    ///   The value of this constant.
+    /// The value of this constant.
     /// </summary>
     public object Value { get; }
 
@@ -89,9 +89,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
             break;
           case 0x19: //decimal
             Value = bits.ReadDecimal();
-            break;
-          default:
-            //TODO: error
             break;
         }
       }

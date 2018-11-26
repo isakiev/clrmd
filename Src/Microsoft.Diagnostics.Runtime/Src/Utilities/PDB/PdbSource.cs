@@ -6,41 +6,41 @@ using System;
 namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
 {
   /// <summary>
-  ///   A source file in the program.
+  /// A source file in the program.
   /// </summary>
   public class PdbSource
   {
     /// <summary>
-    ///   The name of the source file.
+    /// The name of the source file.
     /// </summary>
     public string Name { get; }
     /// <summary>
-    ///   The DocType for this source.
+    /// The DocType for this source.
     /// </summary>
     public Guid DocType { get; }
 
     /// <summary>
-    ///   Pdb source language.
+    /// Pdb source language.
     /// </summary>
     public Guid Language { get; }
 
     /// <summary>
-    ///   Pdb source vendor
+    /// Pdb source vendor
     /// </summary>
     public Guid Vendor { get; }
 
     /// <summary>
-    ///   Pdb algorithm id.
+    /// Pdb algorithm id.
     /// </summary>
     public Guid AlgorithmId { get; }
 
     /// <summary>
-    ///   Checksum for this pdb.
+    /// Checksum for this pdb.
     /// </summary>
     public byte[] Checksum { get; }
 
     /// <summary>
-    ///   The embeded source in this pdb.
+    /// The embeded source in this pdb.
     /// </summary>
     public byte[] Source { get; }
 

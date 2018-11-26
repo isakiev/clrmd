@@ -47,7 +47,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     private static readonly TestTarget _sharedLibrary = new TestTarget("SharedLibrary.cs", true);
 
     private readonly bool _isLibrary;
-    private readonly string _source;
     private string _executable;
     private object _sync = new object();
     private readonly string[] _miniDumpPath = new string[2];
@@ -79,17 +78,17 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     public string Pdb => Path.ChangeExtension(Executable, "pdb");
 
-    public string Source => _source;
+    public string Source { get; }
 
     public TestTarget(string source, bool isLibrary = false)
     {
-      _source = Path.Combine(GetBaseFolder(), source);
+      Source = Path.Combine(GetBaseFolder(), source);
       _isLibrary = isLibrary;
     }
 
     public TestTarget(string source, params TestTarget[] required)
     {
-      _source = Path.Combine(GetBaseFolder(), source);
+      Source = Path.Combine(GetBaseFolder(), source);
       _isLibrary = false;
 
       foreach (var item in required)
@@ -126,7 +125,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       // Don't recompile if it's there.
       var destination = GetOutputAssembly();
       if (!File.Exists(destination))
-        _executable = CompileCSharp(_source, destination, _isLibrary);
+        _executable = CompileCSharp(Source, destination, _isLibrary);
       else
         _executable = destination;
     }
@@ -136,7 +135,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       var extension = _isLibrary ? "dll" : "exe";
       var binPath = Path.Combine(Helpers.GetTempPath(), "Bin");
       Directory.CreateDirectory(binPath);
-      return Path.Combine(binPath, Path.ChangeExtension(Path.GetFileNameWithoutExtension(_source), extension));
+      return Path.Combine(binPath, Path.ChangeExtension(Path.GetFileNameWithoutExtension(Source), extension));
     }
 
     private static string CompileCSharp(string source, string destination, bool isLibrary)

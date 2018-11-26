@@ -5,85 +5,82 @@ using System.Diagnostics;
 namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   Represents an object in the target process.
+  /// Represents an object in the target process.
   /// </summary>
   [DebuggerDisplay("Address={HexAddress}, Type={Type.Name}")]
   public struct ClrObject : IEquatable<ClrObject>
   {
-    private ulong _address;
-    private ClrType _type;
-
     internal static ClrObject Create(ulong address, ClrType type)
     {
       var obj = new ClrObject
       {
-        _address = address,
-        _type = type
+        Address = address,
+        Type = type
       };
 
       return obj;
     }
 
     /// <summary>
-    ///   Constructor.
+    /// Constructor.
     /// </summary>
     /// <param name="address">The address of the object</param>
     /// <param name="type">The concrete type of the object.</param>
     public ClrObject(ulong address, ClrType type)
     {
-      _address = address;
-      _type = type;
+      Address = address;
+      Type = type;
 
       Debug.Assert(address == 0 || type != null);
       Debug.Assert(address == 0 || type.Heap.GetObjectType(address) == type);
     }
 
     /// <summary>
-    ///   Enumerates all objects that this object references.
+    /// Enumerates all objects that this object references.
     /// </summary>
     /// <returns>An enumeration of object references.</returns>
     public IEnumerable<ClrObject> EnumerateObjectReferences(bool carefully = false)
     {
-      return _type.Heap.EnumerateObjectReferences(_address, _type, carefully);
+      return Type.Heap.EnumerateObjectReferences(Address, Type, carefully);
     }
 
     /// <summary>
-    ///   The address of the object.
+    /// The address of the object.
     /// </summary>
-    public ulong Address => _address;
+    public ulong Address { get; private set; }
 
     /// <summary>
-    ///   The address of the object in Hex format.
+    /// The address of the object in Hex format.
     /// </summary>
-    public string HexAddress => _address.ToString("x");
+    public string HexAddress => Address.ToString("x");
 
     /// <summary>
-    ///   The type of the object.
+    /// The type of the object.
     /// </summary>
-    public ClrType Type => _type;
+    public ClrType Type { get; private set; }
 
     /// <summary>
-    ///   Returns if the object value is null.
+    /// Returns if the object value is null.
     /// </summary>
-    public bool IsNull => _address == 0;
+    public bool IsNull => Address == 0;
 
     /// <summary>
-    ///   Gets the size of the object.
+    /// Gets the size of the object.
     /// </summary>
-    public ulong Size => _type.GetSize(Address);
+    public ulong Size => Type.GetSize(Address);
 
     /// <summary>
-    ///   Returns whether this object is actually a boxed primitive or struct.
+    /// Returns whether this object is actually a boxed primitive or struct.
     /// </summary>
-    public bool IsBoxed => !_type.IsObjectReference;
+    public bool IsBoxed => !Type.IsObjectReference;
 
     /// <summary>
-    ///   Returns whether this object is an array or not.
+    /// Returns whether this object is an array or not.
     /// </summary>
-    public bool IsArray => _type.IsArray;
+    public bool IsArray => Type.IsArray;
 
     /// <summary>
-    ///   Returns the count of elements in this array, or throws InvalidOperatonException if this object is not an array.
+    /// Returns the count of elements in this array, or throws InvalidOperatonException if this object is not an array.
     /// </summary>
     public int Length
     {
@@ -92,26 +89,26 @@ namespace Microsoft.Diagnostics.Runtime
         if (!IsArray)
           throw new InvalidOperationException();
 
-        return _type.GetArrayLength(Address);
+        return Type.GetArrayLength(Address);
       }
     }
 
     /// <summary>
-    ///   Returns true if this object possibly contians GC pointers.
+    /// Returns true if this object possibly contians GC pointers.
     /// </summary>
-    public bool ContainsPointers => _type != null && _type.ContainsPointers;
+    public bool ContainsPointers => Type != null && Type.ContainsPointers;
 
     /// <summary>
-    ///   ToString override.
+    /// ToString override.
     /// </summary>
     /// <returns></returns>
     public override string ToString()
     {
-      return $"{_type?.Name} {_address:x}";
+      return $"{Type?.Name} {Address:x}";
     }
 
     /// <summary>
-    ///   Converts a ClrObject into its string value.
+    /// Converts a ClrObject into its string value.
     /// </summary>
     /// <param name="obj">A string object.</param>
     public static explicit operator string(ClrObject obj)
@@ -123,8 +120,8 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Gets the given object reference field from this ClrObject.  Throws ArgumentException if the given field does
-    ///   not exist in the object.  Throws NullReferenceException if IsNull is true.
+    /// Gets the given object reference field from this ClrObject.  Throws ArgumentException if the given field does
+    /// not exist in the object.  Throws NullReferenceException if IsNull is true.
     /// </summary>
     /// <param name="fieldName">The name of the field to retrieve.</param>
     /// <returns>A ClrObject of the given field.</returns>
@@ -133,16 +130,16 @@ namespace Microsoft.Diagnostics.Runtime
       if (IsNull)
         throw new NullReferenceException();
 
-      var field = _type.GetFieldByName(fieldName);
+      var field = Type.GetFieldByName(fieldName);
       if (field == null)
-        throw new ArgumentException($"Type '{_type.Name}' does not contain a field named '{fieldName}'");
+        throw new ArgumentException($"Type '{Type.Name}' does not contain a field named '{fieldName}'");
 
       if (!field.IsObjectReference)
-        throw new ArgumentException($"Field '{_type.Name}.{fieldName}' is not an object reference.");
+        throw new ArgumentException($"Field '{Type.Name}.{fieldName}' is not an object reference.");
 
-      var heap = _type.Heap;
+      var heap = Type.Heap;
 
-      var addr = field.GetAddress(_address);
+      var addr = field.GetAddress(Address);
       if (!heap.ReadPointer(addr, out var obj))
         throw new MemoryReadException(addr);
 
@@ -159,25 +156,25 @@ namespace Microsoft.Diagnostics.Runtime
       if (IsNull)
         throw new NullReferenceException();
 
-      var field = _type.GetFieldByName(fieldName);
+      var field = Type.GetFieldByName(fieldName);
       if (field == null)
-        throw new ArgumentException($"Type '{_type.Name}' does not contain a field named '{fieldName}'");
+        throw new ArgumentException($"Type '{Type.Name}' does not contain a field named '{fieldName}'");
 
       if (!field.IsValueClass)
-        throw new ArgumentException($"Field '{_type.Name}.{fieldName}' is not a ValueClass.");
+        throw new ArgumentException($"Field '{Type.Name}.{fieldName}' is not a ValueClass.");
 
       if (field.Type == null)
         throw new Exception("Field does not have an associated class.");
 
-      var heap = _type.Heap;
+      var heap = Type.Heap;
 
-      var addr = field.GetAddress(_address);
+      var addr = field.GetAddress(Address);
       return new ClrValueClass(addr, field.Type, true);
     }
 
     /// <summary>
-    ///   Gets the value of a primitive field.  This will throw an InvalidCastException if the type parameter
-    ///   does not match the field's type.
+    /// Gets the value of a primitive field.  This will throw an InvalidCastException if the type parameter
+    /// does not match the field's type.
     /// </summary>
     /// <typeparam name="T">The type of the field itself.</typeparam>
     /// <param name="fieldName">The name of the field.</param>
@@ -185,28 +182,28 @@ namespace Microsoft.Diagnostics.Runtime
     public T GetField<T>(string fieldName)
       where T : struct
     {
-      var field = _type.GetFieldByName(fieldName);
+      var field = Type.GetFieldByName(fieldName);
       if (field == null)
-        throw new ArgumentException($"Type '{_type.Name}' does not contain a field named '{fieldName}'");
+        throw new ArgumentException($"Type '{Type.Name}' does not contain a field named '{fieldName}'");
 
-      var value = field.GetValue(_address);
+      var value = field.GetValue(Address);
       return (T)value;
     }
 
     /// <summary>
-    ///   Gets a string field from the object.  Note that the type must match exactly, as this method
-    ///   will not do type coercion.  This method will throw an ArgumentException if no field matches
-    ///   the given name.  It will throw a NullReferenceException if the target object is null (that is,
-    ///   if (IsNull returns true).  It will throw an InvalidOperationException if the field is not
-    ///   of the correct type.  Lastly, it will throw a MemoryReadException if there was an error reading
-    ///   the value of this field out of the data target.
+    /// Gets a string field from the object.  Note that the type must match exactly, as this method
+    /// will not do type coercion.  This method will throw an ArgumentException if no field matches
+    /// the given name.  It will throw a NullReferenceException if the target object is null (that is,
+    /// if (IsNull returns true).  It will throw an InvalidOperationException if the field is not
+    /// of the correct type.  Lastly, it will throw a MemoryReadException if there was an error reading
+    /// the value of this field out of the data target.
     /// </summary>
     /// <param name="fieldName">The name of the field to get the value for.</param>
     /// <returns>The value of the given field.</returns>
     public string GetStringField(string fieldName)
     {
       var address = GetFieldAddress(fieldName, ClrElementType.String, "string");
-      var runtime = (RuntimeBase)_type.Heap.Runtime;
+      var runtime = (RuntimeBase)Type.Heap.Runtime;
 
       if (!runtime.ReadPointer(address, out var str))
         throw new MemoryReadException(address);
@@ -225,20 +222,20 @@ namespace Microsoft.Diagnostics.Runtime
       if (IsNull)
         throw new NullReferenceException();
 
-      var field = _type.GetFieldByName(fieldName);
+      var field = Type.GetFieldByName(fieldName);
       if (field == null)
-        throw new ArgumentException($"Type '{_type.Name}' does not contain a field named '{fieldName}'");
+        throw new ArgumentException($"Type '{Type.Name}' does not contain a field named '{fieldName}'");
 
       if (field.ElementType != element)
-        throw new InvalidOperationException($"Field '{_type.Name}.{fieldName}' is not of type '{typeName}'.");
+        throw new InvalidOperationException($"Field '{Type.Name}.{fieldName}' is not of type '{typeName}'.");
 
       var address = field.GetAddress(Address);
       return address;
     }
 
     /// <summary>
-    ///   Determines if this instance and another specific <see cref="ClrObject" /> have the same value.
-    ///   <para>Instances are considered equal when they have same <see cref="Address" />.</para>
+    /// Determines if this instance and another specific <see cref="ClrObject" /> have the same value.
+    /// <para>Instances are considered equal when they have same <see cref="Address" />.</para>
     /// </summary>
     /// <param name="other">The <see cref="ClrObject" /> to compare to this instance.</param>
     /// <returns><c>true</c> if the <see cref="Address" /> of the parameter is same as <see cref="Address" /> in this instance; <c>false</c> otherwise.</returns>
@@ -248,12 +245,12 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Determines whether this instance and a specified object, which must also be a <see cref="ClrObject" />, have the same value.
+    /// Determines whether this instance and a specified object, which must also be a <see cref="ClrObject" />, have the same value.
     /// </summary>
     /// <param name="other">The <see cref="ClrObject" /> to compare to this instance.</param>
     /// <returns>
-    ///   <c>true</c> if <paramref name="other" /> is <see cref="ClrObject" />, and its <see cref="Address" /> is same as <see cref="Address" /> in this instance; <c>false</c>
-    ///   otherwise.
+    /// <c>true</c> if <paramref name="other" /> is <see cref="ClrObject" />, and its <see cref="Address" /> is same as <see cref="Address" /> in this instance; <c>false</c>
+    /// otherwise.
     /// </returns>
     public override bool Equals(object other)
     {
@@ -264,7 +261,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Returns the hash code for this <see cref="ClrObject" /> based on its <see cref="Address" />.
+    /// Returns the hash code for this <see cref="ClrObject" /> based on its <see cref="Address" />.
     /// </summary>
     /// <returns>An <see cref="int" /> hash code for this instance.</returns>
     public override int GetHashCode()
@@ -273,7 +270,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Determines whether two specified <see cref="ClrObject" /> have the same value.
+    /// Determines whether two specified <see cref="ClrObject" /> have the same value.
     /// </summary>
     /// <param name="left">First <see cref="ClrObject" /> to compare.</param>
     /// <param name="right">Second <see cref="ClrObject" /> to compare.</param>
@@ -284,7 +281,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Determines whether two specified <see cref="ClrObject" /> have different values.
+    /// Determines whether two specified <see cref="ClrObject" /> have different values.
     /// </summary>
     /// <param name="left">First <see cref="ClrObject" /> to compare.</param>
     /// <param name="right">Second <see cref="ClrObject" /> to compare.</param>

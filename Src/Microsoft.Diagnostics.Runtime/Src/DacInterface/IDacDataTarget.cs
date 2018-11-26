@@ -1,19 +1,14 @@
-﻿using Microsoft.Diagnostics.Runtime.ICorDebug;
-using Microsoft.Diagnostics.Runtime.Interop;
-using Microsoft.Diagnostics.Runtime.Utilities;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Diagnostics.Runtime.ICorDebug;
+using Microsoft.Diagnostics.Runtime.Interop;
 
 namespace Microsoft.Diagnostics.Runtime.DacInterface
 {
-  unsafe class DacDataTargetWrapper : COMCallableIUnknown, ICorDebugDataTarget
+  internal unsafe class DacDataTargetWrapper : COMCallableIUnknown, ICorDebugDataTarget
   {
     private static readonly Guid IID_IDacDataTarget = new Guid("3E11CCEE-D08B-43e5-AF01-32717A64DA03");
     private static readonly Guid IID_IMetadataLocator = new Guid("aa8fa804-bc05-4642-b2c5-c353ed22fc63");
@@ -31,7 +26,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       _modules = dataTarget.Modules.ToArray();
       Array.Sort(_modules, delegate(ModuleInfo a, ModuleInfo b) { return a.ImageBase.CompareTo(b.ImageBase); });
 
-      VtableBuilder builder = AddInterface(IID_IDacDataTarget);
+      var builder = AddInterface(IID_IDacDataTarget);
       builder.AddMethod(new GetMachineTypeDelegate(GetMachineType));
       builder.AddMethod(new GetPointerSizeDelegate(GetPointerSize));
       builder.AddMethod(new GetImageBaseDelegate(GetImageBase));
@@ -51,7 +46,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
     public int ReadVirtual(IntPtr self, ulong address, IntPtr buffer, uint bytesRequested, out uint bytesRead)
     {
-      if (ReadVirtual(self, address, buffer, (int)bytesRequested, out int read) >= 0)
+      if (ReadVirtual(self, address, buffer, (int)bytesRequested, out var read) >= 0)
       {
         bytesRead = (uint)read;
         return S_OK;
@@ -93,12 +88,13 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
       while (min <= max)
       {
-        int i = (min + max) / 2;
-        ModuleInfo curr = _modules[i];
+        var i = (min + max) / 2;
+        var curr = _modules[i];
 
         if (curr.ImageBase <= address && address < curr.ImageBase + curr.FileSize)
           return curr;
-        else if (curr.ImageBase < address)
+
+        if (curr.ImageBase < address)
           min = i + 1;
         else
           max = i - 1;
@@ -117,9 +113,9 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     {
       imagePath = Path.GetFileNameWithoutExtension(imagePath);
 
-      foreach (ModuleInfo module in _modules)
+      foreach (var module in _modules)
       {
-        string moduleName = Path.GetFileNameWithoutExtension(module.FileName);
+        var moduleName = Path.GetFileNameWithoutExtension(module.FileName);
         if (imagePath.Equals(moduleName, StringComparison.CurrentCultureIgnoreCase))
         {
           baseAddress = module.ImageBase;
@@ -131,26 +127,26 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       return E_FAIL;
     }
 
-    public unsafe int ReadVirtual(IntPtr self, ulong address, IntPtr buffer, int bytesRequested, out int bytesRead)
+    public int ReadVirtual(IntPtr self, ulong address, IntPtr buffer, int bytesRequested, out int bytesRead)
     {
-      if (_dataReader.ReadMemory(address, buffer, bytesRequested, out int read))
+      if (_dataReader.ReadMemory(address, buffer, bytesRequested, out var read))
       {
         bytesRead = read;
         return S_OK;
       }
 
       bytesRead = 0;
-      ModuleInfo info = GetModule(address);
+      var info = GetModule(address);
       if (info != null)
       {
         if (Path.GetExtension(info.FileName).ToLower() == ".so")
         {
           // TODO
-          System.Diagnostics.Debug.WriteLine($"TODO: Implement reading from module '{info.FileName}'");
+          Debug.WriteLine($"TODO: Implement reading from module '{info.FileName}'");
           return E_NOTIMPL;
         }
 
-        string filePath = _dataTarget.SymbolLocator.FindBinary(info.FileName, (int)info.TimeStamp, (int)info.FileSize, true);
+        var filePath = _dataTarget.SymbolLocator.FindBinary(info.FileName, (int)info.TimeStamp, (int)info.FileSize, true);
         if (filePath == null)
         {
           bytesRead = 0;
@@ -158,19 +154,19 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
         }
 
         // We do not put a using statement here to prevent needing to load/unload the binary over and over.
-        PEFile file = _dataTarget.FileLoader.LoadPEFile(filePath);
+        var file = _dataTarget.FileLoader.LoadPEFile(filePath);
         if (file?.Header != null)
         {
-          PEBuffer peBuffer = file.AllocBuff();
+          var peBuffer = file.AllocBuff();
 
-          int rva = checked((int)(address - info.ImageBase));
+          var rva = checked((int)(address - info.ImageBase));
 
           if (file.Header.TryGetFileOffsetFromRva(rva, out rva))
           {
-            byte* dst = (byte*)buffer.ToPointer();
-            byte* src = peBuffer.Fetch(rva, bytesRequested);
+            var dst = (byte*)buffer.ToPointer();
+            var src = peBuffer.Fetch(rva, bytesRequested);
 
-            for (int i = 0; i < bytesRequested; i++)
+            for (var i = 0; i < bytesRequested; i++)
               dst[i] = src[i];
 
             bytesRead = bytesRequested;
@@ -186,7 +182,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
     public int ReadMemory(ulong address, byte[] buffer, uint bytesRequested, out uint bytesRead)
     {
-      if (_dataReader.ReadMemory(address, buffer, (int)bytesRequested, out int read))
+      if (_dataReader.ReadMemory(address, buffer, (int)bytesRequested, out var read))
       {
         bytesRead = (uint)read;
         return S_OK;
@@ -246,12 +242,12 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
     public int GetMetadata(IntPtr self, string filename, uint imageTimestamp, uint imageSize, IntPtr mvid, uint mdRva, uint flags, uint bufferSize, byte[] buffer, IntPtr dataSize)
     {
-      string filePath = _dataTarget.SymbolLocator.FindBinary(filename, (int)imageTimestamp, (int)imageSize, true);
+      var filePath = _dataTarget.SymbolLocator.FindBinary(filename, (int)imageTimestamp, (int)imageSize, true);
       if (filePath == null)
         return E_FAIL;
 
       // We do not put a using statement here to prevent needing to load/unload the binary over and over.
-      PEFile file = _dataTarget.FileLoader.LoadPEFile(filePath);
+      var file = _dataTarget.FileLoader.LoadPEFile(filePath);
       if (file == null)
         return E_FAIL;
 
@@ -259,12 +255,12 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       if (comDescriptor.VirtualAddress == 0)
         return E_FAIL;
 
-      PEBuffer peBuffer = file.AllocBuff();
+      var peBuffer = file.AllocBuff();
       if (mdRva == 0)
       {
-        IntPtr hdr = file.SafeFetchRVA((int)comDescriptor.VirtualAddress, (int)comDescriptor.Size, peBuffer);
+        var hdr = file.SafeFetchRVA(comDescriptor.VirtualAddress, comDescriptor.Size, peBuffer);
 
-        IMAGE_COR20_HEADER corhdr = (IMAGE_COR20_HEADER)Marshal.PtrToStructure(hdr, typeof(IMAGE_COR20_HEADER));
+        var corhdr = (IMAGE_COR20_HEADER)Marshal.PtrToStructure(hdr, typeof(IMAGE_COR20_HEADER));
         if (bufferSize < corhdr.MetaData.Size)
         {
           file.FreeBuff(peBuffer);
@@ -275,7 +271,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
         bufferSize = corhdr.MetaData.Size;
       }
 
-      IntPtr ptr = file.SafeFetchRVA((int)mdRva, (int)bufferSize, peBuffer);
+      var ptr = file.SafeFetchRVA((int)mdRva, (int)bufferSize, peBuffer);
       Marshal.Copy(ptr, buffer, 0, (int)bufferSize);
 
       file.FreeBuff(peBuffer);
@@ -304,7 +300,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
     uint ICorDebugDataTarget.ReadVirtual(ulong address, IntPtr buffer, uint bytesRequested)
     {
-      if (ReadVirtual(IntPtr.Zero, address, buffer, (int)bytesRequested, out int read) >= 0)
+      if (ReadVirtual(IntPtr.Zero, address, buffer, (int)bytesRequested, out var read) >= 0)
         return (uint)read;
 
       throw new Exception();
@@ -318,9 +314,9 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
     #region Delegates
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int GetMetadataDelegate(
+    private delegate int GetMetadataDelegate(
       IntPtr self,
-      [In, MarshalAs(UnmanagedType.LPWStr)] string filename,
+      [In][MarshalAs(UnmanagedType.LPWStr)] string filename,
       uint imageTimestamp,
       uint imageSize,
       IntPtr mvid,
@@ -331,16 +327,16 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       IntPtr dataSize);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int GetMachineTypeDelegate(IntPtr self, out IMAGE_FILE_MACHINE machineType);
+    private delegate int GetMachineTypeDelegate(IntPtr self, out IMAGE_FILE_MACHINE machineType);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int GetPointerSizeDelegate(IntPtr self, out uint pointerSize);
+    private delegate int GetPointerSizeDelegate(IntPtr self, out uint pointerSize);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int GetImageBaseDelegate(IntPtr self, [In, MarshalAs(UnmanagedType.LPWStr)] string imagePath, out ulong baseAddress);
+    private delegate int GetImageBaseDelegate(IntPtr self, [In][MarshalAs(UnmanagedType.LPWStr)] string imagePath, out ulong baseAddress);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int ReadVirtualDelegate(
+    private delegate int ReadVirtualDelegate(
       IntPtr self,
       ulong address,
       IntPtr buffer,
@@ -348,7 +344,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       out int bytesRead);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int WriteVirtualDelegate(
+    private delegate int WriteVirtualDelegate(
       IntPtr self,
       ulong address,
       IntPtr buffer,
@@ -356,24 +352,24 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       out uint bytesWritten);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int GetTLSValueDelegate(
+    private delegate int GetTLSValueDelegate(
       IntPtr self,
       uint threadID,
       uint index,
       out ulong value);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int SetTLSValueDelegate(
+    private delegate int SetTLSValueDelegate(
       IntPtr self,
       uint threadID,
       uint index,
       ulong value);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int GetCurrentThreadIDDelegate(IntPtr self, out uint threadID);
+    private delegate int GetCurrentThreadIDDelegate(IntPtr self, out uint threadID);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int GetThreadContextDelegate(
+    private delegate int GetThreadContextDelegate(
       IntPtr self,
       uint threadID,
       uint contextFlags,
@@ -381,14 +377,14 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       IntPtr context);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int SetThreadContextDelegate(
+    private delegate int SetThreadContextDelegate(
       IntPtr self,
       uint threadID,
       uint contextSize,
       IntPtr context);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int RequestDelegate(
+    private delegate int RequestDelegate(
       IntPtr self,
       uint reqCode,
       uint inBufferSize,

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.Diagnostics.Runtime.DataReaders.DbgEng;
 using Microsoft.Diagnostics.Runtime.Interop;
 
 namespace Microsoft.Diagnostics.Runtime.Tests
@@ -106,7 +105,6 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     private readonly StringBuilder _output = new StringBuilder();
     private bool m_exited, _processing;
 
-    private readonly IDebugClient5 _client;
     private readonly IDebugControl _control;
     private DataTarget _dataTarget;
 
@@ -136,11 +134,11 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     public event ExitProcessEventHandler ExitProcessEvent;
 
-    public IDebugClient5 Client => _client;
+    public IDebugClient5 Client { get; }
 
     public Debugger(IDebugClient5 client, IDebugControl control)
     {
-      _client = client;
+      Client = client;
       _control = control;
 
       client.SetOutputCallbacks(this);
@@ -167,7 +165,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     public void TerminateProcess()
     {
       m_exited = true;
-      _client.EndSession(DEBUG_END.ACTIVE_TERMINATE);
+      Client.EndSession(DEBUG_END.ACTIVE_TERMINATE);
     }
 
     public string Execute(ulong handle, string command, string args)
@@ -245,7 +243,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     public int WriteDumpFile(string dump, DEBUG_DUMP type)
     {
-      return _client.WriteDumpFile(dump, type);
+      return Client.WriteDumpFile(dump, type);
     }
 
     private void SetDebugStatus(DEBUG_STATUS status)
@@ -383,8 +381,8 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
     public void Dispose()
     {
-      _client.SetEventCallbacks(null);
-      _client.SetOutputCallbacks(null);
+      Client.SetEventCallbacks(null);
+      Client.SetOutputCallbacks(null);
     }
   }
 

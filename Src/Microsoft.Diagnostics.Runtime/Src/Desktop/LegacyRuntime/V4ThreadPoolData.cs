@@ -7,14 +7,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
   {
     private uint _useNewWorkerPool;
 
-    private int _cpuUtilization;
-    private int _numIdleWorkerThreads;
-    private int _numWorkingWorkerThreads;
     private int _numRetiredWorkerThreads;
-    private int _minLimitTotalWorkerThreads;
-    private int _maxLimitTotalWorkerThreads;
-
-    private ulong _firstUnmanagedWorkRequest;
 
     private ulong _hillClimbingLog;
     private int _hillClimbingLogFirstIndex;
@@ -23,38 +16,34 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private uint _numTimers;
 
     private int _numCPThreads;
-    private int _numFreeCPThreads;
-    private int _maxFreeCPThreads;
     private int _numRetiredCPThreads;
-    private int _maxLimitTotalCPThreads;
     private int _currentLimitTotalCPThreads;
-    private int _minLimitTotalCPThreads;
 
     private ulong _queueUserWorkItemCallbackFPtr;
     private ulong _asyncCallbackCompletionFPtr;
     private ulong _asyncTimerCallbackCompletionFPtr;
 
-    public int MinCP => _minLimitTotalCPThreads;
+    public int MinCP { get; }
 
-    public int MaxCP => _maxLimitTotalCPThreads;
+    public int MaxCP { get; }
 
-    public int CPU => _cpuUtilization;
+    public int CPU { get; }
 
-    public int NumFreeCP => _numFreeCPThreads;
+    public int NumFreeCP { get; }
 
-    public int MaxFreeCP => _maxFreeCPThreads;
+    public int MaxFreeCP { get; }
 
-    public int TotalThreads => _numWorkingWorkerThreads;
+    public int TotalThreads { get; }
 
-    public int RunningThreads => _numWorkingWorkerThreads + _numIdleWorkerThreads + _numRetiredWorkerThreads;
+    public int RunningThreads => TotalThreads + IdleThreads + _numRetiredWorkerThreads;
 
-    public int IdleThreads => _numIdleWorkerThreads;
+    public int IdleThreads { get; }
 
-    public int MinThreads => _minLimitTotalWorkerThreads;
+    public int MinThreads { get; }
 
-    public int MaxThreads => _maxLimitTotalWorkerThreads;
+    public int MaxThreads { get; }
 
-    public ulong FirstWorkRequest => _firstUnmanagedWorkRequest;
+    public ulong FirstWorkRequest { get; }
 
     ulong IThreadPoolData.QueueUserWorkItemCallbackFPtr => ulong.MaxValue;
 

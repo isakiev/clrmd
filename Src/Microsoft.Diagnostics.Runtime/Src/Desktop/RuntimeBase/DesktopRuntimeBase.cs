@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Diagnostics.Runtime.DacInterface;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
@@ -72,19 +71,19 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     }
 
     /// <summary>
-    ///   Returns the version of the target process (v2, v4, v45)
+    /// Returns the version of the target process (v2, v4, v45)
     /// </summary>
     internal abstract DesktopVersion CLRVersion { get; }
 
     internal abstract IGCInfo GetGCInfoImpl();
 
     /// <summary>
-    ///   Returns the pointer size of the target process.
+    /// Returns the pointer size of the target process.
     /// </summary>
     public override int PointerSize => IntPtr.Size;
 
     /// <summary>
-    ///   Returns the MethodTable for an array of objects.
+    /// Returns the MethodTable for an array of objects.
     /// </summary>
     public ulong ArrayMethodTable => _commonMTs.ArrayMethodTable;
 
@@ -160,12 +159,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public ulong ObjectMethodTable => _commonMTs.ObjectMethodTable;
 
     /// <summary>
-    ///   Returns the MethodTable for string objects.
+    /// Returns the MethodTable for string objects.
     /// </summary>
     public ulong StringMethodTable => _commonMTs.StringMethodTable;
 
     /// <summary>
-    ///   Returns the MethodTable for free space markers.
+    /// Returns the MethodTable for free space markers.
     /// </summary>
     public ulong FreeMethodTable => _commonMTs.FreeMethodTable;
 
@@ -204,9 +203,9 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     }
 
     /// <summary>
-    ///   Enumerates regions of memory which CLR has allocated with a description of what data
-    ///   resides at that location.  Note that this does not return every chunk of address space
-    ///   that CLR allocates.
+    /// Enumerates regions of memory which CLR has allocated with a description of what data
+    /// resides at that location.  Note that this does not return every chunk of address space
+    /// that CLR allocates.
     /// </summary>
     /// <returns>An enumeration of memory regions in the process.</returns>
     public override IEnumerable<ClrMemoryRegion> EnumerateMemoryRegions()
@@ -350,7 +349,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     }
 
     /// <summary>
-    ///   Converts an address into an AppDomain.
+    /// Converts an address into an AppDomain.
     /// </summary>
     internal override ClrAppDomain GetAppDomainByAddress(ulong address)
     {
@@ -624,10 +623,10 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     }
 
     /// <summary>
-    ///   Returns the name of the type as specified by the TypeHandle.  Note this returns the name as specified by the
-    ///   metadata, NOT as you would expect to see it in a C# program.  For example, generics are denoted with a ` and
-    ///   the number of params.  Thus a Dictionary (with two type params) would look like:
-    ///   System.Collections.Generics.Dictionary`2
+    /// Returns the name of the type as specified by the TypeHandle.  Note this returns the name as specified by the
+    /// metadata, NOT as you would expect to see it in a C# program.  For example, generics are denoted with a ` and
+    /// the number of params.  Thus a Dictionary (with two type params) would look like:
+    /// System.Collections.Generics.Dictionary`2
     /// </summary>
     /// <param name="id">The TypeHandle to get the name of.</param>
     /// <returns>The name of the type, or null on error.</returns>
@@ -648,16 +647,16 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal IEnumerable<ClrStackFrame> EnumerateStackFrames(DesktopThread thread)
     {
-      using (ClrStackWalk stackwalk = _dacInterface.CreateStackWalk(thread.OSThreadId, 0xf))
+      using (var stackwalk = _dacInterface.CreateStackWalk(thread.OSThreadId, 0xf))
       {
         if (stackwalk == null)
           yield break;
 
-        byte[] ulongBuffer = new byte[8];
-        byte[] context = ContextHelper.Context;
+        var ulongBuffer = new byte[8];
+        var context = ContextHelper.Context;
         do
         {
-          if (!stackwalk.GetContext(ContextHelper.ContextFlags, ContextHelper.Length, out uint size, context))
+          if (!stackwalk.GetContext(ContextHelper.ContextFlags, ContextHelper.Length, out var size, context))
             break;
 
           ulong ip, sp;
@@ -673,14 +672,14 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             sp = BitConverter.ToUInt64(context, ContextHelper.StackPointerOffset);
           }
 
-          ulong frameVtbl = stackwalk.GetFrameVtable();
+          var frameVtbl = stackwalk.GetFrameVtable();
           if (frameVtbl != 0)
           {
             sp = frameVtbl;
             ReadPointer(sp, out frameVtbl);
           }
 
-          DesktopStackFrame frame = GetStackFrame(thread, ip, sp, frameVtbl);
+          var frame = GetStackFrame(thread, ip, sp, frameVtbl);
           yield return frame;
         } while (stackwalk.Next());
       }
@@ -688,14 +687,14 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal ILToNativeMap[] GetILMap(ulong ip)
     {
-      List<ILToNativeMap> list = new List<ILToNativeMap>();
+      var list = new List<ILToNativeMap>();
 
-      foreach (ClrDataMethod method in _dacInterface.EnumerateMethodInstancesByAddress(ip))
+      foreach (var method in _dacInterface.EnumerateMethodInstancesByAddress(ip))
       {
-        ILToNativeMap[] map = method.GetILToNativeMap();
+        var map = method.GetILToNativeMap();
         if (map != null)
         {
-          for (int i = 0; i < map.Length; i++)
+          for (var i = 0; i < map.Length; i++)
           {
             // There seems to be a bug in IL to native mappings where a throw statement
             // may end up with an end address lower than the start address.  This is a

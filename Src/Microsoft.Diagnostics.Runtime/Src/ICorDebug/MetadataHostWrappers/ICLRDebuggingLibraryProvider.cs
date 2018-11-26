@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Diagnostics.Runtime.ICorDebug
 {
   /// <summary>
-  ///   Provides version specific debugging libraries such as mscordbi.dll and mscorwks.dll during
-  ///   startup in the native pipeline debugging architecture
+  /// Provides version specific debugging libraries such as mscordbi.dll and mscorwks.dll during
+  /// startup in the native pipeline debugging architecture
   /// </summary>
   [ComImport]
   [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -13,21 +13,21 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
   public interface ICLRDebuggingLibraryProvider
   {
     /// <summary>
-    ///   Provides a version specific debugging library
+    /// Provides a version specific debugging library
     /// </summary>
     /// <param name="fileName">The name of the library being requested</param>
     /// <param name="timestamp">
-    ///   The timestamp of the library being requested as specified
-    ///   in the PE header
+    /// The timestamp of the library being requested as specified
+    /// in the PE header
     /// </param>
     /// <param name="sizeOfImage">
-    ///   The SizeOfImage of the library being requested as specified
-    ///   in the PE header
+    /// The SizeOfImage of the library being requested as specified
+    /// in the PE header
     /// </param>
     /// <param name="hModule">An OS handle to the requested library</param>
     /// <returns>
-    ///   HResults.S_OK if the library was located, otherwise any appropriate
-    ///   error hresult
+    /// HResults.S_OK if the library was located, otherwise any appropriate
+    /// error hresult
     /// </returns>
     [PreserveSig]
     int ProvideLibrary(

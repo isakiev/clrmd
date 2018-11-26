@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   Utility class to provide various random Native debugging operations.
+  /// Utility class to provide various random Native debugging operations.
   /// </summary>
   internal static class DumpUtility
   {
@@ -20,7 +20,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       public readonly short e_magic; // Magic number
 
       /// <summary>
-      ///   Determine if this is a valid DOS image.
+      /// Determine if this is a valid DOS image.
       /// </summary>
       public bool IsValid => e_magic == 0x5a4d;
       // This is the offset of the IMAGE_NT_HEADERS, which is what we really want.
@@ -55,7 +55,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Marshal a structure from the given buffer. Effectively returns ((T*) &amp;buffer[offset]).
+    /// Marshal a structure from the given buffer. Effectively returns ((T*) &amp;buffer[offset]).
     /// </summary>
     /// <typeparam name="T">type of structure to marshal</typeparam>
     /// <param name="buffer">array of bytes representing binary buffer to marshal</param>
@@ -79,15 +79,15 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Gets the raw compilation timestamp of a file.
-    ///   This can be matched with the timestamp of a module in a dump file.
-    ///   NOTE: This is NOT the same as the file's creation or last-write time.
+    /// Gets the raw compilation timestamp of a file.
+    /// This can be matched with the timestamp of a module in a dump file.
+    /// NOTE: This is NOT the same as the file's creation or last-write time.
     /// </summary>
     /// <param name="file"></param>
     /// <returns>
-    ///   0 for common failures like file not found or invalid format. Throws on gross
-    ///   errors. Else returns the module's timestamp for comparison against the minidump
-    ///   module's stamp.
+    /// 0 for common failures like file not found or invalid format. Throws on gross
+    /// errors. Else returns the module's timestamp for comparison against the minidump
+    /// module's stamp.
     /// </returns>
     public static uint GetTimestamp(string file)
     {

@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Diagnostics.Runtime.Linux;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Diagnostics.Runtime.Linux;
 
 namespace Microsoft.Diagnostics.Runtime
 {
@@ -57,13 +58,13 @@ namespace Microsoft.Diagnostics.Runtime
 
     private ModuleInfo CreateModuleInfo(ElfLoadedImage img)
     {
-      string filename = Path.GetFileName(img.Path);
+      var filename = Path.GetFileName(img.Path);
 
-      return new ModuleInfo()
+      return new ModuleInfo
       {
         FileName = img.Path,
         FileSize = (uint)img.Size,
-        ImageBase = (ulong)img.BaseAddress,
+        ImageBase = (ulong)img.BaseAddress
       };
     }
 
@@ -72,9 +73,15 @@ namespace Microsoft.Diagnostics.Runtime
       _threads = null;
     }
 
-    public Architecture GetArchitecture() => _architecture;
+    public Architecture GetArchitecture()
+    {
+      return _architecture;
+    }
 
-    public uint GetPointerSize() => (uint)_pointerSize;
+    public uint GetPointerSize()
+    {
+      return (uint)_pointerSize;
+    }
 
     public unsafe bool GetThreadContext(uint threadID, uint contextFlags, uint contextSize, IntPtr context)
     {
@@ -83,9 +90,9 @@ namespace Microsoft.Diagnostics.Runtime
 
       InitThreads();
 
-      AMD64Context* ctx = (AMD64Context*)context.ToPointer();
+      var ctx = (AMD64Context*)context.ToPointer();
       ctx->ContextFlags = (int)contextFlags;
-      if (_threads.TryGetValue(threadID, out ELFPRStatus status))
+      if (_threads.TryGetValue(threadID, out var status))
       {
         CopyContext(ctx, ref status.RegisterSet);
         return true;
@@ -122,11 +129,11 @@ namespace Microsoft.Diagnostics.Runtime
 
       InitThreads();
 
-      if (_threads.TryGetValue(threadID, out ELFPRStatus status))
+      if (_threads.TryGetValue(threadID, out var status))
       {
         fixed (byte* ptr = context)
         {
-          AMD64Context* ctx = (AMD64Context*)ptr;
+          var ctx = (AMD64Context*)ptr;
           ctx->ContextFlags = (int)contextFlags;
           CopyContext(ctx, ref status.RegisterSet);
           return true;
@@ -144,13 +151,13 @@ namespace Microsoft.Diagnostics.Runtime
     public void GetVersionInfo(ulong baseAddress, out VersionInfo version)
     {
       // TODO
-      System.Diagnostics.Debug.WriteLine($"GetVersionInfo not yet implemented: addr={baseAddress:x}");
+      Debug.WriteLine($"GetVersionInfo not yet implemented: addr={baseAddress:x}");
       version = new VersionInfo();
     }
 
     public uint ReadDwordUnsafe(ulong addr)
     {
-      int read = _core.ReadMemory((long)addr, _buffer, 4);
+      var read = _core.ReadMemory((long)addr, _buffer, 4);
       if (read == 4)
         return BitConverter.ToUInt32(_buffer, 0);
 
@@ -165,11 +172,11 @@ namespace Microsoft.Diagnostics.Runtime
 
     public bool ReadMemory(ulong address, IntPtr ptr, int bytesRequested, out int bytesRead)
     {
-      byte[] buffer = _buffer;
+      var buffer = _buffer;
       if (bytesRequested > buffer.Length)
         buffer = new byte[bytesRequested];
 
-      bool result = ReadMemory(address, buffer, bytesRequested, out bytesRead);
+      var result = ReadMemory(address, buffer, bytesRequested, out bytesRead);
       if (result)
         Marshal.Copy(buffer, 0, ptr, bytesRead);
 
@@ -178,7 +185,7 @@ namespace Microsoft.Diagnostics.Runtime
 
     public ulong ReadPointerUnsafe(ulong addr)
     {
-      int read = _core.ReadMemory((long)addr, _buffer, _pointerSize);
+      var read = _core.ReadMemory((long)addr, _buffer, _pointerSize);
       if (read == _pointerSize)
       {
         if (_pointerSize == 8)
@@ -193,11 +200,11 @@ namespace Microsoft.Diagnostics.Runtime
 
     public bool VirtualQuery(ulong address, out VirtualQueryData vq)
     {
-      long addr = (long)address;
-      foreach (ElfProgramHeader item in _core.ElfFile.ProgramHeaders)
+      var addr = (long)address;
+      foreach (var item in _core.ElfFile.ProgramHeaders)
       {
-        long start = item.RefHeader.VirtualAddress;
-        long end = start + item.RefHeader.VirtualSize;
+        var start = item.RefHeader.VirtualAddress;
+        var end = start + item.RefHeader.VirtualSize;
 
         if (start <= addr && addr < end)
         {
@@ -216,7 +223,7 @@ namespace Microsoft.Diagnostics.Runtime
         return;
 
       _threads = new Dictionary<uint, ELFPRStatus>();
-      foreach (ELFPRStatus status in _core.EnumeratePRStatus())
+      foreach (var status in _core.EnumeratePRStatus())
         _threads.Add(status.Pid, status);
     }
   }

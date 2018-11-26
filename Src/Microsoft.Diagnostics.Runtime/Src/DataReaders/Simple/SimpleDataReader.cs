@@ -266,16 +266,16 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     }
 
     /// <summary>
-    ///   Return the module containing the target address, or null if no match.
+    /// Return the module containing the target address, or null if no match.
     /// </summary>
     /// <param name="targetAddress">address in target</param>
     /// <returns>
-    ///   Null if no match. Else a DumpModule such that the target address is in between the range specified
-    ///   by the DumpModule's .BaseAddress and .Size property
+    /// Null if no match. Else a DumpModule such that the target address is in between the range specified
+    /// by the DumpModule's .BaseAddress and .Size property
     /// </returns>
     /// <remarks>
-    ///   This can be useful for symbol lookups or for using module images to
-    ///   supplement memory read requests for minidumps.
+    /// This can be useful for symbol lookups or for using module images to
+    /// supplement memory read requests for minidumps.
     /// </remarks>
     private MINIDUMP_MODULE TryLookupModuleByAddress(ulong targetAddress)
     {
@@ -408,7 +408,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     public bool VirtualQuery(ulong addr, out VirtualQueryData data)
     {
       uint min = 0;
-      uint max = (uint)myChunks.Length - 1;
+      var max = (uint)myChunks.Length - 1;
 
       while (min <= max)
       {
@@ -440,7 +440,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     }
 
     /// <summary>
-    ///   Read memory from the dump file and return results in newly allocated buffer
+    /// Read memory from the dump file and return results in newly allocated buffer
     /// </summary>
     /// <param name="targetAddress">target address in dump to read length bytes from</param>
     /// <param name="length">number of bytes to read</param>
@@ -454,7 +454,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     }
 
     /// <summary>
-    ///   Read memory from the dump file and copy into the buffer
+    /// Read memory from the dump file and copy into the buffer
     /// </summary>
     /// <param name="targetAddress">target address in dump to read buffer.Length bytets from</param>
     /// <param name="buffer">destination buffer to copy target memory to.</param>
@@ -474,12 +474,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     }
 
     /// <summary>
-    ///   Read memory from target and copy it to the local buffer pointed to by
-    ///   destinationBuffer. Throw if any portion of the requested memory is unavailable.
+    /// Read memory from target and copy it to the local buffer pointed to by
+    /// destinationBuffer. Throw if any portion of the requested memory is unavailable.
     /// </summary>
     /// <param name="targetRequestStart">
-    ///   target address in dump file to copy
-    ///   destinationBufferSizeInBytes bytes from.
+    /// target address in dump file to copy
+    /// destinationBufferSizeInBytes bytes from.
     /// </param>
     /// <param name="destinationBuffer">pointer to copy the memory to.</param>
     /// <param name="destinationBufferSizeInBytes">size of the destinationBuffer in bytes.</param>
@@ -498,11 +498,11 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     }
 
     /// <summary>
-    ///   Read memory from target and copy it to the local buffer pointed to by destinationBuffer.
+    /// Read memory from target and copy it to the local buffer pointed to by destinationBuffer.
     /// </summary>
     /// <param name="targetRequestStart">
-    ///   target address in dump file to copy
-    ///   destinationBufferSizeInBytes bytes from.
+    /// target address in dump file to copy
+    /// destinationBufferSizeInBytes bytes from.
     /// </param>
     /// <param name="destinationBuffer">pointer to copy the memory to.</param>
     /// <param name="destinationBufferSizeInBytes">size of the destinationBuffer in bytes.</param>

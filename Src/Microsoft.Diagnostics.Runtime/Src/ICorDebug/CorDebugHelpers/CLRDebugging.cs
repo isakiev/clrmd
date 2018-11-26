@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Diagnostics.Runtime.ICorDebug
 {
   /// <summary>
-  ///   Wrapper for the ICLRDebugging shim interface. This interface exposes the native pipeline
-  ///   architecture startup APIs
+  /// Wrapper for the ICLRDebugging shim interface. This interface exposes the native pipeline
+  /// architecture startup APIs
   /// </summary>
   internal sealed class CLRDebugging
   {
@@ -14,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
     private readonly ICLRDebugging _clrDebugging;
 
     /// <summary>
-    ///   Constructor
+    /// Constructor
     /// </summary>
     /// <remarks>Creates the underlying interface from mscoree!CLRCreateInstance</remarks>
     public CLRDebugging()
@@ -71,23 +71,23 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
     }
 
     /// <summary>
-    ///   Detects if a native module represents a CLR and if so provides the debugging interface
-    ///   and versioning information
+    /// Detects if a native module represents a CLR and if so provides the debugging interface
+    /// and versioning information
     /// </summary>
     /// <param name="moduleBaseAddress">The native base address of a module which might be a CLR</param>
     /// <param name="dataTarget">The process abstraction which can be used for inspection</param>
     /// <param name="libraryProvider">
-    ///   A callback interface for locating version specific debug libraries
-    ///   such as mscordbi.dll and mscordacwks.dll
+    /// A callback interface for locating version specific debug libraries
+    /// such as mscordbi.dll and mscordacwks.dll
     /// </param>
     /// <param name="maxDebuggerSupportedVersion">
-    ///   The highest version of the CLR/debugging libraries which
-    ///   the caller can support
+    /// The highest version of the CLR/debugging libraries which
+    /// the caller can support
     /// </param>
     /// <param name="version">The version of the CLR detected or null if no CLR was detected</param>
     /// <param name="flags">
-    ///   Flags which have additional information about the CLR.
-    ///   See ClrDebuggingProcessFlags for more details
+    /// Flags which have additional information about the CLR.
+    /// See ClrDebuggingProcessFlags for more details
     /// </param>
     /// <returns>The CLR's debugging interface</returns>
     public ICorDebugProcess OpenVirtualProcess(
@@ -107,7 +107,7 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
     }
 
     /// <summary>
-    ///   Version of the above that doesn't throw exceptions on failure
+    /// Version of the above that doesn't throw exceptions on failure
     /// </summary>
     public int TryOpenVirtualProcess(
       ulong moduleBaseAddress,
@@ -155,7 +155,7 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
     }
 
     /// <summary>
-    ///   Determines if the module is no longer in use
+    /// Determines if the module is no longer in use
     /// </summary>
     /// <param name="moduleHandle">A module handle that was provided via the ILibraryProvider</param>
     /// <returns>True if the module can be unloaded, False otherwise</returns>

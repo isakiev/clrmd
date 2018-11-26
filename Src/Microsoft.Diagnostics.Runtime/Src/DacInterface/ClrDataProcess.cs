@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Diagnostics.Runtime.DacInterface
 {
@@ -37,7 +34,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
     public SOSDac GetSOSDacInterface()
     {
-      IntPtr result = QueryInterface(ref SOSDac.IID_ISOSDac);
+      var result = QueryInterface(ref SOSDac.IID_ISOSDac);
       if (result == IntPtr.Zero)
         return null;
 
@@ -68,19 +65,19 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     {
       InitDelegate(ref _getTask, VTable->GetTaskByOSThreadID);
 
-      int hr = _getTask(Self, id, out IntPtr pUnkTask);
+      var hr = _getTask(Self, id, out var pUnkTask);
       if (hr != S_OK)
         return null;
 
-      using (ClrDataTask dataTask = new ClrDataTask(_library, pUnkTask))
+      using (var dataTask = new ClrDataTask(_library, pUnkTask))
       {
         // There's a bug in certain runtimes where we will fail to release data deep in the runtime
         // when a C++ exception occurs while constructing a ClrDataStackWalk.  This is a workaround
         // for the largest of the leaks caused by this issue.
         //     https://github.com/Microsoft/clrmd/issues/47
-        int count = AddRef();
+        var count = AddRef();
         var res = dataTask.CreateStackWalk(_library, flags);
-        int released = Release();
+        var released = Release();
         if (released == count && res == null)
           Release();
         return res;
@@ -93,15 +90,15 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       InitDelegate(ref _enum, VTable->EnumMethodInstanceByAddress);
       InitDelegate(ref _endEnum, VTable->EndEnumMethodInstancesByAddress);
 
-      List<ClrDataMethod> result = new List<ClrDataMethod>(1);
+      var result = new List<ClrDataMethod>(1);
 
-      int hr = _startEnum(Self, addr, IntPtr.Zero, out ulong handle);
+      var hr = _startEnum(Self, addr, IntPtr.Zero, out var handle);
       if (hr != S_OK)
         return result;
 
       try
       {
-        while ((hr = _enum(Self, ref handle, out IntPtr method)) == S_OK)
+        while ((hr = _enum(Self, ref handle, out var method)) == S_OK)
           result.Add(new ClrDataMethod(_library, method));
       }
       finally
@@ -126,10 +123,10 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       IntPtr self,
       uint reqCode,
       uint inBufferSize,
-      [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
+      [In][MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
       byte[] inBuffer,
       uint outBufferSize,
-      [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
+      [Out][MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
       byte[] outBuffer);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -141,7 +138,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
 #pragma warning disable CS0169
 #pragma warning disable CS0649
-  struct IXCLRDataProcessVtable
+  internal struct IXCLRDataProcessVtable
   {
     public readonly IntPtr Flush;
     private readonly IntPtr Unused_StartEnumTasks;
@@ -198,7 +195,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     [PreserveSig]
     int GetTaskByOSThreadID(
       uint id,
-      [Out, MarshalAs(UnmanagedType.IUnknown)]
+      [Out][MarshalAs(UnmanagedType.IUnknown)]
       out object task);
 
     void GetTaskByUniqueID_do_not_use( /*[in] ULONG64 taskID, [out] IXCLRDataTask** task*/);
@@ -227,14 +224,14 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     [PreserveSig]
     int StartEnumMethodInstancesByAddress(
       ulong address,
-      [In, MarshalAs(UnmanagedType.Interface)]
+      [In][MarshalAs(UnmanagedType.Interface)]
       object appDomain,
       out ulong handle);
 
     [PreserveSig]
     int EnumMethodInstanceByAddress(
       ref ulong handle,
-      [Out, MarshalAs(UnmanagedType.Interface)]
+      [Out][MarshalAs(UnmanagedType.Interface)]
       out object method);
 
     [PreserveSig]
@@ -250,10 +247,10 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     int Request(
       uint reqCode,
       uint inBufferSize,
-      [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
+      [In][MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
       byte[] inBuffer,
       uint outBufferSize,
-      [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
+      [Out][MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
       byte[] outBuffer);
   }
 }

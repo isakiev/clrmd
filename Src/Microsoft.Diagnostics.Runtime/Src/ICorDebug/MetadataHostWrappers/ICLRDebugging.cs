@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Diagnostics.Runtime.ICorDebug
 {
   /// <summary>
-  ///   This interface exposes the native pipeline architecture startup APIs
+  /// This interface exposes the native pipeline architecture startup APIs
   /// </summary>
   [ComImport]
   [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -12,29 +12,29 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
   public interface ICLRDebugging
   {
     /// <summary>
-    ///   Detects if a native module represents a CLR and if so provides the debugging interface
-    ///   and versioning information
+    /// Detects if a native module represents a CLR and if so provides the debugging interface
+    /// and versioning information
     /// </summary>
     /// <param name="moduleBaseAddress">The native base address of a module which might be a CLR</param>
     /// <param name="dataTarget">The process abstraction which can be used for inspection</param>
     /// <param name="libraryProvider">
-    ///   A callback interface for locating version specific debug libraries
-    ///   such as mscordbi.dll and mscordacwks.dll
+    /// A callback interface for locating version specific debug libraries
+    /// such as mscordbi.dll and mscordacwks.dll
     /// </param>
     /// <param name="maxDebuggerSupportedVersion">
-    ///   The highest version of the CLR/debugging libraries which
-    ///   the caller can support
+    /// The highest version of the CLR/debugging libraries which
+    /// the caller can support
     /// </param>
     /// <param name="riidProcess">The Guid for the interface requested.</param>
     /// <param name="process">The CLR's debugging interface or null if no debugger was detected</param>
     /// <param name="version">The version of the CLR detected or null if no CLR was detected</param>
     /// <param name="flags">
-    ///   Flags which have additional information about the CLR.
-    ///   See ClrDebuggingProcessFlags for more details
+    /// Flags which have additional information about the CLR.
+    /// See ClrDebuggingProcessFlags for more details
     /// </param>
     /// <returns>
-    ///   HResults.S_OK if an appropriate version CLR was detected, otherwise an appropriate
-    ///   error hresult
+    /// HResults.S_OK if an appropriate version CLR was detected, otherwise an appropriate
+    /// error hresult
     /// </returns>
     [PreserveSig]
     int OpenVirtualProcess(
@@ -51,12 +51,12 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
       [Out] out ClrDebuggingProcessFlags flags);
 
     /// <summary>
-    ///   Determines if the module is no longer in use
+    /// Determines if the module is no longer in use
     /// </summary>
     /// <param name="moduleHandle">A module handle that was provided via the ILibraryProvider</param>
     /// <returns>
-    ///   HResults.S_OK if the module can be unloaded, HResults.S_FALSE if it is in use
-    ///   or an appropriate error hresult otherwise
+    /// HResults.S_OK if the module can be unloaded, HResults.S_FALSE if it is in use
+    /// or an appropriate error hresult otherwise
     /// </returns>
     [PreserveSig]
     int CanUnloadNow(IntPtr moduleHandle);

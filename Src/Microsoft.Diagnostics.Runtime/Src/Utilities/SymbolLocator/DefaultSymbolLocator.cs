@@ -23,7 +23,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     private readonly ICollection<FileEntry> myMissingEntries = new HashSet<FileEntry>();
 
     /// <summary>
-    ///   The timeout (in milliseconds) used when contacting each individual server. This is not a total timeout for the entire symbol server operation.
+    /// The timeout (in milliseconds) used when contacting each individual server. This is not a total timeout for the entire symbol server operation.
     /// </summary>
     public int Timeout { get; set; } = 60000;
 
@@ -123,7 +123,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Validates whether a file on disk matches the properties we expect.
+    /// Validates whether a file on disk matches the properties we expect.
     /// </summary>
     /// <param name="fullPath">The full path on disk of a PEImage to inspect.</param>
     /// <param name="buildTimeStamp">The build timestamp we expect to match.</param>
@@ -295,7 +295,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Copies a given stream to a file.
+    /// Copies a given stream to a file.
     /// </summary>
     /// <param name="input">The stream of data to copy.</param>
     /// <param name="fullSrcPath">The original source location of "stream".  This may be a URL or null.</param>

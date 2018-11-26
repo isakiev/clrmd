@@ -7,7 +7,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class DesktopInstanceField : ClrInstanceField
   {
-    public override uint Token => _token;
+    public override uint Token { get; }
     public override bool IsPublic => (_attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Public;
 
     public override bool IsPrivate => (_attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Private;
@@ -18,10 +18,10 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public DesktopInstanceField(DesktopGCHeap heap, IFieldData data, string name, FieldAttributes attributes, IntPtr sig, int sigLen)
     {
-      _name = name;
+      Name = name;
       _field = data;
       _attributes = attributes;
-      _token = data.FieldToken;
+      Token = data.FieldToken;
 
       _heap = heap;
       _type = new Lazy<BaseDesktopHeapType>(() => GetType(_heap, data, sig, sigLen, (ClrElementType)_field.CorElementType));
@@ -181,30 +181,28 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       }
     }
 
-    public override string Name => _name;
+    public override string Name { get; }
 
     public override ClrType Type => _type.Value;
 
     // these are optional.  
     /// <summary>
-    ///   If the field has a well defined offset from the base of the object, return it (otherwise -1).
+    /// If the field has a well defined offset from the base of the object, return it (otherwise -1).
     /// </summary>
     public override int Offset => (int)_field.Offset;
 
     /// <summary>
-    ///   Given an object reference, fetch the address of the field.
+    /// Given an object reference, fetch the address of the field.
     /// </summary>
 
     public override bool HasSimpleValue => _type != null && !ElementType.IsValueClass();
     public override int Size => GetSize(_type.Value, ElementType);
 
-    private readonly string _name;
     private readonly DesktopGCHeap _heap;
     private readonly Lazy<BaseDesktopHeapType> _type;
     private readonly IFieldData _field;
     private readonly FieldAttributes _attributes;
     private ClrElementType _elementType = ClrElementType.Unknown;
-    private readonly uint _token;
 
     public override object GetValue(ulong objRef, bool interior = false, bool convertStrings = true)
     {

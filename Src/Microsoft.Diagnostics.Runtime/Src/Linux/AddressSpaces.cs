@@ -2,22 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Microsoft.Diagnostics.Runtime.Linux
 {
-  interface IAddressSpace
+  internal interface IAddressSpace
   {
     int Read(long position, byte[] buffer, int bufferOffset, int count);
     long Length { get; }
     string Name { get; }
   }
 
-  class StreamAddressSpace : IAddressSpace
+  internal class StreamAddressSpace : IAddressSpace
   {
     private readonly Stream _stream;
 
-    public StreamAddressSpace(Stream stream) => _stream = stream;
+    public StreamAddressSpace(Stream stream)
+    {
+      _stream = stream;
+    }
 
     public long Length => _stream.Length;
 
@@ -30,7 +32,7 @@ namespace Microsoft.Diagnostics.Runtime.Linux
     }
   }
 
-  class RelativeAddressSpace : IAddressSpace
+  internal class RelativeAddressSpace : IAddressSpace
   {
     private readonly IAddressSpace _baseAddressSpace;
     private readonly long _baseStart;
@@ -56,7 +58,7 @@ namespace Microsoft.Diagnostics.Runtime.Linux
 
     public int Read(long position, byte[] buffer, int bufferOffset, int count)
     {
-      long basePosition = position - _baseToRelativeShift;
+      var basePosition = position - _baseToRelativeShift;
       if (basePosition < _baseStart)
         return 0;
 
@@ -64,13 +66,10 @@ namespace Microsoft.Diagnostics.Runtime.Linux
       return _baseAddressSpace.Read(basePosition, buffer, bufferOffset, count);
     }
 
-    public long Length
-    {
-      get { return _baseStart + _length + _baseToRelativeShift; }
-    }
+    public long Length => _baseStart + _length + _baseToRelativeShift;
   }
 
-  class ELFVirtualAddressSpace : IAddressSpace
+  internal class ELFVirtualAddressSpace : IAddressSpace
   {
     private readonly IReadOnlyList<ElfProgramHeader> _segments;
     private readonly IAddressSpace _addressSpace;
@@ -88,17 +87,17 @@ namespace Microsoft.Diagnostics.Runtime.Linux
 
     public int Read(long position, byte[] buffer, int bufferOffset, int count)
     {
-      for (int i = 0; i < _segments.Count; i++)
+      for (var i = 0; i < _segments.Count; i++)
       {
-        ref ELFProgramHeader64 header = ref _segments[i].RefHeader;
+        ref var header = ref _segments[i].RefHeader;
         // FileSize == 0 means the segment isn't backed by any data
         if (header.FileSize > 0 && header.VirtualAddress <= position && position + count <= header.VirtualAddress + header.VirtualSize)
         {
-          long segmentOffset = position - header.VirtualAddress;
-          int fileBytes = (int)Math.Min(count, header.FileSize);
+          var segmentOffset = position - header.VirtualAddress;
+          var fileBytes = (int)Math.Min(count, header.FileSize);
 
-          long fileOffset = header.FileOffset + segmentOffset;
-          int bytesRead = _addressSpace.Read(fileOffset, buffer, bufferOffset, fileBytes);
+          var fileOffset = header.FileOffset + segmentOffset;
+          var bytesRead = _addressSpace.Read(fileOffset, buffer, bufferOffset, fileBytes);
 
           //zero the rest of the buffer if it is in the virtual address space but not the physical address space
           if (bytesRead == fileBytes && fileBytes != count)

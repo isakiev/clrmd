@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,7 +13,6 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
     private static int s_totalInstanceCount;
     private static bool s_needRelease = true;
 
-    private IDebugClient _client;
     private IDebugDataSpaces _spaces;
     private IDebugDataSpaces2 _spaces2;
     private IDebugDataSpacesPtr _spacesPtr;
@@ -155,7 +153,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
     private static IDebugClient CreateIDebugClient()
     {
       var guid = new Guid("27fe5639-8407-4f47-8364-ee118fb08ac8");
-      DebugCreate(ref guid, out object obj);
+      DebugCreate(ref guid, out var obj);
 
       var client = (IDebugClient)obj;
       return client;
@@ -170,7 +168,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
       Dispose();
     }
 
-    internal IDebugClient DebuggerInterface => _client;
+    internal IDebugClient DebuggerInterface { get; private set; }
 
     public uint GetPointerSize()
     {
@@ -288,19 +286,19 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
 
     private void CreateClient(IDebugClient client)
     {
-      _client = client;
+      DebuggerInterface = client;
 
-      _spaces = (IDebugDataSpaces)_client;
-      _spacesPtr = (IDebugDataSpacesPtr)_client;
-      _symbols = (IDebugSymbols)_client;
-      _control = (IDebugControl2)_client;
+      _spaces = (IDebugDataSpaces)DebuggerInterface;
+      _spacesPtr = (IDebugDataSpacesPtr)DebuggerInterface;
+      _symbols = (IDebugSymbols)DebuggerInterface;
+      _control = (IDebugControl2)DebuggerInterface;
 
       // These interfaces may not be present in older DbgEng dlls.
-      _spaces2 = _client as IDebugDataSpaces2;
-      _symbols3 = _client as IDebugSymbols3;
-      _advanced = _client as IDebugAdvanced;
-      _systemObjects = _client as IDebugSystemObjects;
-      _systemObjects3 = _client as IDebugSystemObjects3;
+      _spaces2 = DebuggerInterface as IDebugDataSpaces2;
+      _symbols3 = DebuggerInterface as IDebugSymbols3;
+      _advanced = DebuggerInterface as IDebugAdvanced;
+      _systemObjects = DebuggerInterface as IDebugSystemObjects;
+      _systemObjects3 = DebuggerInterface as IDebugSystemObjects3;
 
       Interlocked.Increment(ref s_totalInstanceCount);
 
@@ -562,8 +560,8 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
         if (_systemObjects3 != null)
           _systemObjects3.SetCurrentSystemId(_instance);
 
-        _client.EndSession(DEBUG_END.ACTIVE_DETACH);
-        _client.DetachProcesses();
+        DebuggerInterface.EndSession(DEBUG_END.ACTIVE_DETACH);
+        DebuggerInterface.DetachProcesses();
       }
 
       // If there are no more debug instances, we can safely reset this variable

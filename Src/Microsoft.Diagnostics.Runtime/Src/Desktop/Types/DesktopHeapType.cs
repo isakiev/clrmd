@@ -366,7 +366,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         throw new InvalidOperationException("Type is not an Enum.");
 
       _enumData = new EnumData();
-      MetaDataImport import = DesktopModule?.GetMetadataImport();
+      var import = DesktopModule?.GetMetadataImport();
 
       if (import == null)
         return;
@@ -374,9 +374,9 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       var hnd = IntPtr.Zero;
       var names = new List<string>();
 
-      foreach (int token in import.EnumerateFields((int)_token))
+      foreach (var token in import.EnumerateFields((int)_token))
       {
-        if (import.GetFieldProps(token, out string name, out FieldAttributes attr, out IntPtr ppvSigBlob, out int pcbSigBlob, out int pdwCPlusTypeFlag, out IntPtr ppValue))
+        if (import.GetFieldProps(token, out var name, out var attr, out var ppvSigBlob, out var pcbSigBlob, out var pdwCPlusTypeFlag, out var ppValue))
         {
           if ((int)attr == 0x606 && name == "value__")
           {
@@ -594,12 +594,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         // Get the name of the field.
         string name = null;
         var attr = FieldAttributes.PrivateScope;
-        int sigLen = 0;
+        var sigLen = 0;
         var ppValue = IntPtr.Zero;
         var fieldSig = IntPtr.Zero;
 
         if (import != null)
-          import.GetFieldProps((int)field.FieldToken, out name, out attr, out fieldSig, out sigLen, out int pdwCPlusTypeFlab, out ppValue);
+          import.GetFieldProps((int)field.FieldToken, out name, out attr, out fieldSig, out sigLen, out var pdwCPlusTypeFlab, out ppValue);
 
         // If we couldn't figure out the name, at least give the token.
         if (import == null || name == null) name = string.Format("<ERROR:{0:X}>", field.FieldToken);
@@ -813,7 +813,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public override int BaseSize => (int)_baseSize;
 
     /// <summary>
-    ///   A messy version with better performance that doesn't use regular expression.
+    /// A messy version with better performance that doesn't use regular expression.
     /// </summary>
     internal static int FixGenericsWorker(string name, int start, int end, StringBuilder sb)
     {

@@ -4,12 +4,12 @@ using System.Globalization;
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   Represents a thread from a minidump file. This is a flyweight object.
+  /// Represents a thread from a minidump file. This is a flyweight object.
   /// </summary>
   internal class DumpThread
   {
     /// <summary>
-    ///   Constructor for DumpThread
+    /// Constructor for DumpThread
     /// </summary>
     /// <param name="owner">owning DumpReader object</param>
     /// <param name="raw">unmanaged structure in dump describing the thread</param>
@@ -49,7 +49,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   The native OS Thread Id of this thread.
+    /// The native OS Thread Id of this thread.
     /// </summary>
     public int ThreadId => (int)_raw.ThreadId;
 
@@ -73,7 +73,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
        */
 
     /// <summary>
-    ///   Get a thread's context using a raw buffer and size
+    /// Get a thread's context using a raw buffer and size
     /// </summary>
     public void GetThreadContext(IntPtr buffer, int sizeBufferBytes)
     {

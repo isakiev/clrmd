@@ -6,7 +6,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
   internal static class DumpNative
   {
     /// <summary>
-    ///   Remove the OS sign-extension from a target address.
+    /// Remove the OS sign-extension from a target address.
     /// </summary>
     public static ulong ZeroExtendAddress(ulong addr)
     {

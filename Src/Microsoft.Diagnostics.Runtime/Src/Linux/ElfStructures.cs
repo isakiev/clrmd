@@ -1,22 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Diagnostics.Runtime.Linux
 {
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  struct ElfHeader
+  internal struct ElfHeader
   {
-    const int EI_NIDENT = 16;
+    private const int EI_NIDENT = 16;
 
-    const byte Magic0 = 0x7f;
-    const byte Magic1 = (byte)'E';
-    const byte Magic2 = (byte)'L';
-    const byte Magic3 = (byte)'F';
+    private const byte Magic0 = 0x7f;
+    private const byte Magic1 = (byte)'E';
+    private const byte Magic2 = (byte)'L';
+    private const byte Magic3 = (byte)'F';
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = EI_NIDENT)]
     public byte[] Ident;
@@ -36,15 +32,9 @@ namespace Microsoft.Diagnostics.Runtime.Linux
     public ushort SectionHeaderCount;
     public ushort SectionHeaderStringIndex;
 
-    public ELFClass Class
-    {
-      get { return (ELFClass)Ident[4]; }
-    }
+    public ELFClass Class => (ELFClass)Ident[4];
 
-    public ELFData Data
-    {
-      get { return (ELFData)Ident[5]; }
-    }
+    public ELFData Data => (ELFData)Ident[5];
 
     public void Validate(string filename)
     {
@@ -65,7 +55,7 @@ namespace Microsoft.Diagnostics.Runtime.Linux
   }
 
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  struct ElfSectionHeader
+  internal struct ElfSectionHeader
   {
     public int NameIndex; // sh_name
     public ELFSectionHeaderType Type; // sh_type
@@ -80,7 +70,7 @@ namespace Microsoft.Diagnostics.Runtime.Linux
   }
 
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  struct ELFProgramHeader64
+  internal struct ELFProgramHeader64
   {
     public ELFProgramHeaderType Type; // p_type
     public uint Flags; // p_flags
@@ -92,7 +82,7 @@ namespace Microsoft.Diagnostics.Runtime.Linux
     public long Alignment; // p_align
   }
 
-  enum ElfMachine : ushort
+  internal enum ElfMachine : ushort
   {
     EM_PARISC = 15, /* HPPA */
     EM_SPARC32PLUS = 18, /* Sun's "v8plus" */
@@ -111,10 +101,10 @@ namespace Microsoft.Diagnostics.Runtime.Linux
     EM_MN10300 = 89, /* Panasonic/MEI MN10300, AM33 */
     EM_BLACKFIN = 106, /* ADI Blackfin Processor */
     EM_FRV = 0x5441, /* Fujitsu FR-V */
-    EM_AVR32 = 0x18ad, /* Atmel AVR32 */
+    EM_AVR32 = 0x18ad /* Atmel AVR32 */
   }
 
-  enum ELFNoteType
+  internal enum ELFNoteType
   {
     PrpsStatus = 1,
     PrpsFpreg = 2,
@@ -126,14 +116,14 @@ namespace Microsoft.Diagnostics.Runtime.Linux
   }
 
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  struct ELFNoteHeader
+  internal struct ELFNoteHeader
   {
     public uint NameSize;
     public uint ContentSize;
     public ELFNoteType Type;
   }
 
-  enum ELFProgramHeaderType : uint
+  internal enum ELFProgramHeaderType : uint
   {
     Null = 0,
     Load = 1,
@@ -144,7 +134,7 @@ namespace Microsoft.Diagnostics.Runtime.Linux
     Phdr = 6
   }
 
-  enum ELFSectionHeaderType : uint
+  internal enum ELFSectionHeaderType : uint
   {
     Null = 0,
     ProgBits = 1,
@@ -170,10 +160,10 @@ namespace Microsoft.Diagnostics.Runtime.Linux
     CheckSum = 0x6ffffff8,
     GnuVerDef = 0x6ffffffd,
     GnuVerNeed = 0x6ffffffe,
-    GnuVerSym = 0x6fffffff,
+    GnuVerSym = 0x6fffffff
   }
 
-  enum ELFHeaderType : ushort
+  internal enum ELFHeaderType : ushort
   {
     Relocatable = 1,
     Executable = 2,
@@ -181,14 +171,14 @@ namespace Microsoft.Diagnostics.Runtime.Linux
     Core = 4
   }
 
-  enum ELFClass : byte
+  internal enum ELFClass : byte
   {
     None = 0,
     Class32 = 1,
     Class64 = 2
   }
 
-  enum ELFData : byte
+  internal enum ELFData : byte
   {
     None = 0,
     LittleEndian = 1,
@@ -196,7 +186,7 @@ namespace Microsoft.Diagnostics.Runtime.Linux
   }
 
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  struct ELFSignalInfo
+  internal struct ELFSignalInfo
   {
     public uint Number;
     public uint Code;
@@ -204,14 +194,14 @@ namespace Microsoft.Diagnostics.Runtime.Linux
   }
 
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  struct TimeVal
+  internal struct TimeVal
   {
     public long Seconds;
     public long Milliseconds;
   }
 
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  struct RegSetX64
+  internal struct RegSetX64
   {
     public ulong R15;
     public ulong R14;
@@ -243,7 +233,7 @@ namespace Microsoft.Diagnostics.Runtime.Linux
   }
 
   [StructLayout(LayoutKind.Sequential)]
-  struct ELFPRStatus
+  internal struct ELFPRStatus
   {
     public ELFSignalInfo SignalInfo;
     public short CurrentSignal;

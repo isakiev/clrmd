@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Diagnostics.Runtime.DacInterface
 {
-  internal unsafe sealed class ClrStackWalk : CallableCOMWrapper
+  internal sealed unsafe class ClrStackWalk : CallableCOMWrapper
   {
     private static Guid IID_IXCLRDataStackWalk = new Guid("E59D8D22-ADA7-49a2-89B5-A415AFCFC95F");
 
@@ -23,7 +23,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     {
       InitDelegate(ref _request, VTable->Request);
 
-      int hr = _request(Self, 0xf0000000, 0, null, (uint)_ulongBuffer.Length, _ulongBuffer);
+      var hr = _request(Self, 0xf0000000, 0, null, (uint)_ulongBuffer.Length, _ulongBuffer);
       if (hr == S_OK)
         return BitConverter.ToUInt64(_ulongBuffer, 0);
 
@@ -34,7 +34,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     {
       InitDelegate(ref _next, VTable->Next);
 
-      int hr = _next(Self);
+      var hr = _next(Self);
       return hr == S_OK;
     }
 
@@ -42,7 +42,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     {
       InitDelegate(ref _getContext, VTable->GetContext);
 
-      int hr = _getContext(Self, contextFlags, contextBufSize, out contextSize, buffer);
+      var hr = _getContext(Self, contextFlags, contextBufSize, out contextSize, buffer);
       return hr == S_OK;
     }
 
@@ -53,14 +53,14 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     private delegate int NextDelegate(IntPtr self);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    delegate int RequestDelegate(
+    private delegate int RequestDelegate(
       IntPtr self,
       uint reqCode,
       uint inBufferSize,
-      [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
+      [Out][MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
       byte[] inBuffer,
       uint outBufferSize,
-      [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
+      [Out][MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
       byte[] outBuffer);
   }
 

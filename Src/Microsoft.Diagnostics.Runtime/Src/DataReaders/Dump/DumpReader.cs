@@ -49,11 +49,11 @@ using Microsoft.Win32.SafeHandles;
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   Read contents of a minidump.
-  ///   If we have a 32-bit dump, then there's an addressing collision possible.
-  ///   OS debugging code sign extends 32 bit wide addresses into 64 bit wide addresses.
-  ///   The CLR does not sign extend, thus you cannot round-trip target addresses exposed by this class.
-  ///   Currently we read these addresses once and don't hand them back, so it's not an issue.
+  /// Read contents of a minidump.
+  /// If we have a 32-bit dump, then there's an addressing collision possible.
+  /// OS debugging code sign extends 32 bit wide addresses into 64 bit wide addresses.
+  /// The CLR does not sign extend, thus you cannot round-trip target addresses exposed by this class.
+  /// Currently we read these addresses once and don't hand them back, so it's not an issue.
   /// </summary>
   internal class DumpReader : IDisposable
   {
@@ -68,7 +68,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Translates from an RVA to Dump Pointer.
+    /// Translates from an RVA to Dump Pointer.
     /// </summary>
     /// <param name="rva">RVA within the dump</param>
     /// <returns>DumpPointer representing RVA.</returns>
@@ -78,7 +78,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Translates from an RVA to Dump Pointer.
+    /// Translates from an RVA to Dump Pointer.
     /// </summary>
     /// <param name="rva">RVA within the dump</param>
     /// <returns>DumpPointer representing RVA.</returns>
@@ -88,7 +88,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Translates from an RVA to Dump Pointer.
+    /// Translates from an RVA to Dump Pointer.
     /// </summary>
     /// <param name="rva">RVA within the dump</param>
     /// <returns>DumpPointer representing RVA.</returns>
@@ -98,7 +98,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Gets a MINIDUMP_STRING at the given RVA as an System.String.
+    /// Gets a MINIDUMP_STRING at the given RVA as an System.String.
     /// </summary>
     /// <param name="rva">RVA of MINIDUMP_STRING</param>
     /// <returns>System.String representing contents of MINIDUMP_STRING at the given RVA</returns>
@@ -109,12 +109,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Gets a MINIDUMP_STRING at the given DumpPointer as an System.String.
+    /// Gets a MINIDUMP_STRING at the given DumpPointer as an System.String.
     /// </summary>
     /// <param name="ptr">DumpPointer to a MINIDUMP_STRING</param>
     /// <returns>
-    ///   System.String representing contents of MINIDUMP_STRING at the given location
-    ///   in the dump
+    /// System.String representing contents of MINIDUMP_STRING at the given location
+    /// in the dump
     /// </returns>
     protected internal string GetString(DumpPointer ptr)
     {
@@ -185,7 +185,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Read memory from the dump file and return results in newly allocated buffer
+    /// Read memory from the dump file and return results in newly allocated buffer
     /// </summary>
     /// <param name="targetAddress">target address in dump to read length bytes from</param>
     /// <param name="length">number of bytes to read</param>
@@ -199,7 +199,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Read memory from the dump file and copy into the buffer
+    /// Read memory from the dump file and copy into the buffer
     /// </summary>
     /// <param name="targetAddress">target address in dump to read buffer.Length bytets from</param>
     /// <param name="buffer">destination buffer to copy target memory to.</param>
@@ -219,12 +219,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Read memory from target and copy it to the local buffer pointed to by
-    ///   destinationBuffer. Throw if any portion of the requested memory is unavailable.
+    /// Read memory from target and copy it to the local buffer pointed to by
+    /// destinationBuffer. Throw if any portion of the requested memory is unavailable.
     /// </summary>
     /// <param name="targetRequestStart">
-    ///   target address in dump file to copy
-    ///   destinationBufferSizeInBytes bytes from.
+    /// target address in dump file to copy
+    /// destinationBufferSizeInBytes bytes from.
     /// </param>
     /// <param name="destinationBuffer">pointer to copy the memory to.</param>
     /// <param name="destinationBufferSizeInBytes">size of the destinationBuffer in bytes.</param>
@@ -266,11 +266,11 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     
      */
     /// <summary>
-    ///   Read memory from target and copy it to the local buffer pointed to by destinationBuffer.
+    /// Read memory from target and copy it to the local buffer pointed to by destinationBuffer.
     /// </summary>
     /// <param name="targetRequestStart">
-    ///   target address in dump file to copy
-    ///   destinationBufferSizeInBytes bytes from.
+    /// target address in dump file to copy
+    /// destinationBufferSizeInBytes bytes from.
     /// </param>
     /// <param name="destinationBuffer">pointer to copy the memory to.</param>
     /// <param name="destinationBufferSizeInBytes">size of the destinationBuffer in bytes.</param>
@@ -441,7 +441,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     protected LoadedFileMemoryLookups _mappedFileMemory;
 
     /// <summary>
-    ///   ToString override.
+    /// ToString override.
     /// </summary>
     /// <returns>string description of the DumpReader.</returns>
     public override string ToString()
@@ -454,7 +454,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     public bool IsMinidump { get; set; }
 
     /// <summary>
-    ///   Constructor
+    /// Constructor
     /// </summary>
     /// <param name="path">filename to open dump file</param>
     public DumpReader(string path)
@@ -508,7 +508,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     [Flags]
-    enum PageProtection : uint
+    private enum PageProtection : uint
     {
       NoAccess = 0x01,
       Readonly = 0x02,
@@ -520,12 +520,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       ExecuteWriteCopy = 0x80,
       Guard = 0x100,
       NoCache = 0x200,
-      WriteCombine = 0x400,
+      WriteCombine = 0x400
     }
 
     // Call CloseHandle to clean up.
     [DllImport("kernel32.dll", SetLastError = true)]
-    static extern SafeWin32Handle CreateFileMapping(
+    private static extern SafeWin32Handle CreateFileMapping(
       SafeFileHandle hFile,
       IntPtr lpFileMappingAttributes,
       PageProtection flProtect,
@@ -542,11 +542,11 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       uint dwFileOffsetLow,
       IntPtr dwNumberOfBytesToMap);
 
-    [DllImportAttribute("kernel32.dll")]
+    [DllImport("kernel32.dll")]
     internal static extern void RtlMoveMemory(IntPtr destination, IntPtr source, IntPtr numberBytes);
 
     /// <summary>
-    ///   Dispose method.
+    /// Dispose method.
     /// </summary>
     public void Dispose()
     {
@@ -587,7 +587,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     private MINIDUMP_SYSTEM_INFO _info;
 
     /// <summary>
-    ///   Get a DumpPointer for the given stream. That can then be used to further decode the stream.
+    /// Get a DumpPointer for the given stream. That can then be used to further decode the stream.
     /// </summary>
     /// <param name="type">type of stream to lookup</param>
     /// <returns>DumpPointer refering into the stream. </returns>
@@ -600,7 +600,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Get a DumpPointer for the given stream. That can then be used to further decode the stream.
+    /// Get a DumpPointer for the given stream. That can then be used to further decode the stream.
     /// </summary>
     /// <param name="type">type of stream to lookup</param>
     /// <param name="stream">DumpPointer refering into the stream. </param>
@@ -613,7 +613,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 
       if (!fOk || IntPtr.Zero == pStream || cbStreamSize < 1)
       {
-        stream = default(DumpPointer);
+        stream = default;
         return false;
       }
 
@@ -622,12 +622,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Version numbers of OS that this dump was taken on.
+    /// Version numbers of OS that this dump was taken on.
     /// </summary>
     public Version Version => _info.Version;
 
     /// <summary>
-    ///   The processor architecture that this dump was taken on.
+    /// The processor architecture that this dump was taken on.
     /// </summary>
     public ProcessorArchitecture ProcessorArchitecture
     {
@@ -639,12 +639,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Get the thread for the given thread Id.
+    /// Get the thread for the given thread Id.
     /// </summary>
     /// <param name="threadId">thread Id to lookup.</param>
     /// <returns>
-    ///   a DumpThread object representing a thread in the dump whose thread id matches
-    ///   the requested id.
+    /// a DumpThread object representing a thread in the dump whose thread id matches
+    /// the requested id.
     /// </returns>
     public DumpThread GetThread(int threadId)
     {
@@ -683,7 +683,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Enumerate all the native threads in the dump
+    /// Enumerate all the native threads in the dump
     /// </summary>
     /// <returns>an enumerate of DumpThread objects</returns>
     public IEnumerable<DumpThread> EnumerateThreads()
@@ -773,7 +773,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Check on whether there's an exception stream in the dump
+    /// Check on whether there's an exception stream in the dump
     /// </summary>
     /// <returns> true iff there is a MINIDUMP_EXCEPTION_STREAM in the dump. </returns>
     public bool IsExceptionStream()
@@ -792,7 +792,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Return the TID from the exception stream.
+    /// Return the TID from the exception stream.
     /// </summary>
     /// <returns> The TID from the exception stream. </returns>
     public uint ExceptionStreamThreadId()
@@ -811,7 +811,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
      */
 
     /// <summary>
-    ///   Lookup the first module in the target with a matching.
+    /// Lookup the first module in the target with a matching.
     /// </summary>
     /// <param name="nameModule">The name can either be a matching full name, or just shortname</param>
     /// <returns>The first DumpModule that has a matching name. </returns>
@@ -837,16 +837,16 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Return the module containing the target address, or null if no match.
+    /// Return the module containing the target address, or null if no match.
     /// </summary>
     /// <param name="targetAddress">address in target</param>
     /// <returns>
-    ///   Null if no match. Else a DumpModule such that the target address is in between the range specified
-    ///   by the DumpModule's .BaseAddress and .Size property
+    /// Null if no match. Else a DumpModule such that the target address is in between the range specified
+    /// by the DumpModule's .BaseAddress and .Size property
     /// </returns>
     /// <remarks>
-    ///   This can be useful for symbol lookups or for using module images to
-    ///   supplement memory read requests for minidumps.
+    /// This can be useful for symbol lookups or for using module images to
+    /// supplement memory read requests for minidumps.
     /// </remarks>
     public DumpModule TryLookupModuleByAddress(ulong targetAddress)
     {
@@ -868,7 +868,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     }
 
     /// <summary>
-    ///   Enumerate all the modules in the dump.
+    /// Enumerate all the modules in the dump.
     /// </summary>
     /// <returns></returns>
     public IEnumerable<DumpModule> EnumerateModules()

@@ -1,7 +1,7 @@
 ﻿namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   List of Threads in the minidump.
+  /// List of Threads in the minidump.
   /// </summary>
   internal class MINIDUMP_THREAD_LIST<T> : MinidumpArray<T>, IMinidumpThreadList
     where T : MINIDUMP_THREAD

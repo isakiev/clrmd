@@ -3,8 +3,8 @@
   /// <summary>
   /// Gotten from MiniDumpReadDumpStream via streamPointer
   /// This is a var-args structure defined as:
-  ///   ULONG32 NumberOfModules;  
-  ///   MINIDUMP_MODULE Modules[];
+  /// ULONG32 NumberOfModules;
+  /// MINIDUMP_MODULE Modules[];
   /// </summary>
   internal class MINIDUMP_MODULE_LIST : MinidumpArray<MINIDUMP_MODULE>
   {

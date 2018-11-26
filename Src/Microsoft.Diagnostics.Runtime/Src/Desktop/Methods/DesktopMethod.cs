@@ -12,21 +12,18 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private ILToNativeMap[] _ilMap;
     private readonly string _sig;
     private readonly ulong _ip;
-    private readonly ulong _gcInfo;
-    private readonly MethodCompilationType _jit;
     private readonly MethodAttributes _attrs;
     private readonly DesktopRuntimeBase _runtime;
     private readonly DesktopHeapType _type;
     private List<ulong> _methodHandles;
     private ILInfo _il;
-    private readonly HotColdRegions _hotColdInfo;
 
     internal static DesktopMethod Create(DesktopRuntimeBase runtime, MetaDataImport metadata, IMethodDescData mdData)
     {
       if (mdData == null)
         return null;
 
-      MethodAttributes attrs = new MethodAttributes();
+      var attrs = new MethodAttributes();
       if (metadata != null)
         attrs = metadata.GetMethodAttributes((int)mdData.MDToken);
 
@@ -77,13 +74,13 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       _runtime = runtime;
       _sig = runtime.GetNameForMD(md);
       _ip = mdData.NativeCodeAddr;
-      _jit = mdData.JITType;
+      CompilationType = mdData.JITType;
       _attrs = attrs;
       _token = mdData.MDToken;
-      _gcInfo = mdData.GCInfo;
+      GCInfo = mdData.GCInfo;
       var heap = runtime.Heap;
       _type = (DesktopHeapType)heap.GetTypeByMethodTable(mdData.MethodTable, 0);
-      _hotColdInfo = new HotColdRegions {HotStart = _ip, HotSize = mdData.HotSize, ColdStart = mdData.ColdStart, ColdSize = mdData.ColdSize};
+      HotColdInfo = new HotColdRegions {HotStart = _ip, HotSize = mdData.HotSize, ColdStart = mdData.ColdStart, ColdSize = mdData.ColdSize};
     }
 
     public override string Name
@@ -110,7 +107,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override ulong NativeCode => _ip;
 
-    public override MethodCompilationType CompilationType => _jit;
+    public override MethodCompilationType CompilationType { get; }
 
     public override string GetFullSignature()
     {
@@ -168,7 +165,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override bool IsRTSpecialName => (_attrs & MethodAttributes.RTSpecialName) == MethodAttributes.RTSpecialName;
 
-    public override HotColdRegions HotColdInfo => _hotColdInfo;
+    public override HotColdRegions HotColdInfo { get; }
 
     public override ILToNativeMap[] ILOffsetMap
     {
@@ -185,7 +182,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override ClrType Type => _type;
 
-    public override ulong GCInfo => _gcInfo;
+    public override ulong GCInfo { get; }
 
     public override ILInfo IL
     {

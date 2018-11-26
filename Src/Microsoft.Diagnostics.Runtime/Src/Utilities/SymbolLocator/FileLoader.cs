@@ -43,7 +43,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
     public int ProvideLibrary([In][MarshalAs(UnmanagedType.LPWStr)] string fileName, int timestamp, int sizeOfImage, out IntPtr hModule)
     {
-      string result = _dataTarget.SymbolLocator.FindBinary(fileName, timestamp, sizeOfImage, false);
+      var result = _dataTarget.SymbolLocator.FindBinary(fileName, timestamp, sizeOfImage, false);
       if (result == null)
       {
         hModule = IntPtr.Zero;

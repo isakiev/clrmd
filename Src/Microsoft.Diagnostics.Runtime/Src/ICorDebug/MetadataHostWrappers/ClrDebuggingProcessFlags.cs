@@ -1,8 +1,8 @@
 ﻿namespace Microsoft.Diagnostics.Runtime.ICorDebug
 {
   /// <summary>
-  ///   Information flags about the state of a CLR when it is being attached
-  ///   to in the native pipeline debugging model
+  /// Information flags about the state of a CLR when it is being attached
+  /// to in the native pipeline debugging model
   /// </summary>
   public enum ClrDebuggingProcessFlags
   {

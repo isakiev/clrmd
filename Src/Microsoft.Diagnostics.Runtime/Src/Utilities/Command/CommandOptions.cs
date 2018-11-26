@@ -5,23 +5,23 @@ using System.IO;
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   /// <summary>
-  ///   CommandOptions is a helper class for the Command class.  It stores options
-  ///   that affect the behavior of the execution of ETWCommands and is passes as a
-  ///   parapeter to the constuctor of a Command.
-  ///   It is useful for these options be be on a separate class (rather than
-  ///   on Command itself), because it is reasonably common to want to have a set
-  ///   of options passed to several commands, which is not easily possible otherwise.
+  /// CommandOptions is a helper class for the Command class.  It stores options
+  /// that affect the behavior of the execution of ETWCommands and is passes as a
+  /// parapeter to the constuctor of a Command.
+  /// It is useful for these options be be on a separate class (rather than
+  /// on Command itself), because it is reasonably common to want to have a set
+  /// of options passed to several commands, which is not easily possible otherwise.
   /// </summary>
   public sealed class CommandOptions
   {
     /// <summary>
-    ///   Can be assigned to the Timeout Property to indicate infinite timeout.
+    /// Can be assigned to the Timeout Property to indicate infinite timeout.
     /// </summary>
     public const int Infinite = System.Threading.Timeout.Infinite;
 
     /// <summary>
-    ///   CommanOptions holds a set of options that can be passed to the constructor
-    ///   to the Command Class as well as Command.Run*
+    /// CommanOptions holds a set of options that can be passed to the constructor
+    /// to the Command Class as well as Command.Run*
     /// </summary>
     public CommandOptions()
     {
@@ -29,7 +29,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Return a copy an existing set of command options
+    /// Return a copy an existing set of command options
     /// </summary>
     /// <returns>The copy of the command options</returns>
     public CommandOptions Clone()
@@ -38,8 +38,8 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Normally commands will throw if the subprocess returns a non-zero
-    ///   exit code.  NoThrow suppresses this.
+    /// Normally commands will throw if the subprocess returns a non-zero
+    /// exit code.  NoThrow suppresses this.
     /// </summary>
     public bool NoThrow
     {
@@ -48,8 +48,8 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the NoThrow propery and returns the updated commandOptions.
-    ///   <returns>Updated command options</returns>
+    /// Updates the NoThrow propery and returns the updated commandOptions.
+    /// <returns>Updated command options</returns>
     /// </summary>
     public CommandOptions AddNoThrow()
     {
@@ -58,7 +58,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   ShortHand for UseShellExecute and NoWait
+    /// ShortHand for UseShellExecute and NoWait
     /// </summary>
     public bool Start
     {
@@ -71,7 +71,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the Start propery and returns the updated commandOptions.
+    /// Updates the Start propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddStart()
     {
@@ -80,9 +80,9 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Normally commands are launched with CreateProcess.  However it is
-    ///   also possible use the Shell Start API.  This causes Command to look
-    ///   up the executable differently
+    /// Normally commands are launched with CreateProcess.  However it is
+    /// also possible use the Shell Start API.  This causes Command to look
+    /// up the executable differently
     /// </summary>
     public bool UseShellExecute
     {
@@ -91,7 +91,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the Start propery and returns the updated commandOptions.
+    /// Updates the Start propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddUseShellExecute()
     {
@@ -100,7 +100,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Indicates that you want to hide any new window created.
+    /// Indicates that you want to hide any new window created.
     /// </summary>
     public bool NoWindow
     {
@@ -109,7 +109,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the NoWindow propery and returns the updated commandOptions.
+    /// Updates the NoWindow propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddNoWindow()
     {
@@ -118,7 +118,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Indicates that you want don't want to wait for the command to complete.
+    /// Indicates that you want don't want to wait for the command to complete.
     /// </summary>
     public bool NoWait
     {
@@ -127,7 +127,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the NoWait propery and returns the updated commandOptions.
+    /// Updates the NoWait propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddNoWait()
     {
@@ -136,7 +136,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Indicates that the command must run at elevated Windows privledges (causes a new command window)
+    /// Indicates that the command must run at elevated Windows privledges (causes a new command window)
     /// </summary>
     public bool Elevate
     {
@@ -145,7 +145,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the Elevate propery and returns the updated commandOptions.
+    /// Updates the Elevate propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddElevate()
     {
@@ -154,10 +154,10 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   By default commands have a 10 minute timeout (600,000 msec), If this
-    ///   is inappropriate, the Timeout property can change this.  Like all
-    ///   timouts in .NET, it is in units of milliseconds, and you can use
-    ///   CommandOptions.Infinite to indicate no timeout.
+    /// By default commands have a 10 minute timeout (600,000 msec), If this
+    /// is inappropriate, the Timeout property can change this.  Like all
+    /// timouts in .NET, it is in units of milliseconds, and you can use
+    /// CommandOptions.Infinite to indicate no timeout.
     /// </summary>
     public int Timeout
     {
@@ -166,8 +166,8 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the Timeout propery and returns the updated commandOptions.
-    ///   CommandOptions.Infinite can be used for infinite
+    /// Updates the Timeout propery and returns the updated commandOptions.
+    /// CommandOptions.Infinite can be used for infinite
     /// </summary>
     public CommandOptions AddTimeout(int milliseconds)
     {
@@ -176,7 +176,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Indicates the string will be sent to Console.In for the subprocess.
+    /// Indicates the string will be sent to Console.In for the subprocess.
     /// </summary>
     public string Input
     {
@@ -185,7 +185,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the Input propery and returns the updated commandOptions.
+    /// Updates the Input propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddInput(string input)
     {
@@ -194,7 +194,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Indicates the current directory the subProcess will have.
+    /// Indicates the current directory the subProcess will have.
     /// </summary>
     public string CurrentDirectory
     {
@@ -203,7 +203,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the CurrentDirectory propery and returns the updated commandOptions.
+    /// Updates the CurrentDirectory propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddCurrentDirectory(string directoryPath)
     {
@@ -214,9 +214,9 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     // TODO add a capability to return a enumerator of output lines. (and/or maybe a delegate callback)
 
     /// <summary>
-    ///   Indicates the standard output and error of the command should be redirected
-    ///   to a archiveFile rather than being stored in Memory in the 'Output' property of the
-    ///   command.
+    /// Indicates the standard output and error of the command should be redirected
+    /// to a archiveFile rather than being stored in Memory in the 'Output' property of the
+    /// command.
     /// </summary>
     public string OutputFile
     {
@@ -231,7 +231,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the OutputFile propery and returns the updated commandOptions.
+    /// Updates the OutputFile propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddOutputFile(string outputFile)
     {
@@ -240,9 +240,9 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Indicates the standard output and error of the command should be redirected
-    ///   to a a TextWriter rather than being stored in Memory in the 'Output' property
-    ///   of the command.
+    /// Indicates the standard output and error of the command should be redirected
+    /// to a a TextWriter rather than being stored in Memory in the 'Output' property
+    /// of the command.
     /// </summary>
     public TextWriter OutputStream
     {
@@ -257,7 +257,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Updates the OutputStream propery and returns the updated commandOptions.
+    /// Updates the OutputStream propery and returns the updated commandOptions.
     /// </summary>
     public CommandOptions AddOutputStream(TextWriter outputStream)
     {
@@ -266,12 +266,12 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Gets the Environment variables that will be set in the subprocess that
-    ///   differ from current process's environment variables.  Any time a string
-    ///   of the form %VAR% is found in a value of a environment variable it is
-    ///   replaced with the value of the environment variable at the time the
-    ///   command is launched.  This is useful for example to update the PATH
-    ///   environment variable eg. "%PATH%;someNewPath"
+    /// Gets the Environment variables that will be set in the subprocess that
+    /// differ from current process's environment variables.  Any time a string
+    /// of the form %VAR% is found in a value of a environment variable it is
+    /// replaced with the value of the environment variable at the time the
+    /// command is launched.  This is useful for example to update the PATH
+    /// environment variable eg. "%PATH%;someNewPath"
     /// </summary>
     public Dictionary<string, string> EnvironmentVariables
     {
@@ -284,13 +284,13 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     }
 
     /// <summary>
-    ///   Adds the environment variable with the give value to the set of
-    ///   environmetn variables to be passed to the sub-process and returns the
-    ///   updated commandOptions.   Any time a string
-    ///   of the form %VAR% is found in a value of a environment variable it is
-    ///   replaced with the value of the environment variable at the time the
-    ///   command is launched.  This is useful for example to update the PATH
-    ///   environment variable eg. "%PATH%;someNewPath"
+    /// Adds the environment variable with the give value to the set of
+    /// environmetn variables to be passed to the sub-process and returns the
+    /// updated commandOptions.   Any time a string
+    /// of the form %VAR% is found in a value of a environment variable it is
+    /// replaced with the value of the environment variable at the time the
+    /// command is launched.  This is useful for example to update the PATH
+    /// environment variable eg. "%PATH%;someNewPath"
     /// </summary>
     public CommandOptions AddEnvironmentVariable(string variable, string value)
     {

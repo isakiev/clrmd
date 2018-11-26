@@ -4,17 +4,17 @@
 namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
 {
   /// <summary>
-  ///   A collection of sequence points (usually for a single function).
+  /// A collection of sequence points (usually for a single function).
   /// </summary>
   public class PdbSequencePointCollection
   {
     /// <summary>
-    ///   The source file these sequence points came from.
+    /// The source file these sequence points came from.
     /// </summary>
     public PdbSource File { get; }
 
     /// <summary>
-    ///   A list of IL sequence points in this collection.
+    /// A list of IL sequence points in this collection.
     /// </summary>
     public PdbSequencePoint[] Lines { get; }
 

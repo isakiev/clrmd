@@ -352,17 +352,11 @@ namespace Microsoft.Diagnostics.Runtime.Interop
       FrameOffset = dsf.FrameOffset;
       StackOffset = dsf.StackOffset;
       FuncTableEntry = dsf.FuncTableEntry;
-      fixed (ulong* pParams = Params)
-      {
-        for (var i = 0; i < 4; ++i)
-          pParams[i] = dsf.Params[i];
-      }
+      for (var i = 0; i < 4; ++i)
+        Params[i] = dsf.Params[i];
 
-      fixed (ulong* pReserved = Reserved)
-      {
-        for (var i = 0; i < 6; ++i)
-          pReserved[i] = dsf.Reserved[i];
-      }
+      for (var i = 0; i < 6; ++i)
+        Reserved[i] = dsf.Reserved[i];
 
       Virtual = dsf.Virtual;
       FrameNumber = dsf.FrameNumber;
@@ -739,18 +733,18 @@ namespace Microsoft.Diagnostics.Runtime.Interop
   }
 
   /// <summary>
-  ///   Describes a symbol within a module.
+  /// Describes a symbol within a module.
   /// </summary>
   [StructLayout(LayoutKind.Sequential)]
   public struct DEBUG_MODULE_AND_ID
   {
     /// <summary>
-    ///   The location in the target's virtual address space of the module's base address.
+    /// The location in the target's virtual address space of the module's base address.
     /// </summary>
     public ulong ModuleBase;
 
     /// <summary>
-    ///   The symbol ID of the symbol within the module.
+    /// The symbol ID of the symbol within the module.
     /// </summary>
     public ulong Id;
   }

@@ -2,17 +2,14 @@
 {
   internal class DesktopHeapInterface : ClrInterface
   {
-    private readonly string _name;
-    private readonly ClrInterface _base;
-
     public DesktopHeapInterface(string name, ClrInterface baseInterface)
     {
-      _name = name;
-      _base = baseInterface;
+      Name = name;
+      BaseInterface = baseInterface;
     }
 
-    public override string Name => _name;
+    public override string Name { get; }
 
-    public override ClrInterface BaseInterface => _base;
+    public override ClrInterface BaseInterface { get; }
   }
 }

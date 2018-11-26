@@ -1,7 +1,7 @@
 ﻿namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   Type of stream within the minidump.
+  /// Type of stream within the minidump.
   /// </summary>
   internal enum MINIDUMP_STREAM_TYPE
   {

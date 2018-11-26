@@ -12,19 +12,13 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
   {
     private static readonly PdbInfo s_failurePdb = new PdbInfo();
 
-    private readonly bool _reflection;
     private readonly bool _isPE;
-    private string _name;
-    private readonly string _assemblyName;
+    private readonly string _name;
     private MetaDataImport _metadata;
     private readonly Dictionary<ClrAppDomain, ulong> _mapping = new Dictionary<ClrAppDomain, ulong>();
     private readonly ulong _address;
-    private readonly ulong _imageBase;
     private readonly Lazy<ulong> _size;
-    private readonly ulong _metadataStart;
-    private readonly ulong _metadataLength;
     private DebuggableAttribute.DebuggingModes? _debugMode;
-    private readonly ulong _assemblyAddress;
     private bool _typesLoaded;
     private ClrAppDomain[] _appDomainList;
     private PdbInfo _pdb;
@@ -33,16 +27,16 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       : base(runtime)
     {
       _address = address;
-      _imageBase = data.ImageBase;
-      _assemblyName = assemblyName;
+      ImageBase = data.ImageBase;
+      AssemblyName = assemblyName;
       _isPE = data.IsPEFile;
-      _reflection = data.IsReflection || string.IsNullOrEmpty(name);
+      IsDynamic = data.IsReflection || string.IsNullOrEmpty(name);
       _name = name;
       ModuleId = data.ModuleId;
       ModuleIndex = data.ModuleIndex;
-      _metadataStart = data.MetdataStart;
-      _metadataLength = data.MetadataLength;
-      _assemblyAddress = data.Assembly;
+      MetadataAddress = data.MetdataStart;
+      MetadataLength = data.MetadataLength;
+      AssemblyId = data.Assembly;
       _size = new Lazy<ulong>(() => runtime.GetModuleSize(address));
 
       // This is very expensive in the minidump case, as we may be heading out to the symbol server or
@@ -129,11 +123,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       }
     }
 
-    public override string AssemblyName => _assemblyName;
+    public override string AssemblyName { get; }
 
     public override string Name => _name;
 
-    public override bool IsDynamic => _reflection;
+    public override bool IsDynamic { get; }
 
     public override bool IsFile => _isPE;
 
@@ -188,13 +182,13 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return _metadata;
     }
 
-    public override ulong ImageBase => _imageBase;
+    public override ulong ImageBase { get; }
 
     public override ulong Size => _size.Value;
 
-    public override ulong MetadataAddress => _metadataStart;
+    public override ulong MetadataAddress { get; }
 
-    public override ulong MetadataLength => _metadataLength;
+    public override ulong MetadataLength { get; }
 
     public override object MetadataImport => GetMetadataImport();
 
@@ -221,7 +215,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
       try
       {
-        if (metadata.GetCustomAttributeByName(0x20000001, "System.Diagnostics.DebuggableAttribute", out IntPtr data, out uint cbData) && cbData >= 4)
+        if (metadata.GetCustomAttributeByName(0x20000001, "System.Diagnostics.DebuggableAttribute", out var data, out var cbData) && cbData >= 4)
         {
           var b = (byte*)data.ToPointer();
           ushort opt = b[2];
@@ -249,6 +243,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return null;
     }
 
-    public override ulong AssemblyId => _assemblyAddress;
+    public override ulong AssemblyId { get; }
   }
 }

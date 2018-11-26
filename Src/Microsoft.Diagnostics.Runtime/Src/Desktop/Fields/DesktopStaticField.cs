@@ -18,12 +18,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       int sigLen)
     {
       _field = field;
-      _name = name;
+      Name = name;
       _attributes = attributes;
       _type = (BaseDesktopHeapType)heap.GetTypeByMethodTable(field.TypeMethodTable, 0);
       _defaultValue = defaultValue;
       _heap = heap;
-      _token = field.FieldToken;
+      Token = field.FieldToken;
 
       if (_type != null && ElementType != ClrElementType.Class)
         _type.ElementType = ElementType;
@@ -98,7 +98,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             });
     }
 
-    public override uint Token => _token;
+    public override uint Token { get; }
     public override bool HasDefaultValue => _defaultValue != null;
 
     public override object GetDefaultValue()
@@ -116,7 +116,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override ClrElementType ElementType => (ClrElementType)_field.CorElementType;
 
-    public override string Name => _name;
+    public override string Name { get; }
 
     public override ClrType Type
     {
@@ -179,12 +179,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     // these are optional.  
     /// <summary>
-    ///   If the field has a well defined offset from the base of the object, return it (otherwise -1).
+    /// If the field has a well defined offset from the base of the object, return it (otherwise -1).
     /// </summary>
     public override int Offset => (int)_field.Offset;
 
     /// <summary>
-    ///   Given an object reference, fetch the address of the field.
+    /// Given an object reference, fetch the address of the field.
     /// </summary>
 
     public override bool HasSimpleValue => _containingType != null;
@@ -292,13 +292,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     }
 
     private readonly IFieldData _field;
-    private readonly string _name;
     private BaseDesktopHeapType _type;
     private readonly BaseDesktopHeapType _containingType;
     private readonly FieldAttributes _attributes;
     private readonly object _defaultValue;
     private readonly DesktopGCHeap _heap;
-    private readonly uint _token;
     private readonly Lazy<ClrType> _typeResolver;
   }
 }

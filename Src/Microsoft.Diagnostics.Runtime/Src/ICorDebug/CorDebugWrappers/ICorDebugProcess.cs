@@ -12,8 +12,8 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
     new void Stop([In] uint dwTimeout);
 
     /// <summary>
-    ///   fIsOutOfBand == 0 is the normalcase.   If fIsOutOfBand == 1 when continuing
-    ///   after an event that did not bring the runtime to a 'safe' spot.
+    /// fIsOutOfBand == 0 is the normalcase.   If fIsOutOfBand == 1 when continuing
+    /// after an event that did not bring the runtime to a 'safe' spot.
     /// </summary>
     /// <param name="fIsOutOfBand"></param>
     new void Continue([In] int fIsOutOfBand);

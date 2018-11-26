@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace Microsoft.Diagnostics.Runtime.Linux
 {
-  class ElfCoreFile
+  internal class ElfCoreFile
   {
     private readonly Reader _reader;
     private ElfLoadedImage[] _loadedImages;
@@ -16,7 +15,10 @@ namespace Microsoft.Diagnostics.Runtime.Linux
 
     public ElfMachine Architecture => (ElfMachine)ElfFile.Header.Machine;
 
-    public IEnumerable<ELFPRStatus> EnumeratePRStatus() => GetNotes(ELFNoteType.PrpsStatus).Select(r => r.ReadContents<ELFPRStatus>(0));
+    public IEnumerable<ELFPRStatus> EnumeratePRStatus()
+    {
+      return GetNotes(ELFNoteType.PrpsStatus).Select(r => r.ReadContents<ELFPRStatus>(0));
+    }
 
     public IReadOnlyCollection<ElfLoadedImage> LoadedImages
     {
@@ -58,31 +60,31 @@ namespace Microsoft.Diagnostics.Runtime.Linux
       if (_loadedImages != null)
         return;
 
-      ElfNote fileNote = GetNotes(ELFNoteType.File).Single();
+      var fileNote = GetNotes(ELFNoteType.File).Single();
 
       long position = 0;
-      ELFFileTableHeader header = fileNote.ReadContents<ELFFileTableHeader>(ref position);
+      var header = fileNote.ReadContents<ELFFileTableHeader>(ref position);
 
-      ELFFileTableEntryPointers[] fileTable = new ELFFileTableEntryPointers[header.EntryCount.ToInt32()];
-      List<ElfLoadedImage> images = new List<ElfLoadedImage>(fileTable.Length);
-      Dictionary<string, ElfLoadedImage> lookup = new Dictionary<string, ElfLoadedImage>(fileTable.Length);
+      var fileTable = new ELFFileTableEntryPointers[header.EntryCount.ToInt32()];
+      var images = new List<ElfLoadedImage>(fileTable.Length);
+      var lookup = new Dictionary<string, ElfLoadedImage>(fileTable.Length);
 
-      for (int i = 0; i < fileTable.Length; i++)
+      for (var i = 0; i < fileTable.Length; i++)
         fileTable[i] = fileNote.ReadContents<ELFFileTableEntryPointers>(ref position);
 
-      long size = fileNote.Header.ContentSize - position;
-      byte[] bytes = fileNote.ReadContents(position, (int)size);
-      int start = 0;
-      for (int i = 0; i < fileTable.Length; i++)
+      var size = fileNote.Header.ContentSize - position;
+      var bytes = fileNote.ReadContents(position, (int)size);
+      var start = 0;
+      for (var i = 0; i < fileTable.Length; i++)
       {
-        int end = start;
+        var end = start;
         while (bytes[end] != 0)
           end++;
 
-        string path = Encoding.ASCII.GetString(bytes, start, end - start);
+        var path = Encoding.ASCII.GetString(bytes, start, end - start);
         start = end + 1;
 
-        if (!lookup.TryGetValue(path, out ElfLoadedImage image))
+        if (!lookup.TryGetValue(path, out var image))
           image = lookup[path] = new ElfLoadedImage(path);
 
         image.AddTableEntryPointers(fileTable[i]);

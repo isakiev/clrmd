@@ -1,6 +1,6 @@
-﻿using Microsoft.Diagnostics.Runtime.Desktop;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
+using Microsoft.Diagnostics.Runtime.Desktop;
 
 #pragma warning disable 0649
 #pragma warning disable 0169
@@ -192,7 +192,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     public readonly ulong ModuleIndex;
 
     ulong IModuleData.Assembly => Assembly;
-    ulong IModuleData.PEFile => (IsPEFile == 0) ? ILBase : PEFile;
+    ulong IModuleData.PEFile => IsPEFile == 0 ? ILBase : PEFile;
     ulong IModuleData.LookupTableHeap => LookupTableHeap;
     ulong IModuleData.ThunkHeap => ThunkHeap;
     IntPtr IModuleData.LegacyMetaDataImport => IntPtr.Zero;
@@ -526,25 +526,25 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       this = other;
 
       // Sign extension issues
-      unchecked
+      if (IntPtr.Size == 4)
       {
-        if (IntPtr.Size == 4)
-        {
-          FixupPointer(ref AllocationContextPointer);
-          FixupPointer(ref AllocationContextLimit);
-          FixupPointer(ref Context);
-          FixupPointer(ref Domain);
-          FixupPointer(ref Frame);
-          FixupPointer(ref FirstNestedException);
-          FixupPointer(ref Teb);
-          FixupPointer(ref FiberData);
-          FixupPointer(ref LastThrownObjectHandle);
-          FixupPointer(ref NextThread);
-        }
+        FixupPointer(ref AllocationContextPointer);
+        FixupPointer(ref AllocationContextLimit);
+        FixupPointer(ref Context);
+        FixupPointer(ref Domain);
+        FixupPointer(ref Frame);
+        FixupPointer(ref FirstNestedException);
+        FixupPointer(ref Teb);
+        FixupPointer(ref FiberData);
+        FixupPointer(ref LastThrownObjectHandle);
+        FixupPointer(ref NextThread);
       }
     }
 
-    private static void FixupPointer(ref ulong ptr) => ptr = (uint)ptr;
+    private static void FixupPointer(ref ulong ptr)
+    {
+      ptr = (uint)ptr;
+    }
 
     ulong IThreadData.Next => NextThread;
     ulong IThreadData.AllocPtr => AllocationContextPointer;
@@ -594,25 +594,25 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
       this = data;
 
       // Sign extension issues
-      unchecked
+      if (IntPtr.Size == 4)
       {
-        if (IntPtr.Size == 4)
-        {
-          FixupPointer(ref Address);
-          FixupPointer(ref Allocated);
-          FixupPointer(ref Committed);
-          FixupPointer(ref Reserved);
-          FixupPointer(ref Used);
-          FixupPointer(ref Mem);
-          FixupPointer(ref Next);
-          FixupPointer(ref Heap);
-          FixupPointer(ref HighAllocMark);
-          FixupPointer(ref BackgroundAllocated);
-        }
+        FixupPointer(ref Address);
+        FixupPointer(ref Allocated);
+        FixupPointer(ref Committed);
+        FixupPointer(ref Reserved);
+        FixupPointer(ref Used);
+        FixupPointer(ref Mem);
+        FixupPointer(ref Next);
+        FixupPointer(ref Heap);
+        FixupPointer(ref HighAllocMark);
+        FixupPointer(ref BackgroundAllocated);
       }
     }
 
-    private static void FixupPointer(ref ulong ptr) => ptr = (uint)ptr;
+    private static void FixupPointer(ref ulong ptr)
+    {
+      ptr = (uint)ptr;
+    }
 
     ulong ISegmentData.Address => Address;
     ulong ISegmentData.Next => Next;
@@ -636,19 +636,19 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     {
       this = other;
 
-      unchecked
+      if (IntPtr.Size == 4)
       {
-        if (IntPtr.Size == 4)
-        {
-          FixupPointer(ref StartSegment);
-          FixupPointer(ref AllocationStart);
-          FixupPointer(ref AllocationContextPointer);
-          FixupPointer(ref AllocationContextLimit);
-        }
+        FixupPointer(ref StartSegment);
+        FixupPointer(ref AllocationStart);
+        FixupPointer(ref AllocationContextPointer);
+        FixupPointer(ref AllocationContextLimit);
       }
     }
 
-    private static void FixupPointer(ref ulong ptr) => ptr = (uint)ptr;
+    private static void FixupPointer(ref ulong ptr)
+    {
+      ptr = (uint)ptr;
+    }
   }
 
   [StructLayout(LayoutKind.Sequential)]
@@ -699,16 +699,19 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
           FixupPointer(ref HighestAddress);
           FixupPointer(ref CardTable);
 
-          for (int i = 0; i < FinalizationFillPointers.Length; i++)
+          for (var i = 0; i < FinalizationFillPointers.Length; i++)
             FixupPointer(ref FinalizationFillPointers[i]);
 
-          for (int i = 0; i < GenerationTable.Length; i++)
+          for (var i = 0; i < GenerationTable.Length; i++)
             GenerationTable[i] = new GenerationData(ref GenerationTable[i]);
         }
       }
     }
 
-    private static void FixupPointer(ref ulong ptr) => ptr = (uint)ptr;
+    private static void FixupPointer(ref ulong ptr)
+    {
+      ptr = (uint)ptr;
+    }
 
     ulong IHeapDetails.FirstHeapSegment => GenerationTable[2].StartSegment;
 
@@ -729,7 +732,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     ulong IHeapDetails.Gen2Stop => GenerationTable[1].AllocationStart;
   }
 
-  public enum CodeHeapType : int
+  public enum CodeHeapType
   {
     Loader,
     Host,

@@ -3,7 +3,7 @@
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   The struct that holds an EXCEPTION_RECORD
+  /// The struct that holds an EXCEPTION_RECORD
   /// </summary>
   [StructLayout(LayoutKind.Sequential)]
   internal class MINIDUMP_EXCEPTION

@@ -4,22 +4,22 @@
 namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
 {
   /// <summary>
-  ///   The representation of a local variable slot.
+  /// The representation of a local variable slot.
   /// </summary>
   public class PdbSlot
   {
     /// <summary>
-    ///   The slot number.
+    /// The slot number.
     /// </summary>
     public uint Slot { get; }
 
     /// <summary>
-    ///   The name of this variable slot.
+    /// The name of this variable slot.
     /// </summary>
     public string Name { get; }
 
     /// <summary>
-    ///   the flags associated with this slot.
+    /// the flags associated with this slot.
     /// </summary>
     public ushort Flags { get; }
     //internal uint segment;

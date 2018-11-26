@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 {
   /// <summary>
-  ///   Raw MINIDUMP_THREAD structure imported from DbgHelp.h
+  /// Raw MINIDUMP_THREAD structure imported from DbgHelp.h
   /// </summary>
   [StructLayout(LayoutKind.Sequential)]
   internal class MINIDUMP_THREAD
@@ -25,7 +25,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     public ulong Teb => DumpNative.ZeroExtendAddress(_teb);
 
     /// <summary>
-    ///   Describes the memory location of the thread's raw stack.
+    /// Describes the memory location of the thread's raw stack.
     /// </summary>
     public MINIDUMP_MEMORY_DESCRIPTOR Stack;
 

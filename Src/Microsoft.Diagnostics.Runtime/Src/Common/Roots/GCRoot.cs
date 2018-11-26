@@ -9,37 +9,36 @@ using Microsoft.Diagnostics.Runtime.Desktop;
 namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   A helper class to find the GC rooting chain for a particular object.
+  /// A helper class to find the GC rooting chain for a particular object.
   /// </summary>
   public class GCRoot
   {
     private static readonly Stack<ClrObject> s_emptyStack = new Stack<ClrObject>();
-    private readonly ClrHeap _heap;
     private int _maxTasks;
 
     /// <summary>
-    ///   Since GCRoot can be long running, this event will provide periodic updates to how many objects the algorithm
-    ///   has processed.  Note that in the case where we search all objects and do not find a path, it's unlikely that
-    ///   the number of objects processed will ever reach the total number of objects on the heap.  That's because there
-    ///   will be garbage objects on the heap we can't reach.
+    /// Since GCRoot can be long running, this event will provide periodic updates to how many objects the algorithm
+    /// has processed.  Note that in the case where we search all objects and do not find a path, it's unlikely that
+    /// the number of objects processed will ever reach the total number of objects on the heap.  That's because there
+    /// will be garbage objects on the heap we can't reach.
     /// </summary>
     public event GCRootProgressEvent ProgressUpdate;
 
     /// <summary>
-    ///   Returns the heap that's associated with this GCRoot instance.
+    /// Returns the heap that's associated with this GCRoot instance.
     /// </summary>
-    public ClrHeap Heap => _heap;
+    public ClrHeap Heap { get; }
 
     /// <summary>
-    ///   Whether or not to allow GC root to search in parallel or not.  Note that GCRoot does not have to respect this
-    ///   flag.  Parallel searching of roots will only happen if a copy of the stack and heap were built using BuildCache,
-    ///   and if the entire heap was cached.  Note that ClrMD and underlying APIs do NOT support multithreading, so this
-    ///   is only used when we can ensure all relevant data is local memory and we do not need to touch the debuggee.
+    /// Whether or not to allow GC root to search in parallel or not.  Note that GCRoot does not have to respect this
+    /// flag.  Parallel searching of roots will only happen if a copy of the stack and heap were built using BuildCache,
+    /// and if the entire heap was cached.  Note that ClrMD and underlying APIs do NOT support multithreading, so this
+    /// is only used when we can ensure all relevant data is local memory and we do not need to touch the debuggee.
     /// </summary>
     public bool AllowParallelSearch { get; set; } = true;
 
     /// <summary>
-    ///   The maximum number of tasks allowed to run in parallel, if GCRoot does a parallel search.
+    /// The maximum number of tasks allowed to run in parallel, if GCRoot does a parallel search.
     /// </summary>
     public int MaximumTasksAllowed
     {
@@ -54,22 +53,22 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Returns true if all relevant heap and root data is locally cached in this process for fast GCRoot processing.
+    /// Returns true if all relevant heap and root data is locally cached in this process for fast GCRoot processing.
     /// </summary>
-    public bool IsFullyCached => _heap.AreRootsCached;
+    public bool IsFullyCached => Heap.AreRootsCached;
 
     /// <summary>
-    ///   Creates a GCRoot helper object for the given heap.
+    /// Creates a GCRoot helper object for the given heap.
     /// </summary>
     /// <param name="heap">The heap the object in question is on.</param>
     public GCRoot(ClrHeap heap)
     {
-      _heap = heap ?? throw new ArgumentNullException(nameof(heap));
+      Heap = heap ?? throw new ArgumentNullException(nameof(heap));
       _maxTasks = Environment.ProcessorCount * 2;
     }
 
     /// <summary>
-    ///   Enumerates GCRoots of a given object.  Similar to !gcroot.  Note this function only returns paths that are fully unique.
+    /// Enumerates GCRoots of a given object.  Similar to !gcroot.  Note this function only returns paths that are fully unique.
     /// </summary>
     /// <param name="target">The target object to search for GC rooting.</param>
     /// <param name="cancelToken">A cancellation token to stop enumeration.</param>
@@ -80,7 +79,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Enumerates GCRoots of a given object.  Similar to !gcroot.
+    /// Enumerates GCRoots of a given object.  Similar to !gcroot.
     /// </summary>
     /// <param name="target">The target object to search for GC rooting.</param>
     /// <param name="unique">Whether to only return fully unique paths.</param>
@@ -88,8 +87,8 @@ namespace Microsoft.Diagnostics.Runtime
     /// <returns>An enumeration of all GC roots found for target.</returns>
     public IEnumerable<RootPath> EnumerateGCRoots(ulong target, bool unique, CancellationToken cancelToken)
     {
-      _heap.BuildDependentHandleMap(cancelToken);
-      var totalObjects = _heap.TotalObjects;
+      Heap.BuildDependentHandleMap(cancelToken);
+      var totalObjects = Heap.TotalObjects;
       long lastObjectReported = 0;
 
       var parallel = AllowParallelSearch && IsFullyCached && _maxTasks > 0;
@@ -99,15 +98,15 @@ namespace Microsoft.Diagnostics.Runtime
       var knownEndPoints = new Dictionary<ulong, LinkedListNode<ClrObject>>();
 
       if (parallel)
-        processedObjects = new ParallelObjectSet(_heap);
+        processedObjects = new ParallelObjectSet(Heap);
 
       else
-        processedObjects = new ObjectSet(_heap);
+        processedObjects = new ObjectSet(Heap);
 
       var initial = 0;
       tasks = new Task<Tuple<LinkedList<ClrObject>, ClrRoot>>[_maxTasks];
 
-      foreach (var handle in _heap.EnumerateStrongHandles())
+      foreach (var handle in Heap.EnumerateStrongHandles())
       {
         Debug.Assert(handle.HandleType != HandleType.Dependent);
         Debug.Assert(handle.Object != 0);
@@ -115,7 +114,7 @@ namespace Microsoft.Diagnostics.Runtime
         if (processedObjects.Contains(handle.Object))
           continue;
 
-        Debug.Assert(_heap.GetObjectType(handle.Object) == handle.Type);
+        Debug.Assert(Heap.GetObjectType(handle.Object) == handle.Type);
 
         if (parallel)
         {
@@ -144,10 +143,10 @@ namespace Microsoft.Diagnostics.Runtime
         ReportObjectCount(processedObjects.Count, ref lastObjectReported, totalObjects);
       }
 
-      foreach (var root in _heap.EnumerateStackRoots())
+      foreach (var root in Heap.EnumerateStackRoots())
         if (!processedObjects.Contains(root.Object))
         {
-          Debug.Assert(_heap.GetObjectType(root.Object) == root.Type);
+          Debug.Assert(Heap.GetObjectType(root.Object) == root.Type);
 
           if (parallel)
           {
@@ -210,7 +209,7 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Returns the path from the start object to the end object (or null if no such path exists).
+    /// Returns the path from the start object to the end object (or null if no such path exists).
     /// </summary>
     /// <param name="source">The initial object to start the search from.</param>
     /// <param name="target">The object we are searching for.</param>
@@ -218,12 +217,12 @@ namespace Microsoft.Diagnostics.Runtime
     /// <returns>A path from 'source' to 'target' if one exists, null if one does not.</returns>
     public LinkedList<ClrObject> FindSinglePath(ulong source, ulong target, CancellationToken cancelToken)
     {
-      _heap.BuildDependentHandleMap(cancelToken);
-      return PathTo(new ObjectSet(_heap), null, new ClrObject(source, _heap.GetObjectType(source)), target, false, false, cancelToken).FirstOrDefault();
+      Heap.BuildDependentHandleMap(cancelToken);
+      return PathTo(new ObjectSet(Heap), null, new ClrObject(source, Heap.GetObjectType(source)), target, false, false, cancelToken).FirstOrDefault();
     }
 
     /// <summary>
-    ///   Returns the path from the start object to the end object (or null if no such path exists).
+    /// Returns the path from the start object to the end object (or null if no such path exists).
     /// </summary>
     /// <param name="source">The initial object to start the search from.</param>
     /// <param name="target">The object we are searching for.</param>
@@ -232,11 +231,11 @@ namespace Microsoft.Diagnostics.Runtime
     /// <returns>A path from 'source' to 'target' if one exists, null if one does not.</returns>
     public IEnumerable<LinkedList<ClrObject>> EnumerateAllPaths(ulong source, ulong target, bool unique, CancellationToken cancelToken)
     {
-      _heap.BuildDependentHandleMap(cancelToken);
+      Heap.BuildDependentHandleMap(cancelToken);
       return PathTo(
-        new ObjectSet(_heap),
+        new ObjectSet(Heap),
         new Dictionary<ulong, LinkedListNode<ClrObject>>(),
-        new ClrObject(source, _heap.GetObjectType(source)),
+        new ClrObject(source, Heap.GetObjectType(source)),
         target,
         unique,
         false,
@@ -244,26 +243,26 @@ namespace Microsoft.Diagnostics.Runtime
     }
 
     /// <summary>
-    ///   Builds a cache of the GC heap and roots.  This will consume a LOT of memory, so when calling it you must wrap this in
-    ///   a try/catch for OutOfMemoryException.
-    ///   Note that this function allows you to choose whether we have exact thread callstacks or not.  Exact thread callstacks
-    ///   will essentially force ClrMD to walk the stack as a real GC would, but this can take 10s of minutes when the thread count gets
-    ///   into the 1000s.
+    /// Builds a cache of the GC heap and roots.  This will consume a LOT of memory, so when calling it you must wrap this in
+    /// a try/catch for OutOfMemoryException.
+    /// Note that this function allows you to choose whether we have exact thread callstacks or not.  Exact thread callstacks
+    /// will essentially force ClrMD to walk the stack as a real GC would, but this can take 10s of minutes when the thread count gets
+    /// into the 1000s.
     /// </summary>
     /// <param name="cancelToken">The cancellation token used to cancel the operation if it's taking too long.</param>
     public void BuildCache(CancellationToken cancelToken)
     {
-      _heap.CacheRoots(cancelToken);
-      _heap.CacheHeap(cancelToken);
+      Heap.CacheRoots(cancelToken);
+      Heap.CacheHeap(cancelToken);
     }
 
     /// <summary>
-    ///   Clears all caches, reclaiming most memory held by this GCRoot object.
+    /// Clears all caches, reclaiming most memory held by this GCRoot object.
     /// </summary>
     public void ClearCache()
     {
-      _heap.ClearHeapCache();
-      _heap.ClearRootCache();
+      Heap.ClearHeapCache();
+      Heap.ClearRootCache();
     }
 
     private Task<Tuple<LinkedList<ClrObject>, ClrRoot>> PathToParallel(
@@ -339,7 +338,7 @@ namespace Microsoft.Diagnostics.Runtime
       // Did the 'start' object point directly to 'end'?  If so, early out.
       if (foundTarget)
       {
-        path.AddLast(new PathEntry {Object = ClrObject.Create(target, _heap.GetObjectType(target))});
+        path.AddLast(new PathEntry {Object = ClrObject.Create(target, Heap.GetObjectType(target))});
         yield return GetResult(knownEndPoints, path, null, target);
       }
       else if (foundEnding != null)
@@ -382,7 +381,7 @@ namespace Microsoft.Diagnostics.Runtime
             // If we found the target object while enumerating refs of the current object, we are done.
             if (foundTarget)
             {
-              path.AddLast(new PathEntry {Object = ClrObject.Create(target, _heap.GetObjectType(target))});
+              path.AddLast(new PathEntry {Object = ClrObject.Create(target, Heap.GetObjectType(target))});
               TraceFullPath("FoundTarget", path);
 
               yield return GetResult(knownEndPoints, path, null, target);
@@ -521,7 +520,7 @@ namespace Microsoft.Diagnostics.Runtime
     [Conditional("GCROOTTRACE")]
     private void TraceCurrent(ulong next, IEnumerable<ulong> refs)
     {
-      Debug.WriteLine($"Considering: {new ClrObject(next, _heap.GetObjectType(next))} Refs:{string.Join(" ", refs)}");
+      Debug.WriteLine($"Considering: {new ClrObject(next, Heap.GetObjectType(next))} Refs:{string.Join(" ", refs)}");
     }
 
     [Conditional("GCROOTTRACE")]

@@ -8,7 +8,7 @@ using System.IO;
 namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
 {
   /// <summary>
-  ///   An object that can map offsets in an IL stream to source locations and block scopes.
+  /// An object that can map offsets in an IL stream to source locations and block scopes.
   /// </summary>
   public sealed class PdbReader : IDisposable
   {
@@ -21,7 +21,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
     private Guid _guid;
 
     /// <summary>
-    ///   Gets the properties of a given pdb.  Throws IOException on error.
+    /// Gets the properties of a given pdb.  Throws IOException on error.
     /// </summary>
     /// <param name="pdbFile">The pdb file to load.</param>
     /// <param name="signature">The signature of pdbFile.</param>
@@ -46,8 +46,8 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
     }
 
     /// <summary>
-    ///   Allocates an object that can map some kinds of ILocation objects to IPrimarySourceLocation objects.
-    ///   For example, a PDB reader that maps offsets in an IL stream to source locations.
+    /// Allocates an object that can map some kinds of ILocation objects to IPrimarySourceLocation objects.
+    /// For example, a PDB reader that maps offsets in an IL stream to source locations.
     /// </summary>
     public PdbReader(Stream pdbStream)
     {
@@ -55,7 +55,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
     }
 
     /// <summary>
-    ///   Constructs a PdbReader from a path on disk.
+    /// Constructs a PdbReader from a path on disk.
     /// </summary>
     /// <param name="fileName">The pdb on disk to load.</param>
     public PdbReader(string fileName)
@@ -73,32 +73,32 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
     }
 
     /// <summary>
-    ///   A collection of all sources in this pdb.
+    /// A collection of all sources in this pdb.
     /// </summary>
     public IEnumerable<PdbSource> Sources => _sources;
 
     /// <summary>
-    ///   A collection of all functions in this pdb.
+    /// A collection of all functions in this pdb.
     /// </summary>
     internal IEnumerable<PdbFunction> Functions => _pdbFunctionMap.Values;
 
     /// <summary>
-    ///   The version of this PDB.
+    /// The version of this PDB.
     /// </summary>
     public int Version => _ver;
 
     /// <summary>
-    ///   The Guid signature of this pdb.  Should be compared to the corresponding pdb signature in the matching PEFile.
+    /// The Guid signature of this pdb.  Should be compared to the corresponding pdb signature in the matching PEFile.
     /// </summary>
     public Guid Signature => _guid;
 
     /// <summary>
-    ///   The age of this pdb.  Should be compared to the corresponding pdb age in the matching PEFile.
+    /// The age of this pdb.  Should be compared to the corresponding pdb age in the matching PEFile.
     /// </summary>
     public int Age => _age;
 
     /// <summary>
-    ///   Closes all of the source files that have been opened to provide the contents source locations corresponding to IL offsets.
+    /// Closes all of the source files that have been opened to provide the contents source locations corresponding to IL offsets.
     /// </summary>
     public void Dispose()
     {
@@ -107,7 +107,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
     }
 
     /// <summary>
-    ///   Closes all of the source files that have been opened to provide the contents source locations corresponding to IL offsets.
+    /// Closes all of the source files that have been opened to provide the contents source locations corresponding to IL offsets.
     /// </summary>
     ~PdbReader()
     {
@@ -121,7 +121,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
     }
 
     /// <summary>
-    ///   Retreives a PdbFunction by its metadata token.
+    /// Retreives a PdbFunction by its metadata token.
     /// </summary>
     /// <param name="methodToken"></param>
     /// <returns></returns>

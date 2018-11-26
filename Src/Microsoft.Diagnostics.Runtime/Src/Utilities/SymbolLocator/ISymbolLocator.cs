@@ -3,8 +3,8 @@
   public interface ISymbolLocator
   {
     /// <summary>
-    ///   Attempts to locate a binary via the symbol server. This function will then copy the file
-    ///   locally to the symbol cache and return the location of the local file on disk.
+    /// Attempts to locate a binary via the symbol server. This function will then copy the file
+    /// locally to the symbol cache and return the location of the local file on disk.
     /// </summary>
     /// <param name="fileName">The filename that the binary is indexed under.</param>
     /// <param name="buildTimeStamp">The build timestamp the binary is indexed under.</param>

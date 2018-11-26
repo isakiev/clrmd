@@ -15,7 +15,7 @@ namespace Microsoft.Diagnostics.Runtime.Interop
     /* IDebugOutputCallbacks */
 
     /// <summary>
-    ///   This method is not used.
+    /// This method is not used.
     /// </summary>
     [PreserveSig]
     new int Output(

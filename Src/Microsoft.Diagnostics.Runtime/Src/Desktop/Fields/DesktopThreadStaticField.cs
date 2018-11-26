@@ -8,8 +8,8 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public DesktopThreadStaticField(DesktopGCHeap heap, IFieldData field, string name)
     {
       _field = field;
-      _name = name;
-      _token = field.FieldToken;
+      Name = name;
+      Token = field.FieldToken;
       _type = (BaseDesktopHeapType)heap.GetTypeByMethodTable(field.TypeMethodTable, 0);
     }
 
@@ -38,7 +38,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return _type.DesktopHeap.GetValueAtAddress(ElementType, addr);
     }
 
-    public override uint Token => _token;
+    public override uint Token { get; }
 
     public override ulong GetAddress(ClrAppDomain appDomain, ClrThread thread)
     {
@@ -53,18 +53,18 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override ClrElementType ElementType => (ClrElementType)_field.CorElementType;
 
-    public override string Name => _name;
+    public override string Name { get; }
 
     public override ClrType Type => _type;
 
     // these are optional.  
     /// <summary>
-    ///   If the field has a well defined offset from the base of the object, return it (otherwise -1).
+    /// If the field has a well defined offset from the base of the object, return it (otherwise -1).
     /// </summary>
     public override int Offset => (int)_field.Offset;
 
     /// <summary>
-    ///   Given an object reference, fetch the address of the field.
+    /// Given an object reference, fetch the address of the field.
     /// </summary>
 
     public override bool HasSimpleValue => _type != null && !ElementType.IsValueClass();
@@ -79,8 +79,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public override bool IsProtected => throw new NotImplementedException();
 
     private readonly IFieldData _field;
-    private readonly string _name;
     private readonly BaseDesktopHeapType _type;
-    private readonly uint _token;
   }
 }

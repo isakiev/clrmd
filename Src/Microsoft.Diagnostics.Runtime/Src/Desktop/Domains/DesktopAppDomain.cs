@@ -6,8 +6,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
   internal class DesktopAppDomain : ClrAppDomain
   {
     private readonly ulong _address;
-    private readonly string _name;
-    private readonly int _id;
     private readonly List<ClrModule> _modules = new List<ClrModule>();
     private readonly DesktopRuntimeBase _runtime;
 
@@ -16,8 +14,8 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     internal DesktopAppDomain(DesktopRuntimeBase runtime, IAppDomainData data, string name)
     {
       _address = data.Address;
-      _id = data.Id;
-      _name = name;
+      Id = data.Id;
+      Name = name;
       InternalId = s_internalId++;
       _runtime = runtime;
     }
@@ -30,19 +28,19 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public override ClrRuntime Runtime => _runtime;
 
     /// <summary>
-    ///   ulong of the AppDomain.
+    /// ulong of the AppDomain.
     /// </summary>
     public override ulong Address => _address;
 
     /// <summary>
-    ///   The AppDomain's ID.
+    /// The AppDomain's ID.
     /// </summary>
-    public override int Id => _id;
+    public override int Id { get; }
 
     /// <summary>
-    ///   The name of the AppDomain, as specified when the domain was created.
+    /// The name of the AppDomain, as specified when the domain was created.
     /// </summary>
-    public override string Name => _name;
+    public override string Name { get; }
     public override IList<ClrModule> Modules => _modules;
 
     internal int InternalId { get; }

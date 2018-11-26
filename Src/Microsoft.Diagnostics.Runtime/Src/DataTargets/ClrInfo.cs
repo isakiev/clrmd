@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 
 namespace Microsoft.Diagnostics.Runtime
 {
   /// <summary>
-  ///   Represents information about a single Clr runtime in a process.
+  /// Represents information about a single Clr runtime in a process.
   /// </summary>
   [Serializable]
   public class ClrInfo

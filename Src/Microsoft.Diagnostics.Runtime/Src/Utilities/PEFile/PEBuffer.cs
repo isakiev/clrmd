@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
   /// <summary>
-  ///   A PEBuffer represents
+  /// A PEBuffer represents
   /// </summary>
   internal sealed unsafe class PEBuffer : IDisposable
   {
@@ -25,27 +25,27 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     {
       if (size > _buff.Length)
         GetBuffer(size);
-      if (!(_buffPos <= filePos && filePos + size <= _buffPos + _buffLen))
+      if (!(_buffPos <= filePos && filePos + size <= _buffPos + Length))
       {
         // Read in the block of 'size' bytes at filePos
         _buffPos = filePos;
         _stream.Seek(_buffPos, SeekOrigin.Begin);
-        _buffLen = 0;
-        while (_buffLen < _buff.Length)
+        Length = 0;
+        while (Length < _buff.Length)
         {
-          var count = _stream.Read(_buff, _buffLen, size - _buffLen);
+          var count = _stream.Read(_buff, Length, size - Length);
           if (count == 0)
             break;
 
-          _buffLen += count;
+          Length += count;
         }
       }
 
-      return &_buffPtr[filePos - _buffPos];
+      return &Buffer[filePos - _buffPos];
     }
 
-    public byte* Buffer => _buffPtr;
-    public int Length => _buffLen;
+    public byte* Buffer { get; private set; }
+    public int Length { get; private set; }
 
     public void Dispose()
     {
@@ -64,16 +64,14 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       _pinningHandle = GCHandle.Alloc(_buff, GCHandleType.Pinned);
       fixed (byte* ptr = _buff)
       {
-        _buffPtr = ptr;
+        Buffer = ptr;
       }
 
-      _buffLen = 0;
+      Length = 0;
     }
 
     private int _buffPos;
-    private int _buffLen; // Number of valid bytes in _buff
     private byte[] _buff;
-    private byte* _buffPtr;
     private GCHandle _pinningHandle;
     private readonly Stream _stream;
   }

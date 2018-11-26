@@ -14,31 +14,31 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
   internal sealed class MINIDUMP_MODULE
   {
     /// <summary>
-    ///   Address that module is loaded within target.
+    /// Address that module is loaded within target.
     /// </summary>
     private ulong _baseofimage;
 
     public ulong BaseOfImage => DumpNative.ZeroExtendAddress(_baseofimage);
 
     /// <summary>
-    ///   Size of image within memory copied from IMAGE_OPTIONAL_HEADER.SizeOfImage.
-    ///   Note that this is usually different than the file size.
+    /// Size of image within memory copied from IMAGE_OPTIONAL_HEADER.SizeOfImage.
+    /// Note that this is usually different than the file size.
     /// </summary>
     public uint SizeOfImage;
 
     /// <summary>
-    ///   Checksum, copied from IMAGE_OPTIONAL_HEADER.CheckSum. May be 0 if not optional
-    ///   header is not available.
+    /// Checksum, copied from IMAGE_OPTIONAL_HEADER.CheckSum. May be 0 if not optional
+    /// header is not available.
     /// </summary>
     public uint CheckSum;
 
     /// <summary>
-    ///   TimeStamp in Unix 32-bit time_t format. Copied from IMAGE_FILE_HEADER.TimeDateStamp
+    /// TimeStamp in Unix 32-bit time_t format. Copied from IMAGE_FILE_HEADER.TimeDateStamp
     /// </summary>
     public uint TimeDateStamp;
 
     /// <summary>
-    ///   RVA within minidump of the string containing the full path of the module.
+    /// RVA within minidump of the string containing the full path of the module.
     /// </summary>
     public RVA ModuleNameRva;
 
@@ -52,8 +52,8 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     private ulong _reserved1;
 
     /// <summary>
-    ///   Gets TimeDateStamp as a DateTime. This is based off a 32-bit value and will overflow in 2038.
-    ///   This is not the same as the timestamps on the file.
+    /// Gets TimeDateStamp as a DateTime. This is based off a 32-bit value and will overflow in 2038.
+    /// This is not the same as the timestamps on the file.
     /// </summary>
     public DateTime Timestamp
     {

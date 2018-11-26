@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Microsoft.Diagnostics.Runtime.Linux
+﻿namespace Microsoft.Diagnostics.Runtime.Linux
 {
-  class ElfProgramHeader
+  internal class ElfProgramHeader
   {
     private readonly Reader _reader;
     private ELFProgramHeader64 _header;
