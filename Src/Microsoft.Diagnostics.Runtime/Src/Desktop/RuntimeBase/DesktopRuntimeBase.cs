@@ -171,12 +171,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     public override ClrHeap Heap => _heap.Value;
 
-    [Obsolete]
-    public override ClrHeap GetHeap()
-    {
-      return _heap.Value;
-    }
-
     private DesktopGCHeap CreateHeap()
     {
       if (HasArrayComponentMethodTables)

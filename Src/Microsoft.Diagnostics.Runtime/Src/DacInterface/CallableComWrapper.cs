@@ -17,7 +17,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
 
         private ReleaseDelegate _release;
         
-        internal CallableCOMWrapper(CallableCOMWrapper toClone)
+        protected CallableCOMWrapper(CallableCOMWrapper toClone)
         {
           if (toClone._disposed)
             throw new ObjectDisposedException(GetType().FullName);

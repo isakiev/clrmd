@@ -125,12 +125,6 @@ namespace Microsoft.Diagnostics.Runtime
     /// <summary>
     ///   Gets the GC heap of the process.
     /// </summary>
-    [Obsolete("Use the Heap property instead.")]
-    public abstract ClrHeap GetHeap();
-
-    /// <summary>
-    ///   Gets the GC heap of the process.
-    /// </summary>
     public abstract ClrHeap Heap { get; }
 
     /// <summary>

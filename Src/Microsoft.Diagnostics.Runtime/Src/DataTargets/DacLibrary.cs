@@ -37,6 +37,16 @@ namespace Microsoft.Diagnostics.Runtime
               return sos != null ? new SOSDac(sos) : null;
             }
         }
+        
+        public T GetInterface<T>(ref Guid riid) where T : CallableCOMWrapper
+        {
+          IntPtr pUnknown = InternalDacPrivateInterface.QueryInterface(ref riid);
+          if (pUnknown == IntPtr.Zero)
+            return null;
+
+          T t = (T)Activator.CreateInstance(typeof(T), this, pUnknown);
+          return t;
+        }
 
         internal static IntPtr TryGetDacPtr(object ix)
         {
