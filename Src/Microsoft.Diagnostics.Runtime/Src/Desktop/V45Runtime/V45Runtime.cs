@@ -39,7 +39,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     protected override void InitApi()
     {
       if (_sos == null)
-        _sos = DacLibrary.SOSDacInterface;
+        _sos = DacLibrary.GetSOSInterfaceNoAddRef();
 
       Debug.Assert(_sos != null);
     }

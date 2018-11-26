@@ -30,6 +30,10 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
         {
             _library = library;
         }
+        
+        public ClrDataProcess(CallableCOMWrapper toClone) : base(toClone)
+        {
+        }
 
         public SOSDac GetSOSDacInterface()
         {
