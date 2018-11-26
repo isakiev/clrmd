@@ -12,7 +12,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       ValidateChunks(chunks, isList64);
       return chunks;
     }
-    
+
     private static void SplitAndMergeChunks(IList<DumpMemoryChunk> chunks)
     {
       for (var i = 1; i < chunks.Count; i++)
@@ -57,7 +57,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
         }
       }
     }
-    
+
     private static void ValidateChunks(IList<DumpMemoryChunk> chunks, bool isList64)
     {
       for (var i = 0; i < chunks.Count; i++)
@@ -66,7 +66,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
           chunks[i].TargetStartAddress > chunks[i].TargetEndAddress)
           throw new ClrDiagnosticsException(
             "Unexpected inconsistency error in dump memory chunk " + i
-          + " with target base address " + chunks[i].TargetStartAddress + ".",
+            + " with target base address " + chunks[i].TargetStartAddress + ".",
             ClrDiagnosticsExceptionKind.CrashDumpError);
 
         // If there's a next to compare to, and it's a MinidumpWithFullMemory, then we expect
@@ -77,7 +77,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
           chunks[i].TargetEndAddress > chunks[i + 1].TargetStartAddress))
           throw new ClrDiagnosticsException(
             "Unexpected relative addresses inconsistency between dump memory chunks "
-          + i + " and " + (i + 1) + ".",
+            + i + " and " + (i + 1) + ".",
             ClrDiagnosticsExceptionKind.CrashDumpError);
 
         // Because we sorted and split/merged entries we can expect them to be increasing and non-overlapping

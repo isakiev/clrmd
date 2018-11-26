@@ -15,7 +15,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       _ccw = data;
       _heap = heap;
     }
-    
+
     public override ulong IUnknown => _ccw.IUnknown;
     public override ulong Object => _ccw.Object;
     public override ulong Handle => _ccw.Handle;

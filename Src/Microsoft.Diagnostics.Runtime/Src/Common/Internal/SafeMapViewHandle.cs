@@ -14,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime
     {
       return UnmapViewOfFile(handle);
     }
-    
+
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool UnmapViewOfFile(IntPtr baseAddress);

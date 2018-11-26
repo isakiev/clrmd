@@ -14,17 +14,17 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
     public const int MAX_PATH = 260;
 
     [
-    DllImport(Kernel32LibraryName)
+      DllImport(Kernel32LibraryName)
     ]
     public static extern bool CloseHandle(IntPtr handle);
 
     [
-    DllImport(ShimLibraryName, CharSet = CharSet.Unicode, PreserveSig = false)
+      DllImport(ShimLibraryName, CharSet = CharSet.Unicode, PreserveSig = false)
     ]
     public static extern ICorDebug CreateDebuggingInterfaceFromVersion(int iDebuggerVersion, string szDebuggeeVersion);
 
     [
-    DllImport(ShimLibraryName, CharSet = CharSet.Unicode, PreserveSig = false)
+      DllImport(ShimLibraryName, CharSet = CharSet.Unicode, PreserveSig = false)
     ]
     public static extern void GetVersionFromProcess(
       ProcessSafeHandle hProcess,
@@ -33,7 +33,7 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
       out int dwLength);
 
     [
-    DllImport(ShimLibraryName, CharSet = CharSet.Unicode, PreserveSig = false)
+      DllImport(ShimLibraryName, CharSet = CharSet.Unicode, PreserveSig = false)
     ]
     public static extern void GetRequestedRuntimeVersion(
       string pExe,
@@ -42,7 +42,7 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
       out int dwLength);
 
     [
-    DllImport(ShimLibraryName, CharSet = CharSet.Unicode, PreserveSig = false)
+      DllImport(ShimLibraryName, CharSet = CharSet.Unicode, PreserveSig = false)
     ]
     public static extern void CLRCreateInstance(
       ref Guid clsid,
@@ -67,7 +67,7 @@ namespace Microsoft.Diagnostics.Runtime.ICorDebug
     }
 
     [
-    DllImport(Kernel32LibraryName, PreserveSig = true)
+      DllImport(Kernel32LibraryName, PreserveSig = true)
     ]
     public static extern ProcessSafeHandle OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
   }

@@ -16,11 +16,12 @@ namespace Microsoft.Diagnostics.Runtime
 
     public override bool IsThreadpoolTimer => (ThreadType & (int)TlsThreadType.ThreadType_Timer) == (int)TlsThreadType.ThreadType_Timer;
 
-    public override bool IsThreadpoolCompletionPort => (ThreadType & (int)TlsThreadType.ThreadType_Threadpool_IOCompletion) == (int)TlsThreadType.ThreadType_Threadpool_IOCompletion
-   || (_threadState & (int)ThreadState.TS_CompletionPortThread) == (int)ThreadState.TS_CompletionPortThread;
+    public override bool IsThreadpoolCompletionPort =>
+      (ThreadType & (int)TlsThreadType.ThreadType_Threadpool_IOCompletion) == (int)TlsThreadType.ThreadType_Threadpool_IOCompletion
+      || (_threadState & (int)ThreadState.TS_CompletionPortThread) == (int)ThreadState.TS_CompletionPortThread;
 
     public override bool IsThreadpoolWorker => (ThreadType & (int)TlsThreadType.ThreadType_Threadpool_Worker) == (int)TlsThreadType.ThreadType_Threadpool_Worker
-   || (_threadState & (int)ThreadState.TS_TPWorkerThread) == (int)ThreadState.TS_TPWorkerThread;
+      || (_threadState & (int)ThreadState.TS_TPWorkerThread) == (int)ThreadState.TS_TPWorkerThread;
 
     public override bool IsThreadpoolWait => (ThreadType & (int)TlsThreadType.ThreadType_Wait) == (int)TlsThreadType.ThreadType_Wait;
 
@@ -51,7 +52,7 @@ namespace Microsoft.Diagnostics.Runtime
     public override bool IsMTA => (_threadState & (int)ThreadState.TS_InMTA) == (int)ThreadState.TS_InMTA;
 
     public override bool IsAbortRequested => (_threadState & (int)ThreadState.TS_AbortRequested) == (int)ThreadState.TS_AbortRequested
-   || (_threadState & (int)ThreadState.TS_AbortInitiated) == (int)ThreadState.TS_AbortInitiated;
+      || (_threadState & (int)ThreadState.TS_AbortInitiated) == (int)ThreadState.TS_AbortInitiated;
 
     public override bool IsAlive => _osThreadId != 0 && (_threadState & ((int)ThreadState.TS_Unstarted | (int)ThreadState.TS_Dead)) == 0;
     public override uint OSThreadId => _osThreadId;

@@ -8,7 +8,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
   public static class ModuleUtil
   {
     public static readonly Regex InvalidChars = new Regex($"[{Regex.Escape(new string(Path.GetInvalidPathChars()))}]");
-    
+
     public static IReadOnlyCollection<ClrInfo> GetVersions([NotNull] this IEnumerable<ModuleInfo> modules, Architecture architecture, out bool hasNativeRuntimes)
     {
       var versions = new List<ClrInfo>();

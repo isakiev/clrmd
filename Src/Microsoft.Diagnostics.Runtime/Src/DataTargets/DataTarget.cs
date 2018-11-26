@@ -21,9 +21,9 @@ namespace Microsoft.Diagnostics.Runtime
 //        PlatformFunctions = new LinuxFunctions();
 //      else
 //#endif
-        PlatformFunctions = new WindowsFunctions();
+      PlatformFunctions = new WindowsFunctions();
     }
-    
+
     private List<DacLibrary> _dacLibraries = new List<DacLibrary>(2);
 
     public DataTarget(IDataReader dataReader, IDacLocator dacLocator, ISymbolLocator symbolLocator)
@@ -61,7 +61,7 @@ namespace Microsoft.Diagnostics.Runtime
       foreach (DacLibrary library in _dacLibraries)
         library.Dispose();
     }
-    
+
     /// <summary>
     ///   Creates a runtime from the given Dac file on disk.
     /// </summary>

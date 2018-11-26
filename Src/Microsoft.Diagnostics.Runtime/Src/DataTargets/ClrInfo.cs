@@ -19,7 +19,7 @@ namespace Microsoft.Diagnostics.Runtime
       ModuleInfo = moduleInfo;
       Architecture = architecture;
     }
-    
+
     public VersionInfo Version => ModuleInfo.Version;
     public string DacFileName => ClrInfoProvider.GetDacFileName(Flavor);
     public string DacRequestFileName => ClrInfoProvider.GetDacRequestFileName(Flavor, Architecture, Architecture, Version);

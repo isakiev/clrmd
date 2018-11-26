@@ -7,8 +7,8 @@ namespace Microsoft.Diagnostics.Runtime
     public static bool IsPrimitive(this ClrElementType cet)
     {
       return cet >= ClrElementType.Boolean && cet <= ClrElementType.Double
-     || cet == ClrElementType.NativeInt || cet == ClrElementType.NativeUInt
-     || cet == ClrElementType.Pointer || cet == ClrElementType.FunctionPointer;
+        || cet == ClrElementType.NativeInt || cet == ClrElementType.NativeUInt
+        || cet == ClrElementType.Pointer || cet == ClrElementType.FunctionPointer;
     }
 
     public static bool IsValueClass(this ClrElementType cet)
@@ -19,8 +19,8 @@ namespace Microsoft.Diagnostics.Runtime
     public static bool IsObjectReference(this ClrElementType cet)
     {
       return cet == ClrElementType.String || cet == ClrElementType.Class
-     || cet == ClrElementType.Array || cet == ClrElementType.SZArray
-     || cet == ClrElementType.Object;
+        || cet == ClrElementType.Array || cet == ClrElementType.SZArray
+        || cet == ClrElementType.Object;
     }
 
     public static Type GetTypeForElementType(this ClrElementType type)

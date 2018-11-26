@@ -25,7 +25,7 @@ namespace Microsoft.Diagnostics.Runtime
     {
       return CloseHandle(handle);
     }
-    
+
     [DllImport("kernel32.dll", SetLastError = true, PreserveSig = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool CloseHandle(IntPtr handle);

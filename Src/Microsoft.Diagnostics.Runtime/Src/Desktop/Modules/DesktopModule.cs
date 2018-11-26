@@ -233,7 +233,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         {
           _debugMode = DebuggableAttribute.DebuggingModes.None;
         }
-        
       }
       catch (SEHException)
       {

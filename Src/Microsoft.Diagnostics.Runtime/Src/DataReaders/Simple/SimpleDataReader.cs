@@ -54,12 +54,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     private const uint DumpVersion = 0xa793;
     private const uint DumpVersionMask = 0xffff;
     private const uint DumpWithFullMemoryInfo = 0x0002;
-    
+
     private readonly BinaryReader myReader;
     private readonly DumpHeader myHeader;
     private readonly DumpSystemInfo mySystemInfo;
     private readonly IDictionary<DumpStreamType, DumpStreamDetails> myStreamDictionary;
-    
+
     // Caching the chunks avoids the cost of Marshal.PtrToStructure on every single element in the memory list.
     // Empirically, this cache provides huge performance improvements for read memory.
     // This cache could be completey removed if we used unsafe C# and just had direct pointers
@@ -68,16 +68,15 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 
     private IReadOnlyCollection<MINIDUMP_MODULE> myModules;
     private IReadOnlyCollection<MINIDUMP_THREAD> myThreads;
-    
 
     public SimpleDataReader(string filePath)
     {
       if (!File.Exists(filePath))
         throw new FileNotFoundException(filePath);
-      
+
       myReader = new BinaryReader(File.OpenRead(filePath));
       myHeader = myReader.ReadStructure<DumpHeader>();
-      
+
       if (myHeader.Singature != DumpSignature)
         throw new ClrDiagnosticsException("Incorrect dump signature");
       if ((myHeader.Version & DumpVersionMask) != DumpVersion)
@@ -114,8 +113,8 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     public static bool IsCorrectDumpFormat([NotNull] string file)
     {
       if (!File.Exists(file))
-        throw new FileNotFoundException(file);      
-      
+        throw new FileNotFoundException(file);
+
       using (var reader = new BinaryReader(File.OpenRead(file)))
       {
         var header = reader.ReadStructure<DumpHeader>();
@@ -135,12 +134,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 
       return details;
     }
-    
+
     public void Dispose()
     {
       myReader.Dispose();
     }
-    
+
     public void Close()
     {
       Dispose();
@@ -178,11 +177,11 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
           return 4;
       }
     }
-    
+
     private string ReadString(ContentPosition position)
     {
       myReader.Seek(position);
-      
+
       // Minidump string is defined as:
       // typedef struct _MINIDUMP_STRING {
       //   ULONG32 Length;         // Length in bytes of the string
@@ -198,7 +197,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     {
       if (myModules != null)
         return myModules;
-      
+
       var streamDetails = GetStreamDetails(DumpStreamType.ModuleList);
       myReader.Seek(streamDetails.Position);
 
@@ -217,14 +216,15 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 
       foreach (var module in GetModules())
       {
-        result.Add(new ModuleInfo(this)
-        {
-          FileName = ReadString(new ContentPosition(module.ModuleNameRva.Value)),
-          ImageBase = module.BaseOfImage,
-          FileSize = module.SizeOfImage,
-          TimeStamp = module.TimeDateStamp,
-          Version = GetVersionInfo(module)
-        });
+        result.Add(
+          new ModuleInfo(this)
+          {
+            FileName = ReadString(new ContentPosition(module.ModuleNameRva.Value)),
+            ImageBase = module.BaseOfImage,
+            FileSize = module.SizeOfImage,
+            TimeStamp = module.TimeDateStamp,
+            Version = GetVersionInfo(module)
+          });
       }
 
       return result;
@@ -236,7 +236,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
         return myThreads;
 
       var isThreadEx = false;
-      
+
       // On x86 and X64, we have the ThreadListStream.  On IA64, we have the ThreadExListStream.
       if (!myStreamDictionary.TryGetValue(DumpStreamType.ThreadList, out var streamDetails))
       {
@@ -245,7 +245,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       }
 
       myReader.Seek(streamDetails.Position);
-      
+
       var entriesCount = myReader.ReadInt32();
       var result = new List<MINIDUMP_THREAD>(entriesCount);
 
@@ -264,7 +264,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       var module = TryLookupModuleByAddress(baseAddress);
       version = module != null ? GetVersionInfo(module) : new VersionInfo();
     }
-    
+
     /// <summary>
     ///   Return the module containing the target address, or null if no match.
     /// </summary>
@@ -332,7 +332,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
         return 0;
 
       var offset = addr - chunk.TargetStartAddress;
-      
+
       var position = new ContentPosition(chunk.ContentPosition.Value + (long)offset);
       myReader.Seek(position);
 
@@ -380,11 +380,11 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
       var thread = GetThreads().FirstOrDefault(x => x.ThreadId == id);
       if (thread == null)
         return false;
-      
+
       var buffer = context;
       var sizeBufferBytes = (int)contextSize;
       var loc = thread.ThreadContext;
-      
+
       if (loc.IsNull) throw new ClrDiagnosticsException("Context not present", ClrDiagnosticsExceptionKind.CrashDumpError);
 
       var position = new ContentPosition(loc.Rva.Value);
@@ -544,12 +544,12 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
         Debug.Assert(bytesToCopy > 0);
         if (bytesToCopy == 0)
           break;
-        
+
         var adjustedPosition = new ContentPosition(pointerCurrentChunk.Value + (long)startAddr);
         myReader.Seek(adjustedPosition);
 
         myReader.BaseStream.Read(destinationBuffer, bytesRead, bytesToCopy);
-        
+
         //TODO: check if copied less
         bytesRead += bytesToCopy;
       } while (bytesRead < bytesRequested);
@@ -588,10 +588,9 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 
         var dest = new IntPtr(destinationBuffer.ToInt64() + bytesRead);
         var destSize = destinationBufferSizeInBytes - bytesRead;
-        
-        
+
         var adjustedPosition = new ContentPosition(pointerCurrentChunk.Value + idxStart);
-        
+
         if (bytesToCopy > destSize)
           throw new ArgumentException("Buffer too small");
 

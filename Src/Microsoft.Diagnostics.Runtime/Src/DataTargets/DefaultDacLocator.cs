@@ -21,7 +21,7 @@ namespace Microsoft.Diagnostics.Runtime
       var dacLocation = Path.Combine(moduleDirectory, clrInfo.DacFileName);
       if (File.Exists(dacLocation))
         return dacLocation;
-      
+
       return _symbolLocator.FindBinary(clrInfo.DacRequestFileName, (int)clrInfo.ModuleInfo.TimeStamp, (int)clrInfo.ModuleInfo.FileSize);
     }
   }

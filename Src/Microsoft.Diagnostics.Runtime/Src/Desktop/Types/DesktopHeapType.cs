@@ -373,7 +373,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
       var hnd = IntPtr.Zero;
       var names = new List<string>();
-      
+
       foreach (int token in import.EnumerateFields((int)_token))
       {
         if (import.GetFieldProps(token, out string name, out FieldAttributes attr, out IntPtr ppvSigBlob, out int pcbSigBlob, out int pdwCPlusTypeFlag, out IntPtr ppValue))
@@ -546,7 +546,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     {
       if (_fields != null)
         return;
-      
+
       if (IsFree)
       {
         _fields = new List<ClrInstanceField>();

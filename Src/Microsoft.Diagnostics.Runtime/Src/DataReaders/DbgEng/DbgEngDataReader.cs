@@ -160,7 +160,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.DbgEng
       var client = (IDebugClient)obj;
       return client;
     }
-    
+
     [DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
     [DllImport("dbgeng.dll")]
     public static extern uint DebugCreate(ref Guid interfaceId, [MarshalAs(UnmanagedType.IUnknown)] out object Interface);

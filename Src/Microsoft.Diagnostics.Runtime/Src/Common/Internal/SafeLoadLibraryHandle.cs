@@ -20,7 +20,7 @@ namespace Microsoft.Diagnostics.Runtime
     {
       return FreeLibrary(handle);
     }
-    
+
     [DllImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool FreeLibrary(IntPtr hModule);

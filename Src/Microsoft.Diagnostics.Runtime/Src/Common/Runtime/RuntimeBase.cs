@@ -35,7 +35,7 @@ namespace Microsoft.Diagnostics.Runtime
       DataTarget = dataTarget ?? throw new ArgumentNullException(nameof(dataTarget));
       DacLibrary = lib ?? throw new ArgumentNullException(nameof(lib));
       _dacInterface = lib.InternalDacPrivateInterface ?? throw new ArgumentNullException(nameof(lib.InternalDacPrivateInterface));
-      
+
       InitApi();
 
       _dacInterface.Flush();

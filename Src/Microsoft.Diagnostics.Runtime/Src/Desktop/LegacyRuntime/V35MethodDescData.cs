@@ -24,7 +24,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     // This is only valid if bIsDynamic is true
     private ulong _managedDynamicMethodObject;
-    
+
     public ulong MethodTable => _methodTablePtr;
     public ulong MethodDesc => _methodDescPtr;
     public ulong Module => _modulePtr;

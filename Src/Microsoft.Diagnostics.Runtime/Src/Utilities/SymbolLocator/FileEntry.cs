@@ -19,6 +19,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     {
       if (ReferenceEquals(null, other)) return false;
       if (ReferenceEquals(this, other)) return true;
+
       return string.Equals(FileName, other.FileName) && TimeStamp == other.TimeStamp && FileSize == other.FileSize;
     }
 
@@ -27,7 +28,8 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       if (ReferenceEquals(null, obj)) return false;
       if (ReferenceEquals(this, obj)) return true;
       if (obj.GetType() != GetType()) return false;
-      return Equals((FileEntry) obj);
+
+      return Equals((FileEntry)obj);
     }
 
     public override int GetHashCode()

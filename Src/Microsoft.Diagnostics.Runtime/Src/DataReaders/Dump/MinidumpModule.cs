@@ -17,7 +17,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     ///   Address that module is loaded within target.
     /// </summary>
     private ulong _baseofimage;
-        
+
     public ulong BaseOfImage => DumpNative.ZeroExtendAddress(_baseofimage);
 
     /// <summary>

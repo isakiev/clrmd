@@ -12,7 +12,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private ClrMethod _method;
     private readonly DesktopRuntimeBase _runtime;
     private readonly DesktopThread _thread;
-    
+
     public DesktopStackFrame(DesktopRuntimeBase runtime, DesktopThread thread, ulong ip, ulong sp, ulong md)
     {
       _runtime = runtime;
@@ -61,13 +61,13 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         _method = DesktopMethod.Create(_runtime, mdData);
       }
     }
-    
+
     public override ClrThread Thread => _thread;
     public override ulong StackPointer => _sp;
     public override ulong InstructionPointer => _ip;
     public override ClrStackFrameType Kind => _type;
     public override string DisplayString => _frameName;
-    
+
     public override ClrMethod Method
     {
       get

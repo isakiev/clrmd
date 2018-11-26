@@ -8,7 +8,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     public readonly DumpStreamType Type;
     public readonly uint Size;
     private readonly uint Offset;
-    
+
     public ContentPosition Position => new ContentPosition(Offset);
   }
 }

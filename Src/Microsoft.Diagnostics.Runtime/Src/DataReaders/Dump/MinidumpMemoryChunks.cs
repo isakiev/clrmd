@@ -198,7 +198,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
           _chunks[i].TargetStartAddress > _chunks[i].TargetEndAddress)
           throw new ClrDiagnosticsException(
             "Unexpected inconsistency error in dump memory chunk " + i
-          + " with target base address " + _chunks[i].TargetStartAddress + ".",
+            + " with target base address " + _chunks[i].TargetStartAddress + ".",
             ClrDiagnosticsExceptionKind.CrashDumpError);
 
         // If there's a next to compare to, and it's a MinidumpWithFullMemory, then we expect
@@ -209,7 +209,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
           _chunks[i].TargetEndAddress > _chunks[i + 1].TargetStartAddress))
           throw new ClrDiagnosticsException(
             "Unexpected relative addresses inconsistency between dump memory chunks "
-          + i + " and " + (i + 1) + ".",
+            + i + " and " + (i + 1) + ".",
             ClrDiagnosticsExceptionKind.CrashDumpError);
 
         // Because we sorted and split/merged entries we can expect them to be increasing and non-overlapping

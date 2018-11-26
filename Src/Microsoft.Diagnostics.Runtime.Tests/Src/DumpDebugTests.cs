@@ -16,7 +16,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
 
         corDebugProcess.EnumerateAppDomains(out var appDomains);
         Assert.NotNull(appDomains);
-        
+
         corDebugProcess.EnumerateThreads(out var threads);
         Assert.NotNull(threads);
       }

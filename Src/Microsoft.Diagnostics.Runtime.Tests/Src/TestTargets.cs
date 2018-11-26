@@ -62,7 +62,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       var rootFolder = Path.GetDirectoryName(binFolder);
       if (rootFolder == null)
         throw new ApplicationException("Failed to detect project root folder");
-      
+
       _baseFolder = Path.Combine(rootFolder, "Src", "Microsoft.Diagnostics.Runtime.Tests", "Data");
       return _baseFolder;
     }
@@ -232,7 +232,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     {
       var cacheLocation = Path.Combine(Helpers.GetTempPath(), "Cache");
       Directory.CreateDirectory(cacheLocation);
-      
+
       var symbolLocator = new DefaultSymbolLocator(DefaultLogger.Instance, cacheLocation);
       return new DataTarget(new DbgEngDataReader(dumpPath), new DefaultDacLocator(symbolLocator), symbolLocator);
     }

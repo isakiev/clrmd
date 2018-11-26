@@ -19,7 +19,7 @@ namespace Microsoft.Diagnostics.Runtime
       moduleName = moduleName.ToLower();
       return true;
     }
-    
+
     public static bool IsSupportedRuntime(ModuleInfo moduleInfo, out ClrFlavor flavor)
     {
       flavor = default(ClrFlavor);
@@ -50,13 +50,13 @@ namespace Microsoft.Diagnostics.Runtime
 
       return moduleName == NativeModuleName;
     }
-    
+
     public static string GetDacFileName(ClrFlavor flavor)
     {
       //TODO: .so in case of Linux
       return flavor == ClrFlavor.Core ? "mscordaccore.dll" : "mscordacwks.dll";
     }
-    
+
     public static string GetDacRequestFileName(ClrFlavor flavor, Architecture currentArchitecture, Architecture targetArchitecture, VersionInfo clrVersion)
     {
       var dacName = flavor == ClrFlavor.Core ? "mscordaccore" : "mscordacwks";

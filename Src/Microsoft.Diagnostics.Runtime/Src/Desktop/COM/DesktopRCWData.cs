@@ -17,14 +17,14 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       _heap = heap;
       _osThreadID = uint.MaxValue;
     }
-    
+
     public override ulong IUnknown => _rcw.UnknownPointer;
     public override ulong VTablePointer => _rcw.VTablePtr;
     public override int RefCount => _rcw.RefCount;
     public override ulong Object => _rcw.ManagedObject;
     public override bool Disconnected => _rcw.IsDisconnected;
     public override ulong WinRTObject => _rcw.JupiterObject;
-    
+
     public override uint CreatorThread
     {
       get

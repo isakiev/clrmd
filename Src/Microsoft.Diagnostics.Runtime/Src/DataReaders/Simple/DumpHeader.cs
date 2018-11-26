@@ -12,7 +12,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     public readonly uint CheckSum;
     public readonly uint TimeDateStamp;
     public readonly ulong Flags;
-    
+
     public ContentPosition StreamDirectoryPosition => new ContentPosition(StreamDirectoryOffset);
   }
 }

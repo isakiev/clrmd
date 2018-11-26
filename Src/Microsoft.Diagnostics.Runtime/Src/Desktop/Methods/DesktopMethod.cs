@@ -20,7 +20,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private List<ulong> _methodHandles;
     private ILInfo _il;
     private readonly HotColdRegions _hotColdInfo;
-    
+
     internal static DesktopMethod Create(DesktopRuntimeBase runtime, MetaDataImport metadata, IMethodDescData mdData)
     {
       if (mdData == null)
@@ -231,7 +231,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           }
         }
     }
-    
+
     public override string ToString()
     {
       return _sig;

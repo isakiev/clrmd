@@ -440,7 +440,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     {
       var mts = new List<MethodTableTokenPair>();
 
-      SOSDac.ModuleMapTraverse traverse = delegate (uint index, ulong mt, IntPtr token) { mts.Add(new MethodTableTokenPair(mt, index)); };
+      SOSDac.ModuleMapTraverse traverse = delegate(uint index, ulong mt, IntPtr token) { mts.Add(new MethodTableTokenPair(mt, index)); };
       var args = new LegacyModuleMapTraverseArgs
       {
         pCallback = Marshal.GetFunctionPointerForDelegate(traverse),

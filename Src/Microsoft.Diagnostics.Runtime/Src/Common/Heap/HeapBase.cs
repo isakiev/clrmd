@@ -44,7 +44,7 @@ namespace Microsoft.Diagnostics.Runtime
     public override bool CanWalkHeap => _canWalkHeap;
 
     public override IList<ClrSegment> Segments => _segments;
-    
+
     public override ulong TotalHeapSize => _totalHeapSize;
 
     public override ulong GetSizeByGen(int gen)
@@ -205,6 +205,7 @@ namespace Microsoft.Diagnostics.Runtime
             break;
         }
       }
+
       return null;
     }
 
@@ -261,7 +262,7 @@ namespace Microsoft.Diagnostics.Runtime
       MemoryReader reader = GetMemoryReaderForAddress(obj);
       gcdesc.WalkObject(obj, size, (ptr) => ReadPointer(reader, ptr), callback);
     }
-    
+
     private ulong ReadPointer(MemoryReader reader, ulong addr)
     {
       if (reader.ReadPtr(addr, out ulong result))

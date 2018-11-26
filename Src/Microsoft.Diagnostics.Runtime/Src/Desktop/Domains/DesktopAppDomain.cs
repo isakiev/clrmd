@@ -12,7 +12,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     private readonly DesktopRuntimeBase _runtime;
 
     private static int s_internalId;
-    
+
     internal DesktopAppDomain(DesktopRuntimeBase runtime, IAppDomainData data, string name)
     {
       _address = data.Address;
@@ -26,7 +26,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     {
       _modules.Add(module);
     }
-    
+
     public override ClrRuntime Runtime => _runtime;
 
     /// <summary>

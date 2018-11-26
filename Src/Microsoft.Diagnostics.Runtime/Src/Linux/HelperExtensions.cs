@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Diagnostics.Runtime.Linux
 {
-    static class HelperExtensions
-    {
-        public static string GetFilename(this Stream stream) => stream is FileStream fs ? fs.Name : null;
-    }
+  static class HelperExtensions
+  {
+    public static string GetFilename(this Stream stream) => stream is FileStream fs ? fs.Name : null;
+  }
 }

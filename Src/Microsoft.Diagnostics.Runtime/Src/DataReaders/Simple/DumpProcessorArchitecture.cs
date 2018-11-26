@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
+
 namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
 {
   internal enum DumpProcessorArchitecture : ushort

@@ -81,6 +81,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
           (_buffer[_offset + 2] << 16) |
           (_buffer[_offset + 3] << 24));
       }
+
       _offset += 4;
     }
 
@@ -97,6 +98,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
           ((ulong)_buffer[_offset + 6] << 48) |
           ((ulong)_buffer[_offset + 7] << 56));
       }
+
       _offset += 8;
     }
 
@@ -107,6 +109,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
         value = (ushort)((_buffer[_offset + 0] & 0xFF) |
           (_buffer[_offset + 1] << 8));
       }
+
       _offset += 2;
     }
 
@@ -116,6 +119,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
       {
         value = (byte)((_buffer[_offset + 0] & 0xFF));
       }
+
       _offset += 1;
     }
 
@@ -128,6 +132,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
           (_buffer[_offset + 2] << 16) |
           (_buffer[_offset + 3] << 24));
       }
+
       _offset += 4;
     }
 
@@ -144,6 +149,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities.Pdb
           ((ulong)_buffer[_offset + 6] << 48) |
           ((ulong)_buffer[_offset + 7] << 56));
       }
+
       _offset += 8;
     }
 

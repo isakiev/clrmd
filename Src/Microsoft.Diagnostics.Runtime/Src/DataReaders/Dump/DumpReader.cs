@@ -506,7 +506,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
       _mappedFileMemory = new LoadedFileMemoryLookups();
       IsMinidump = DumpNative.IsMiniDump(_view.BaseAddress);
     }
-    
+
     [Flags]
     enum PageProtection : uint
     {
@@ -527,15 +527,20 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     [DllImport("kernel32.dll", SetLastError = true)]
     static extern SafeWin32Handle CreateFileMapping(
       SafeFileHandle hFile,
-      IntPtr lpFileMappingAttributes, PageProtection flProtect, uint dwMaximumSizeHigh,
-      uint dwMaximumSizeLow, string lpName);
-
-
+      IntPtr lpFileMappingAttributes,
+      PageProtection flProtect,
+      uint dwMaximumSizeHigh,
+      uint dwMaximumSizeLow,
+      string lpName);
 
     [DllImport("kernel32.dll", SetLastError = true)]
-    public static extern SafeMapViewHandle MapViewOfFile(SafeWin32Handle hFileMappingObject, uint
-                                                           dwDesiredAccess, uint dwFileOffsetHigh, uint dwFileOffsetLow,
-                                                         IntPtr dwNumberOfBytesToMap);
+    public static extern SafeMapViewHandle MapViewOfFile(
+      SafeWin32Handle hFileMappingObject,
+      uint
+        dwDesiredAccess,
+      uint dwFileOffsetHigh,
+      uint dwFileOffsetLow,
+      IntPtr dwNumberOfBytesToMap);
 
     [DllImportAttribute("kernel32.dll")]
     internal static extern void RtlMoveMemory(IntPtr destination, IntPtr source, IntPtr numberBytes);

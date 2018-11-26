@@ -13,7 +13,7 @@ namespace Microsoft.Diagnostics.Runtime
     {
       Kind = kind;
     }
-    
+
     protected ClrDiagnosticsException(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {

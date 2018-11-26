@@ -15,7 +15,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     {
       return new ContentPosition(reader.BaseStream.Position);
     }
-    
+
     public static T ReadStructure<T>(this BinaryReader reader)
     {
       var bytes = reader.ReadBytes(Marshal.SizeOf(typeof(T)));

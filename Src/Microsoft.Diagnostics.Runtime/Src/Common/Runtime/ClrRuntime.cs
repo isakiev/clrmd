@@ -18,7 +18,7 @@ namespace Microsoft.Diagnostics.Runtime
     /// </summary>
     [NotNull]
     public abstract ClrInfo ClrInfo { get; }
-    
+
     /// <summary>
     /// Used for internal purposes.
     /// </summary>

@@ -145,7 +145,7 @@ int_align_invocations = false
 int_align_binary_expressions = false
 int_align_comments = false
 
-outdent_binary_ops = true
+outdent_binary_ops = false
 outdent_dots = false
 special_else_if_treatment = true
 insert_final_newline = false
@@ -231,3 +231,7 @@ space_after_type_parameter_constraint_colon = true
 space_around_alias_eq = true
 space_before_trailing_comment = true
 space_after_operator_keyword = true
+
+# _XMLDOC_
+xmldoc_indent_text = zero_indent
+

@@ -15,6 +15,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests.Data
       {
         throw new Exception("Count = " + n);
       }
+
       Method(n + 1);
     }
   }

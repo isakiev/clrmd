@@ -21,18 +21,17 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     private readonly IEnumerable<SymPathElement> mySymPathElements;
     private readonly IDictionary<FileEntry, string> myCache = new Dictionary<FileEntry, string>();
     private readonly ICollection<FileEntry> myMissingEntries = new HashSet<FileEntry>();
-    
-    
+
     /// <summary>
     ///   The timeout (in milliseconds) used when contacting each individual server. This is not a total timeout for the entire symbol server operation.
     /// </summary>
     public int Timeout { get; set; } = 60000;
-    
+
     public DefaultSymbolLocator(IExternalLogger logger, string cacheLocation)
     {
       myLogger = logger ?? throw new ArgumentNullException(nameof(logger));
       myCacheLocation = cacheLocation ?? throw new ArgumentNullException(nameof(cacheLocation));
-      
+
       mySymPathElements = GetSymPathElements();
     }
 
@@ -41,7 +40,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       var result = new List<SymPathElement>();
       foreach (var entry in MicrosoftSymbolServers)
         result.Add(new SymPathElement(entry));
-      
+
       var ntSymbolPath = Environment.GetEnvironmentVariable("_NT_SYMBOL_PATH");
       var entries = (ntSymbolPath ?? "").Split(';').Where(e => !string.IsNullOrEmpty(e)).ToArray();
       foreach (var entry in entries)
@@ -55,10 +54,10 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
       fileName = Path.GetFileName(fileName);
       if (string.IsNullOrEmpty(fileName))
         return null;
-      
+
       return new FileEntry(fileName.ToLower(), buildTimeStamp, imageSize);
     }
-    
+
     public string FindBinary(string fileName, int buildTimeStamp, int imageSize, bool checkProperties = true)
     {
       var entry = CreateEntry(fileName, buildTimeStamp, imageSize);
@@ -99,7 +98,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
             Trace($"Found '{fileName}' on server '{element.Target}'.  Copied to '{target}'.");
             lock (myLock)
               myCache[entry] = target;
-            
+
             return target;
           }
         }
@@ -111,7 +110,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
             Trace($"Found '{fileName}' at '{filePath}'.");
             lock (myLock)
               myCache[entry] = filePath;
-            
+
             return filePath;
           }
         }
@@ -119,11 +118,10 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
       lock (myLock)
         myMissingEntries.Add(entry);
-      
+
       return null;
     }
-    
-   
+
     /// <summary>
     ///   Validates whether a file on disk matches the properties we expect.
     /// </summary>
@@ -164,19 +162,20 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         Trace("Encountered exception {0} while attempting to inspect file '{1}'.", e.GetType().Name, fullPath);
         return false;
       }
+
       return false;
     }
-    
+
     private void Trace(string format, params object[] parameters)
     {
       myLogger.Log("DefaultSymbolLocator", format, parameters);
     }
-    
+
     private static string GetIndexPath(FileEntry entry)
     {
       return entry.FileName + @"\" + entry.TimeStamp.ToString("x") + entry.FileSize.ToString("x") + @"\" + entry.FileName;
     }
-    
+
     private string TryGetFileFromServer(string urlForServer, string fileIndexPath, string cache)
     {
       Debug.Assert(!string.IsNullOrEmpty(cache));
@@ -230,7 +229,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
       return null;
     }
-    
+
     private string GetPhysicalFileFromServer(string serverPath, string pdbIndexPath, string symbolCacheDir, bool returnContents = false)
     {
       if (string.IsNullOrEmpty(serverPath))
@@ -294,7 +293,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
       return fullDestPath;
     }
-    
+
     /// <summary>
     ///   Copies a given stream to a file.
     /// </summary>

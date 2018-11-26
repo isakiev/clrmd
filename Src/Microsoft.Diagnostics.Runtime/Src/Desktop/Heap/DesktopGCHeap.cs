@@ -170,7 +170,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       // Get type name.
       if (!meta.GetTypeDefProperties((int)token, out string name, out TypeAttributes attrs, out int parent))
         return null;
-            
+
       if (meta.GetNestedClassProperties((int)token, out int enclosing) && token != enclosing)
       {
         string inner = GetTypeNameFromToken(module, (uint)enclosing);
@@ -417,7 +417,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
                 }
               }
 
-            NextStatic:;
+            NextStatic: ;
           }
 
           // Thread statics

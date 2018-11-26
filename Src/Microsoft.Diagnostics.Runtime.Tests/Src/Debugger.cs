@@ -175,7 +175,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       var mask = _outputMask;
       _output.Clear();
       _outputMask = DEBUG_OUTPUT.NORMAL | DEBUG_OUTPUT.SYMBOLS
-      | DEBUG_OUTPUT.ERROR | DEBUG_OUTPUT.WARNING | DEBUG_OUTPUT.DEBUGGEE;
+        | DEBUG_OUTPUT.ERROR | DEBUG_OUTPUT.WARNING | DEBUG_OUTPUT.DEBUGGEE;
 
       string result = null;
       try
@@ -282,9 +282,9 @@ namespace Microsoft.Diagnostics.Runtime.Tests
     public int GetInterestMask(out DEBUG_EVENT Mask)
     {
       Mask = DEBUG_EVENT.BREAKPOINT | DEBUG_EVENT.CREATE_PROCESS
-      | DEBUG_EVENT.EXCEPTION | DEBUG_EVENT.EXIT_PROCESS
-      | DEBUG_EVENT.CREATE_THREAD | DEBUG_EVENT.EXIT_THREAD
-      | DEBUG_EVENT.LOAD_MODULE | DEBUG_EVENT.UNLOAD_MODULE;
+        | DEBUG_EVENT.EXCEPTION | DEBUG_EVENT.EXIT_PROCESS
+        | DEBUG_EVENT.CREATE_THREAD | DEBUG_EVENT.EXIT_THREAD
+        | DEBUG_EVENT.LOAD_MODULE | DEBUG_EVENT.UNLOAD_MODULE;
       return 0;
     }
 

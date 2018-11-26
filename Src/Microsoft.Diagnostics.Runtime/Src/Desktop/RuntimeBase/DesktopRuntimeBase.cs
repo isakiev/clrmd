@@ -266,7 +266,13 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           yield return new MemoryRegion(this, segment.Start, segment.Committed - segment.Start, ClrMemoryRegionType.GCSegment, (uint)i, GCSegmentType.LargeObject);
 
           if (segment.Committed <= segment.Reserved)
-            yield return new MemoryRegion(this, segment.Committed, segment.Reserved - segment.Committed, ClrMemoryRegionType.ReservedGCSegment, (uint)i, GCSegmentType.LargeObject);
+            yield return new MemoryRegion(
+              this,
+              segment.Committed,
+              segment.Reserved - segment.Committed,
+              ClrMemoryRegionType.ReservedGCSegment,
+              (uint)i,
+              GCSegmentType.LargeObject);
 
           if (segment.Address == segment.Next || segment.Address == 0) break;
 
@@ -653,7 +659,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         {
           if (!stackwalk.GetContext(ContextHelper.ContextFlags, ContextHelper.Length, out uint size, context))
             break;
-                    
+
           ulong ip, sp;
 
           if (PointerSize == 4)
@@ -666,7 +672,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             ip = BitConverter.ToUInt64(context, ContextHelper.InstructionPointerOffset);
             sp = BitConverter.ToUInt64(context, ContextHelper.StackPointerOffset);
           }
-                    
+
           ulong frameVtbl = stackwalk.GetFrameVtable();
           if (frameVtbl != 0)
           {

@@ -10,7 +10,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     {
       if (value < 0)
         throw new ApplicationException("Position can't be negative");
-      
+
       Value = value;
     }
 
@@ -22,6 +22,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     public override bool Equals(object obj)
     {
       if (ReferenceEquals(null, obj)) return false;
+
       return obj is ContentPosition position && Equals(position);
     }
 
@@ -29,7 +30,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Simple
     {
       return Value.GetHashCode();
     }
-    
+
     public static bool operator ==(ContentPosition left, ContentPosition right)
     {
       return left.Equals(right);

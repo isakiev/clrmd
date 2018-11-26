@@ -9,7 +9,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
   {
     private const string TempPathPrefix = "clrmd_tests_removeme_";
     private static string _tempPath;
-    
+
     public static string GetTempPath()
     {
       if (_tempPath == null)
@@ -26,7 +26,7 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       foreach (var tempPath in Directory.GetDirectories(Path.GetTempPath(), TempPathPrefix + "*"))
         Directory.Delete(tempPath, true);
     }
-    
+
     public static IEnumerable<ulong> GetObjectsOfType(this ClrHeap heap, string name)
     {
       return from obj in heap.EnumerateObjectAddresses()

@@ -20,7 +20,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
     {
       if (file == null) throw new ArgumentNullException(nameof(file));
       if (tempPath == null) throw new ArgumentNullException(nameof(tempPath));
-      
+
       if (!File.Exists(file))
         throw new FileNotFoundException(file);
 
@@ -39,7 +39,7 @@ namespace Microsoft.Diagnostics.Runtime.DataReaders.Dump
 
     private string ExtractCab(string file)
     {
-      _generatedPath = Path.Combine(_tempPath, Guid.NewGuid().ToString()) ;
+      _generatedPath = Path.Combine(_tempPath, Guid.NewGuid().ToString());
       Directory.CreateDirectory(_generatedPath);
 
       var options = new CommandOptions
