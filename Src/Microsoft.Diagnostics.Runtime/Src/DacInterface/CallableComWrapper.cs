@@ -16,6 +16,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
         protected void* _vtable => _unknownVTable + 1;
 
         private ReleaseDelegate _release;
+        private AddRefDelegate _addRef;
         
         protected CallableCOMWrapper(CallableCOMWrapper toClone)
         {
@@ -26,9 +27,17 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
           _unknownVTable = toClone._unknownVTable;
           _library = toClone._library;
             
-          AddRefDelegate addRef = (AddRefDelegate)Marshal.GetDelegateForFunctionPointer(_unknownVTable->AddRef, typeof(AddRefDelegate));
-          addRef(Self);
+          AddRef();
           _library.AddRef();
+        }
+        
+        public int AddRef()
+        {
+          if (_addRef == null)
+            _addRef = (AddRefDelegate)Marshal.GetDelegateForFunctionPointer(_unknownVTable->AddRef, typeof(AddRefDelegate));
+
+          int count = _addRef(Self);
+          return count;
         }
 
         internal CallableCOMWrapper(RefCountedFreeLibrary library, ref Guid desiredInterface, IntPtr pUnknown)
@@ -47,19 +56,19 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
             }
 
             var release = (ReleaseDelegate)Marshal.GetDelegateForFunctionPointer(tbl->Release, typeof(ReleaseDelegate));
-            release(pUnknown);
+            int count = release(pUnknown);
 
             Self = pCorrectUnknown;
             _unknownVTable = *(IUnknownVTable**)pCorrectUnknown;
         }
 
-        public void Release()
+        public int Release()
         {
             if (_release == null)
                 _release = (ReleaseDelegate)Marshal.GetDelegateForFunctionPointer(_unknownVTable->Release, typeof(ReleaseDelegate));
 
-            _release(Self);
-            _library.Release();
+            int count = _release(Self);
+            return count;
         }
 
         public IntPtr QueryInterface(ref Guid riid)
@@ -92,6 +101,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
             if (!_disposed)
             {
                 Release();
+                _library.Release();
                 _disposed = true;
             }
         }
