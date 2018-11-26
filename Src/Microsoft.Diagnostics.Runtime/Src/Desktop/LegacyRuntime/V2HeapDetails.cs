@@ -1,4 +1,6 @@
-﻿#pragma warning disable 0649
+﻿using Microsoft.Diagnostics.Runtime.DacInterface;
+
+#pragma warning disable 0649
 #pragma warning disable 0169
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -8,10 +10,10 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public ulong heapAddr;
     public ulong alloc_allocated;
 
-    public V4GenerationData generation_table0;
-    public V4GenerationData generation_table1;
-    public V4GenerationData generation_table2;
-    public V4GenerationData generation_table3;
+    public GenerationData generation_table0;
+    public GenerationData generation_table1;
+    public GenerationData generation_table2;
+    public GenerationData generation_table3;
     public ulong ephemeral_heap_segment;
     public ulong finalization_fill_pointers0;
     public ulong finalization_fill_pointers1;
@@ -27,8 +29,8 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     public ulong FirstLargeHeapSegment => generation_table3.StartSegment;
     public ulong EphemeralSegment => ephemeral_heap_segment;
     public ulong EphemeralEnd => alloc_allocated;
-    public ulong EphemeralAllocContextPtr => generation_table0.AllocContextPtr;
-    public ulong EphemeralAllocContextLimit => generation_table0.AllocContextLimit;
+    public ulong EphemeralAllocContextPtr => generation_table0.AllocationContextPointer;
+    public ulong EphemeralAllocContextLimit => generation_table0.AllocationContextLimit;
     
     public ulong Gen0Start => generation_table0.AllocationStart;
     public ulong Gen0Stop => alloc_allocated;

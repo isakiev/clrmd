@@ -1,4 +1,5 @@
-﻿using Microsoft.Diagnostics.Runtime.Desktop;
+﻿using Microsoft.Diagnostics.Runtime.DacInterface;
+using Microsoft.Diagnostics.Runtime.Desktop;
 
 namespace Microsoft.Diagnostics.Runtime
 {

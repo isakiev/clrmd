@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Diagnostics.Runtime.DacInterface;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
 {
@@ -16,7 +17,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     }
 
     private readonly List<MemoryRegion> _regions = new List<MemoryRegion>();
-    private readonly DesktopRuntimeBase.LoaderHeapTraverse _delegate;
+    private readonly SOSDac.LoaderHeapTraverse _delegate;
     private ClrMemoryRegionType _type;
     private ulong _appDomain;
     private readonly DesktopRuntimeBase _runtime;

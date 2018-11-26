@@ -10,7 +10,7 @@ namespace Microsoft.Diagnostics.Runtime.DacInterface
     /// <summary>
     /// This is an undocumented, untested, and unsupported interface.  Do not use.
     /// </summary>
-    public unsafe class ClrDataProcess : CallableCOMWrapper
+    internal unsafe class ClrDataProcess : CallableCOMWrapper
     {
         private static Guid IID_IXCLRDataProcess = new Guid("5c552ab6-fc09-4cb3-8e36-22fa03c798b7");
 

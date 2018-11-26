@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Diagnostics.Runtime.Desktop
+﻿using Microsoft.Diagnostics.Runtime.DacInterface;
+
+namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal interface ICodeHeap
   {

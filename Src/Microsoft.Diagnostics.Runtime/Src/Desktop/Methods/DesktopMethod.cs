@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Diagnostics.Runtime.ComWrappers;
+using Microsoft.Diagnostics.Runtime.DacInterface;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -26,7 +26,9 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (mdData == null)
         return null;
 
-      MethodAttributes attrs = metadata.GetMethodAttributes((int)mdData.MDToken);
+      MethodAttributes attrs = new MethodAttributes();
+      if (metadata != null)
+        attrs = metadata.GetMethodAttributes((int)mdData.MDToken);
 
       return new DesktopMethod(runtime, mdData.MethodDesc, mdData, attrs);
     }

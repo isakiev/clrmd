@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Diagnostics.Runtime.ComWrappers;
+using Microsoft.Diagnostics.Runtime.DacInterface;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -71,7 +71,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (assembly == 0)
         return null;
 
-      return Request<IAssemblyData, LegacyAssemblyData>(DacRequests.ASSEMBLY_DATA, assembly);
+      return Request<IAssemblyData, AssemblyData>(DacRequests.ASSEMBLY_DATA, assembly);
     }
 
     public override IEnumerable<ClrHandle> EnumerateHandles()
@@ -93,7 +93,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return handleTable.Handles;
     }
 
-    internal override bool TraverseHeap(ulong heap, LoaderHeapTraverse callback)
+    internal override bool TraverseHeap(ulong heap, SOSDac.LoaderHeapTraverse callback)
     {
       var input = new byte[sizeof(ulong) * 2];
       WriteValueToBuffer(heap, input, 0);
@@ -102,7 +102,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       return Request(DacRequests.LOADERHEAP_TRAVERSE, input, null);
     }
 
-    internal override bool TraverseStubHeap(ulong appDomain, int type, LoaderHeapTraverse callback)
+    internal override bool TraverseStubHeap(ulong appDomain, int type, SOSDac.LoaderHeapTraverse callback)
     {
       byte[] input;
       if (IntPtr.Size == 4)
@@ -134,7 +134,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (CLRVersion == DesktopVersion.v2)
         return Request<IThreadData, V2ThreadData>(DacRequests.THREAD_DATA, input);
 
-      return Request<IThreadData, V4ThreadData>(DacRequests.THREAD_DATA, input);
+      return Request<IThreadData, ThreadData>(DacRequests.THREAD_DATA, input);
     }
 
     internal override IHeapDetails GetSvrHeapDetails(ulong addr)
@@ -142,7 +142,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (CLRVersion == DesktopVersion.v2)
         return Request<IHeapDetails, V2HeapDetails>(DacRequests.GCHEAPDETAILS_DATA, addr);
 
-      return Request<IHeapDetails, V4HeapDetails>(DacRequests.GCHEAPDETAILS_DATA, addr);
+      return Request<IHeapDetails, HeapDetails>(DacRequests.GCHEAPDETAILS_DATA, addr);
     }
 
     internal override IHeapDetails GetWksHeapDetails()
@@ -150,7 +150,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (CLRVersion == DesktopVersion.v2)
         return Request<IHeapDetails, V2HeapDetails>(DacRequests.GCHEAPDETAILS_STATIC_DATA);
 
-      return Request<IHeapDetails, V4HeapDetails>(DacRequests.GCHEAPDETAILS_STATIC_DATA);
+      return Request<IHeapDetails, HeapDetails>(DacRequests.GCHEAPDETAILS_STATIC_DATA);
     }
 
     internal override ulong[] GetServerHeapList()
@@ -187,7 +187,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal override IGCInfo GetGCInfoImpl()
     {
-      return Request<IGCInfo, LegacyGCInfo>(DacRequests.GCHEAP_DATA);
+      return Request<IGCInfo, GCInfo>(DacRequests.GCHEAP_DATA);
     }
 
     internal override ISegmentData GetSegmentData(ulong segmentAddr)
@@ -195,7 +195,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (CLRVersion == DesktopVersion.v2)
         return Request<ISegmentData, V2SegmentData>(DacRequests.HEAPSEGMENT_DATA, segmentAddr);
 
-      return Request<ISegmentData, V4SegmentData>(DacRequests.HEAPSEGMENT_DATA, segmentAddr);
+      return Request<ISegmentData, SegmentData>(DacRequests.HEAPSEGMENT_DATA, segmentAddr);
     }
 
     internal override string GetAppDomaminName(ulong addr)
@@ -231,12 +231,12 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal override IAppDomainStoreData GetAppDomainStoreData()
     {
-      return Request<IAppDomainStoreData, LegacyAppDomainStoreData>(DacRequests.APPDOMAIN_STORE_DATA);
+      return Request<IAppDomainStoreData, AppDomainStoreData>(DacRequests.APPDOMAIN_STORE_DATA);
     }
 
     internal override IAppDomainData GetAppDomainData(ulong addr)
     {
-      return Request<IAppDomainData, LegacyAppDomainData>(DacRequests.APPDOMAIN_DATA, addr);
+      return Request<IAppDomainData, AppDomainData>(DacRequests.APPDOMAIN_DATA, addr);
     }
 
     internal override bool GetCommonMethodTables(ref CommonMethodTables mCommonMTs)
@@ -307,7 +307,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       var output = new byte[sizeof(int)];
       if (Request(DacRequests.JITLIST, null, output))
       {
-        var JitManagerSize = Marshal.SizeOf(typeof(LegacyJitManagerInfo));
+        var JitManagerSize = Marshal.SizeOf(typeof(JitManagerInfo));
         var count = BitConverter.ToInt32(output, 0);
         var size = JitManagerSize * count;
 
@@ -316,11 +316,11 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
           output = new byte[size];
           if (Request(DacRequests.MANAGER_LIST, null, output))
           {
-            var heapInfo = new LegacyJitCodeHeapInfo();
-            var CodeHeapTypeOffset = Marshal.OffsetOf(typeof(LegacyJitCodeHeapInfo), "codeHeapType").ToInt32();
-            var AddressOffset = Marshal.OffsetOf(typeof(LegacyJitCodeHeapInfo), "address").ToInt32();
-            var CurrAddrOffset = Marshal.OffsetOf(typeof(LegacyJitCodeHeapInfo), "currentAddr").ToInt32();
-            var JitCodeHeapInfoSize = Marshal.SizeOf(typeof(LegacyJitCodeHeapInfo));
+            var heapInfo = new MutableJitCodeHeapInfo();
+            int CodeHeapTypeOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "codeHeapType").ToInt32();
+            int AddressOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "address").ToInt32();
+            int CurrAddrOffset = Marshal.OffsetOf(typeof(JitCodeHeapInfo), "currentAddr").ToInt32();
+            int JitCodeHeapInfoSize = Marshal.SizeOf(typeof(JitCodeHeapInfo));
 
             for (var i = 0; i < count; ++i)
             {
@@ -342,9 +342,9 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
                 if (Request(DacRequests.CODEHEAP_LIST, jitManagerBuffer, codeHeapBuffer))
                   for (var j = 0; j < heapCount; ++j)
                   {
-                    heapInfo.address = BitConverter.ToUInt64(codeHeapBuffer, j * JitCodeHeapInfoSize + AddressOffset);
-                    heapInfo.codeHeapType = BitConverter.ToUInt32(codeHeapBuffer, j * JitCodeHeapInfoSize + CodeHeapTypeOffset);
-                    heapInfo.currentAddr = BitConverter.ToUInt64(codeHeapBuffer, j * JitCodeHeapInfoSize + CurrAddrOffset);
+                    heapInfo.Address = BitConverter.ToUInt64(codeHeapBuffer, j * JitCodeHeapInfoSize + AddressOffset);
+                    heapInfo.Type = (CodeHeapType)BitConverter.ToUInt32(codeHeapBuffer, j * JitCodeHeapInfoSize + CodeHeapTypeOffset);
+                    heapInfo.CurrentAddress = BitConverter.ToUInt64(codeHeapBuffer, j * JitCodeHeapInfoSize + CurrAddrOffset);
 
                     yield return heapInfo;
                   }
@@ -371,7 +371,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal override IFieldData GetFieldData(ulong fieldDesc)
     {
-      return Request<IFieldData, LegacyFieldData>(DacRequests.FIELDDESC_DATA, fieldDesc);
+      return Request<IFieldData, FieldData>(DacRequests.FIELDDESC_DATA, fieldDesc);
     }
 
     internal override IObjectData GetObjectData(ulong objRef)
@@ -385,7 +385,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       RegisterForRelease(data);
 
       if (data != null && data.LegacyMetaDataImport != IntPtr.Zero)
-        return new MetaDataImport(data.LegacyMetaDataImport);
+        return new MetaDataImport(DacLibrary, data.LegacyMetaDataImport);
 
       return null;
     }
@@ -658,8 +658,8 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal override IThreadStoreData GetThreadStoreData()
     {
-      var threadStore = new LegacyThreadStoreData();
-      if (!RequestStruct(DacRequests.THREAD_STORE_DATA, ref threadStore))
+      ThreadStoreData threadStore = new ThreadStoreData();
+      if (!RequestStruct<ThreadStoreData>(DacRequests.THREAD_STORE_DATA, ref threadStore))
         return null;
 
       return threadStore;
@@ -768,7 +768,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal override int GetSyncblkCount()
     {
-      var data = Request<ISyncBlkData, LegacySyncBlkData>(DacRequests.SYNCBLOCK_DATA, 1);
+      var data = Request<ISyncBlkData, SyncBlockData>(DacRequests.SYNCBLOCK_DATA, 1);
       if (data == null)
         return 0;
 
@@ -780,7 +780,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
       if (index < 0)
         return null;
 
-      return Request<ISyncBlkData, LegacySyncBlkData>(DacRequests.SYNCBLOCK_DATA, (uint)index + 1);
+      return Request<ISyncBlkData, SyncBlockData>(DacRequests.SYNCBLOCK_DATA, (uint)index + 1);
     }
 
     internal override IThreadPoolData GetThreadPoolData()

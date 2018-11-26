@@ -1,4 +1,4 @@
-﻿using Microsoft.Diagnostics.Runtime.ComWrappers;
+﻿using Microsoft.Diagnostics.Runtime.DacInterface;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
 {
@@ -6,7 +6,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
   {
     public bool Init(SOSDac sos, ulong md)
     {
-      if (!sos.GetMethodDescData(md, 0, out V45MethodDescData data))
+      if (!sos.GetMethodDescData(md, 0, out MethodDescData data))
         return false;
 
       _md = data.MethodDescPtr;

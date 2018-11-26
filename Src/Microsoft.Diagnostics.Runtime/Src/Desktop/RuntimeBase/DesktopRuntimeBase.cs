@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Diagnostics.Runtime.ComWrappers;
+using Microsoft.Diagnostics.Runtime.DacInterface;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 
 namespace Microsoft.Diagnostics.Runtime.Desktop
@@ -720,10 +720,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
     internal abstract Dictionary<ulong, List<ulong>> GetDependentHandleMap(CancellationToken cancelToken);
     internal abstract uint GetExceptionHROffset();
-
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    internal delegate void LoaderHeapTraverse(ulong address, IntPtr size, int isCurrent);
-
     internal abstract ulong[] GetAppDomainList(int count);
     internal abstract ulong[] GetAssemblyList(ulong appDomain, int count);
     internal abstract ulong[] GetModuleList(ulong assembly, int count);
@@ -735,8 +731,8 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
     internal abstract IModuleData GetModuleData(ulong addr);
     internal abstract IAppDomainData GetAppDomainData(ulong addr);
     internal abstract string GetAppDomaminName(ulong addr);
-    internal abstract bool TraverseHeap(ulong heap, LoaderHeapTraverse callback);
-    internal abstract bool TraverseStubHeap(ulong appDomain, int type, LoaderHeapTraverse callback);
+    internal abstract bool TraverseHeap(ulong heap, SOSDac.LoaderHeapTraverse callback);
+    internal abstract bool TraverseStubHeap(ulong appDomain, int type, SOSDac.LoaderHeapTraverse callback);
     internal abstract IEnumerable<ICodeHeap> EnumerateJitHeaps();
     internal abstract ulong GetModuleForMT(ulong mt);
     internal abstract IFieldInfo GetFieldInfo(ulong mt);

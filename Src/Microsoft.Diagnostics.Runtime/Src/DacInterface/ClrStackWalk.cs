@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Diagnostics.Runtime.DacInterface
 {
-    public unsafe sealed class ClrStackWalk : CallableCOMWrapper
+    internal unsafe sealed class ClrStackWalk : CallableCOMWrapper
     {
         private static Guid IID_IXCLRDataStackWalk = new Guid("E59D8D22-ADA7-49a2-89B5-A415AFCFC95F");
 

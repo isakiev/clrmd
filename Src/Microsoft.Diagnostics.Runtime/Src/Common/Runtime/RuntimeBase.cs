@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.Diagnostics.Runtime.ComWrappers;
+using Microsoft.Diagnostics.Runtime.DacInterface;
 using Microsoft.Diagnostics.Runtime.DataReaders;
 using Microsoft.Diagnostics.Runtime.Desktop;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
@@ -13,7 +13,6 @@ namespace Microsoft.Diagnostics.Runtime
   internal abstract class RuntimeBase : ClrRuntime
   {
     private static readonly ulong[] s_emptyPointerArray = new ulong[0];
-    protected readonly DacLibrary _library;
     protected readonly ClrDataProcess _dacInterface;
     private MemoryReader _cache;
     protected readonly IDataReader _dataReader;
@@ -24,7 +23,7 @@ namespace Microsoft.Diagnostics.Runtime
       get
       {
         if (_corDebugProcess == null)
-          _corDebugProcess = CLRDebugging.CreateICorDebugProcess(ClrInfo.ModuleInfo.ImageBase, _library.DacDataTarget, DataTarget.FileLoader);
+          _corDebugProcess = ICorDebug.CLRDebugging.CreateICorDebugProcess(ClrInfo.ModuleInfo.ImageBase, DacLibrary.DacDataTarget, DataTarget.FileLoader);
 
         return _corDebugProcess;
       }
@@ -34,8 +33,8 @@ namespace Microsoft.Diagnostics.Runtime
     {
       ClrInfo = info ?? throw new ArgumentNullException(nameof(info));
       DataTarget = dataTarget ?? throw new ArgumentNullException(nameof(dataTarget));
-      _library = lib ?? throw new ArgumentNullException(nameof(lib));
-      _dacInterface = lib.DacInterface ?? throw new ArgumentNullException(nameof(lib.DacInterface));
+      DacLibrary = lib ?? throw new ArgumentNullException(nameof(lib));
+      _dacInterface = lib.DacPrivateInterface ?? throw new ArgumentNullException(nameof(lib.DacPrivateInterface));
       
       InitApi();
 

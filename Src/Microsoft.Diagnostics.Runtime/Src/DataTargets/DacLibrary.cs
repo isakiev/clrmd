@@ -2,32 +2,32 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Microsoft.Diagnostics.Runtime.ComWrappers;
+using Microsoft.Diagnostics.Runtime.DacInterface;
 using Microsoft.Diagnostics.Runtime.Desktop;
 
 namespace Microsoft.Diagnostics.Runtime
 {
     internal class DacLibrary
     {
-        private IntPtr _library;
+        private readonly IntPtr _library;
         private SOSDac _sos;
 
-        public DacDataTargetWrapper DacDataTarget { get; }
+        internal DacDataTargetWrapper DacDataTarget { get; }
 
-        public ClrDataProcess DacInterface { get; }
+        public ClrDataProcess DacPrivateInterface { get; }
 
-        public SOSDac SOSInterface
+        public SOSDac SOSDacInterface
         {
             get
             {
                 if (_sos == null)
-                    _sos = DacInterface.GetSOSDacInterface();
+                    _sos = DacPrivateInterface.GetSOSDacInterface();
 
                 return _sos;
             }
         }
 
-        public DacLibrary(DataTarget dataTarget, object ix)
+        internal DacLibrary(DataTarget dataTarget, object ix)
         {
             if (!(ix is IntPtr pUnk))
             {
@@ -40,10 +40,10 @@ namespace Microsoft.Diagnostics.Runtime
             if (pUnk == IntPtr.Zero)
                 throw new ArgumentException("clrDataProcess not an instance of IXCLRDataProcess");
 
-            DacInterface = new ClrDataProcess(pUnk);
+            DacPrivateInterface = new ClrDataProcess(this, pUnk);
         }
 
-        public DacLibrary(DataTarget dataTarget, string dacDll)
+        internal DacLibrary(DataTarget dataTarget, string dacDll)
         {
             if (dataTarget.ClrVersions.Count == 0)
                 throw new ClrDiagnosticsException(String.Format("Process is not a CLR process!"));
@@ -72,7 +72,7 @@ namespace Microsoft.Diagnostics.Runtime
                 throw new ClrDiagnosticsException("Failure loading DAC: CreateDacInstance failed 0x" + res.ToString("x"), ClrDiagnosticsExceptionKind.DacError);
 
 
-            DacInterface = new ClrDataProcess(iUnk);
+            DacPrivateInterface = new ClrDataProcess(this, iUnk);
         }
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]

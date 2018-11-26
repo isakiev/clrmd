@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Diagnostics.Runtime.Desktop
+﻿using Microsoft.Diagnostics.Runtime.DacInterface;
+
+namespace Microsoft.Diagnostics.Runtime.Desktop
 {
   internal class DesktopNativeWorkItem : NativeWorkItem
   {
@@ -36,7 +38,7 @@
       }
     }
 
-    public DesktopNativeWorkItem(V45WorkRequestData result)
+    public DesktopNativeWorkItem(WorkRequestData result)
     {
       _callback = result.Function;
       _data = result.Context;
