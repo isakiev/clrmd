@@ -23,6 +23,8 @@ namespace Microsoft.Diagnostics.Runtime
 //#endif
         PlatformFunctions = new WindowsFunctions();
     }
+    
+    private List<DacLibrary> _dacLibraries = new List<DacLibrary>(2);
 
     public DataTarget(IDataReader dataReader, IDacLocator dacLocator, ISymbolLocator symbolLocator)
     {
@@ -51,11 +53,15 @@ namespace Microsoft.Diagnostics.Runtime
     public IReadOnlyCollection<ClrInfo> ClrVersions { get; }
     public bool HasNativeRuntimes { get; }
 
+    internal void AddDacLibrary(DacLibrary dacLibrary) => _dacLibraries.Add(dacLibrary);
+
     public void Dispose()
     {
       DataReader.Close();
+      foreach (DacLibrary library in _dacLibraries)
+        library.Dispose();
     }
-
+    
     /// <summary>
     ///   Creates a runtime from the given Dac file on disk.
     /// </summary>

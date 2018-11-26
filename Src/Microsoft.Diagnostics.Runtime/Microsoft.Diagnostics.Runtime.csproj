@@ -92,6 +92,7 @@
     <Compile Include="Src\Common\MemoryReadException.cs" />
     <Compile Include="Src\Common\ObjectSet.cs" />
     <Compile Include="Src\Common\ParallelObjectSet.cs" />
+    <Compile Include="Src\Common\RefCountedFreeLibrary.cs" />
     <Compile Include="Src\Common\Roots\GCRoot.cs" />
     <Compile Include="Src\Common\Roots\GCRootProgressEvent.cs" />
     <Compile Include="Src\Common\Roots\RootPath.cs" />
