@@ -80,7 +80,6 @@
     <Compile Include="Src\TypeTests.cs" />
     <Compile Include="Src\AppDomainTests.cs" />
     <Compile Include="Src\DataTargetTestExtensions.cs" />
-    <Compile Include="Src\Debugger.cs" />
     <Compile Include="Src\ExceptionTests.cs" />
     <Compile Include="Src\GCHandleTests.cs" />
     <Compile Include="Src\GCRootTests.cs" />

@@ -71,12 +71,9 @@ namespace Microsoft.Diagnostics.Runtime.Tests
       return runtime.AppDomains.Single(ad => ad.Name == domainName);
     }
 
-    public static ClrModule GetModule(this ClrRuntime runtime, string filename)
+    public static ClrModule GetModule(this ClrRuntime runtime, string fileName)
     {
-      return (from module in runtime.Modules
-              let file = Path.GetFileName(module.FileName)
-              where file.Equals(filename, StringComparison.OrdinalIgnoreCase)
-              select module).Single();
+      return runtime.Modules.Single(x => string.Equals(Path.GetFileName(x.FileName), fileName, StringComparison.OrdinalIgnoreCase));
     }
 
     public static ClrThread GetMainThread(this ClrRuntime runtime)
