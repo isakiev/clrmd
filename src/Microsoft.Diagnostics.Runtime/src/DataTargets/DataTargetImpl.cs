@@ -75,7 +75,6 @@ namespace Microsoft.Diagnostics.Runtime
                 if (!ClrInfoProvider.IsSupportedRuntime(module, out var flavor, out var platform))
                     continue;
 
-                module.IsRuntime = true; //strange logic here (originally from the ClrInfo constructor)
                 versions.Add(new ClrInfo(this, module, flavor, platform));
             }
 
