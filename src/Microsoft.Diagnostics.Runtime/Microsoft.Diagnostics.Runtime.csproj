@@ -1,8 +1,8 @@
 ﻿<!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net45;netstandard2.0</TargetFrameworks>
+    <AssemblyName>JetBrains.Microsoft.Diagnostics.Runtime</AssemblyName>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
 
     <NoWarn>;1591;1701</NoWarn>
     <IsPackable>true</IsPackable>
@@ -21,8 +21,8 @@
     <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
-    <DefineConstants>TRACE;NET45</DefineConstants>
-    <DocumentationFile>Microsoft.Diagnostics.Runtime.xml</DocumentationFile>
+    <DefineConstants>NET45</DefineConstants>
+    <DocumentationFile>JetBrains.Microsoft.Diagnostics.Runtime.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
