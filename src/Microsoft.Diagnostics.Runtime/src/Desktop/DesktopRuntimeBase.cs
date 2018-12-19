@@ -100,11 +100,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             return data;
         }
 
-        public override IEnumerable<ClrException> EnumerateSerializedExceptions()
-        {
-            return new ClrException[0];
-        }
-
         public override IEnumerable<int> EnumerateGCThreads()
         {
             foreach (uint thread in _dataReader.EnumerateAllThreads())

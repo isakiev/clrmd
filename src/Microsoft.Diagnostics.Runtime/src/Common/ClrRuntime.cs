@@ -14,11 +14,6 @@ namespace Microsoft.Diagnostics.Runtime
     public abstract class ClrRuntime
     {
         /// <summary>
-        /// In .NET native crash dumps, we have a list of serialized exceptions objects. This property expose them as ClrException objects.
-        /// </summary>
-        public abstract IEnumerable<ClrException> EnumerateSerializedExceptions();
-
-        /// <summary>
         /// Used for internal purposes.
         /// </summary>
         public DacLibrary DacLibrary { get; protected set; }
