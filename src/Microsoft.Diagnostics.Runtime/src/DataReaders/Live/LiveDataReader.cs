@@ -117,7 +117,7 @@ namespace Microsoft.Diagnostics.Runtime
             uint size = (uint)modules.Length * sizeof(uint);
 
             if (!EnumProcessModules(_process, modules, size, out needed))
-                throw new ClrDiagnosticsException("Unable to get process modules.", ClrDiagnosticsException.HR.DataRequestError);
+                throw new ClrDiagnosticsException("Unable to get process modules.", ClrDiagnosticsExceptionKind.DataRequestError);
 
             for (int i = 0; i < modules.Length; i++)
             {

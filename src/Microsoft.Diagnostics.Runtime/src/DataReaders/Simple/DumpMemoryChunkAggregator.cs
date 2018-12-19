@@ -70,7 +70,7 @@ namespace Microsoft.Diagnostics.Runtime
                     throw new ClrDiagnosticsException(
                         "Unexpected inconsistency error in dump memory chunk " + i
                         + " with target base address " + chunks[i].TargetStartAddress + ".",
-                        ClrDiagnosticsException.HR.CrashDumpError);
+                        ClrDiagnosticsExceptionKind.CrashDumpError);
 
                 // If there's a next to compare to, and it's a MinidumpWithFullMemory, then we expect
                 // that the RVAs & addresses will all be sorted in the dump.
@@ -81,11 +81,11 @@ namespace Microsoft.Diagnostics.Runtime
                     throw new ClrDiagnosticsException(
                         "Unexpected relative addresses inconsistency between dump memory chunks "
                         + i + " and " + (i + 1) + ".",
-                        ClrDiagnosticsException.HR.CrashDumpError);
+                        ClrDiagnosticsExceptionKind.CrashDumpError);
 
                 // Because we sorted and split/merged entries we can expect them to be increasing and non-overlapping
                 if (i < chunks.Count - 1 && chunks[i].TargetEndAddress > chunks[i + 1].TargetStartAddress)
-                    throw new ClrDiagnosticsException("Unexpected overlap between memory chunks", ClrDiagnosticsException.HR.CrashDumpError);
+                    throw new ClrDiagnosticsException("Unexpected overlap between memory chunks", ClrDiagnosticsExceptionKind.CrashDumpError);
             }
         }
     }

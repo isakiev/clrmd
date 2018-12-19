@@ -54,7 +54,10 @@ namespace Microsoft.Diagnostics.Runtime
             int hr = client.OpenDumpFile(dumpFile);
 
             if (hr != 0)
-                throw new ClrDiagnosticsException($"Could not load crash dump '{dumpFile}', HRESULT: 0x{hr:x8}", ClrDiagnosticsException.HR.DebuggerError);
+            {
+                var kind = (uint)hr == 0x80004005 ? ClrDiagnosticsExceptionKind.CorruptedFileOrUnknownFormat : ClrDiagnosticsExceptionKind.DebuggerError;
+                throw new ClrDiagnosticsException($"Could not load crash dump, HRESULT: 0x{hr:x8}", kind).AddData("DumpFile", dumpFile);
+            }
 
             CreateClient(client);
 
@@ -101,7 +104,7 @@ namespace Microsoft.Diagnostics.Runtime
                 if ((uint)hr == 0xd00000bb)
                     throw new InvalidOperationException("Mismatched architecture between this process and the target process.");
 
-                throw new ClrDiagnosticsException($"Could not attach to pid {pid:X}, HRESULT: 0x{hr:x8}", ClrDiagnosticsException.HR.DebuggerError);
+                throw new ClrDiagnosticsException($"Could not attach to pid {pid:X}, HRESULT: 0x{hr:x8}", ClrDiagnosticsExceptionKind.DebuggerError);
             }
         }
 
@@ -133,8 +136,8 @@ namespace Microsoft.Diagnostics.Runtime
             SetClientInstance();
 
             int hr = _control.GetExecutingProcessorType(out IMAGE_FILE_MACHINE machineType);
-            if (0 != hr)
-                throw new ClrDiagnosticsException($"Failed to get processor type, HRESULT: {hr:x8}", ClrDiagnosticsException.HR.DebuggerError);
+            if (hr != 0)
+                throw new ClrDiagnosticsException($"Failed to get processor type, HRESULT: {hr:x8}", ClrDiagnosticsExceptionKind.DebuggerError);
 
             switch (machineType)
             {
@@ -183,7 +186,7 @@ namespace Microsoft.Diagnostics.Runtime
             if (hr == 1)
                 return 4;
 
-            throw new ClrDiagnosticsException(string.Format("IsPointer64Bit failed: {0:x8}", hr), ClrDiagnosticsException.HR.DebuggerError);
+            throw new ClrDiagnosticsException($"IsPointer64Bit failed, HRESULT: {hr:x8}", ClrDiagnosticsExceptionKind.DebuggerError);
         }
 
         public void Flush()
@@ -309,7 +312,7 @@ namespace Microsoft.Diagnostics.Runtime
             Interlocked.Increment(ref s_totalInstanceCount);
 
             if (_systemObjects3 == null && s_totalInstanceCount > 1)
-                throw new ClrDiagnosticsException("This version of DbgEng is too old to create multiple instances of DataTarget.", ClrDiagnosticsException.HR.DebuggerError);
+                throw new ClrDiagnosticsException("This version of DbgEng is too old to create multiple instances of DataTarget.", ClrDiagnosticsExceptionKind.DebuggerError);
 
             if (_systemObjects3 != null)
                 _systemObjects3.GetCurrentSystemId(out _instance);
