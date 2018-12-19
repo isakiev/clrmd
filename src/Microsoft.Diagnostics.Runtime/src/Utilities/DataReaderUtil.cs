@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
@@ -15,13 +16,6 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         private static IEnumerable<ModuleInfo> GetModulesWithoutInvalidChars(this IDataReader dataReader)
         {
             return dataReader.EnumerateModules().Where(m => !ModuleUtil.InvalidChars.IsMatch(m.FileName));
-        }
-
-        public static IReadOnlyCollection<ClrInfo> GetVersions([NotNull] this IDataReader reader)
-        {
-            var modules = reader.GetModulesWithoutInvalidChars();
-            var architecture = reader.GetArchitecture();
-            return modules.GetVersions(architecture, out _);
         }
     }
 }

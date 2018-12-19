@@ -4,7 +4,7 @@
 
 namespace Microsoft.Diagnostics.Runtime
 {
-    internal enum Platform
+    public enum Platform
     {
         Windows,
         Linux

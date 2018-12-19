@@ -40,7 +40,7 @@ namespace Microsoft.Diagnostics.Runtime
         /// <summary>
         /// Target platform.
         /// </summary>
-        internal Platform Platform { get; }
+        public Platform Platform { get; }
 
         /// <summary>
         /// To string.
