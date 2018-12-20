@@ -2,26 +2,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>JetBrains.Microsoft.Diagnostics.Runtime.Tests</AssemblyName>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net45</TargetFrameworks>
+    <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-    <!-- This _IS_ a Unit Test Project, but because of build_test_assets.cmd, we don't want to run as part of CI right now -->
-    <IsUnitTestProject Condition="'$(ContinuousIntegrationBuild)' == 'true'">false</IsUnitTestProject>
-
-    <!-- 
-      We would need to download 32bit dotnet cli, which would add extra time to PR runs 
-      Testing 64bit only on Desktop sufficiently covers our interop code paths.  
-    -->
-    <TestArchitectures Condition="'$(TargetFramework)' == 'net46'">x64;x86</TestArchitectures>
-
     <NoWarn>1701;1702;1705;1591;436</NoWarn>
+    <OutputPath>$(MSBuildThisFileDirectory)\..\..\bin</OutputPath>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\..\..\obj</BaseIntermediateOutputPath>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Diagnostics.Runtime\Microsoft.Diagnostics.Runtime.csproj" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="..\TestTargets\**\*.*" Exclude="..\TestTargets\Bin\**\*.*">
       <Link>data\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Diagnostics.Runtime\Microsoft.Diagnostics.Runtime.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
 </Project>
