@@ -1,27 +1,20 @@
 ﻿<!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>JetBrains.Microsoft.Diagnostics.Runtime</AssemblyName>
-    <TargetFrameworks>net45</TargetFrameworks>
-    <LangVersion>7.3</LangVersion>
-    <NoWarn>1591;1701</NoWarn>
-    <Description>ClrMD is a set of advanced APIs for programmatically inspecting a crash dump of a .NET program much in the same way that the SOS Debugging Extensions (SOS) do. This allows you to write automated crash analysis for your applications as well as automate many common debugger tasks. In addition to reading crash dumps ClrMD also allows supports attaching to live processes.</Description>
+    <TargetFramework>net46</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\Microsoft.Diagnostics.Runtime.snk</AssemblyOriginatorKeyFile>
+
+    <AssemblyName>JetBrains.Microsoft.Diagnostics.Runtime</AssemblyName>
+    <Description>ClrMD is a set of advanced APIs for programmatically inspecting a crash dump of a .NET program much in the same way that the SOS Debugging Extensions (SOS) do. This allows you to write automated crash analysis for your applications as well as automate many common debugger tasks. In addition to reading crash dumps ClrMD also allows supports attaching to live processes.</Description>
     <RepositoryUrl>https://github.com/Microsoft/clrmd</RepositoryUrl>
+
     <AssemblyVersion>1.0.3.0</AssemblyVersion>
     <FileVersion>1.0.3.0</FileVersion>
     <Version>1.0.3</Version>
-    <OutputPath>$(MSBuildThisFileDirectory)\..\..\bin</OutputPath>
-    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\..\..\obj</BaseIntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
-    <DefineConstants>NET45</DefineConstants>
-    <DocumentationFile>$(MSBuildThisFileDirectory)\..\..\Obj\Release\JetBrains.Microsoft.Diagnostics.Runtime.xml</DocumentationFile>
+
+    <NoWarn>1591;1701</NoWarn>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\Microsoft.Diagnostics.Runtime.snk</AssemblyOriginatorKeyFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
