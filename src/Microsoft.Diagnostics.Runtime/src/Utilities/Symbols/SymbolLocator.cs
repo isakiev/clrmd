@@ -14,7 +14,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
     /// <summary>
     /// This class is a general purpose symbol locator and binary locator.
     /// </summary>
-    public abstract partial class SymbolLocator
+    public abstract partial class SymbolLocator : ISymbolLocator
     {
         /// <summary>
         /// The raw symbol path.  You should probably use the SymbolPath property instead.

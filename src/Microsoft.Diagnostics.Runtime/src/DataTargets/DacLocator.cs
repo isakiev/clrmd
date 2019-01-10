@@ -15,10 +15,10 @@ namespace Microsoft.Diagnostics.Runtime
     
     public class DacLocator : IDacLocator
     {
-        private readonly ICustomSymbolLocator _symbolLocator;
+        private readonly ISymbolLocator _symbolLocator;
         private readonly IExternalLogger _logger;
 
-        public DacLocator([NotNull] ICustomSymbolLocator symbolLocator, [NotNull] IExternalLogger logger)
+        public DacLocator([NotNull] ISymbolLocator symbolLocator, [NotNull] IExternalLogger logger)
         {
             _symbolLocator = symbolLocator ?? throw new ArgumentNullException(nameof(symbolLocator));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
