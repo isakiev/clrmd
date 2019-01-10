@@ -17,4 +17,8 @@
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoFixture" Version="4.6.0" />
+    <PackageReference Include="AutoFixture.Xunit2" Version="4.6.0" />
+  </ItemGroup>
 </Project>

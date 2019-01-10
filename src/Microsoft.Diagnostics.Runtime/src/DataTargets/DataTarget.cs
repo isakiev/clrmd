@@ -175,6 +175,7 @@ namespace Microsoft.Diagnostics.Runtime
             set => _symbolLocator = value;
         }
 
+        [Obsolete]
         private FileLoader _fileLoader;
         internal FileLoader FileLoader
         {
