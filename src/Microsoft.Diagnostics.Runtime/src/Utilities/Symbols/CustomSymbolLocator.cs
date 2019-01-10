@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using Microsoft.Diagnostics.Runtime.Utilities.Logging;
+using JetBrains.Annotations;
 
 namespace Microsoft.Diagnostics.Runtime.Utilities
 {
@@ -17,16 +17,16 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
         };
         private readonly IDictionary<FileEntry, string> _cache = new Dictionary<FileEntry, string>();
         private readonly string _cacheLocation;
+        private readonly Action<string, object[]> _logMessage;
 
         private readonly object _lock = new object();
-        private readonly IExternalLogger _logger;
         private readonly ICollection<FileEntry> _missingEntries = new HashSet<FileEntry>();
         private readonly IEnumerable<SymPathElement> _symPathElements;
 
-        public CustomSymbolLocator(IExternalLogger logger, string cacheLocation)
+        public CustomSymbolLocator([NotNull] string cacheLocation, [NotNull] Action<string, object[]> logMessage)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cacheLocation = cacheLocation ?? throw new ArgumentNullException(nameof(cacheLocation));
+            _logMessage = logMessage ?? throw new ArgumentNullException(nameof(logMessage));
 
             _symPathElements = GetSymPathElements();
         }
@@ -168,7 +168,7 @@ namespace Microsoft.Diagnostics.Runtime.Utilities
 
         private void Trace(string format, params object[] parameters)
         {
-            _logger.Info("DefaultSymbolLocator", format, parameters);
+            _logMessage(format, parameters);
         }
 
         private static string GetIndexPath(FileEntry entry)

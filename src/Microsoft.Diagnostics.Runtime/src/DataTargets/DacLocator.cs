@@ -2,26 +2,17 @@ using System;
 using System.IO;
 using JetBrains.Annotations;
 using Microsoft.Diagnostics.Runtime.Utilities;
-using Microsoft.Diagnostics.Runtime.Utilities.Logging;
 using FileVersionInfo = System.Diagnostics.FileVersionInfo;
 
 namespace Microsoft.Diagnostics.Runtime
 {
-    public interface IDacLocator
-    {
-        /// <returns>null if not found</returns>
-        string FindDac(ClrInfo clrInfo, Architecture architecture);
-    }
-    
-    public class DacLocator : IDacLocator
+    public class DacLocator
     {
         private readonly ISymbolLocator _symbolLocator;
-        private readonly IExternalLogger _logger;
 
-        public DacLocator([NotNull] ISymbolLocator symbolLocator, [NotNull] IExternalLogger logger)
+        public DacLocator([NotNull] ISymbolLocator symbolLocator)
         {
             _symbolLocator = symbolLocator ?? throw new ArgumentNullException(nameof(symbolLocator));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public virtual string FindDac(ClrInfo clrInfo, Architecture architecture)
@@ -46,11 +37,11 @@ namespace Microsoft.Diagnostics.Runtime
 
             if (actualVersion != expectedVersion)
             {
-                _logger.Info("There is a local dac '{0}', but in doesn't fit due to version mismatch (expected: {1}, actual: {2})", dacLocation, expectedVersion, actualVersion);
+                LogMessage("There is a local dac '{0}', but in doesn't fit due to version mismatch (expected: {1}, actual: {2})", dacLocation, expectedVersion, actualVersion);
                 return null;
             }
 
-            _logger.Info("Found a local dac '{0}'", dacLocation);
+            LogMessage("Found a local dac '{0}'", dacLocation);
             return dacLocation;
         }
 
@@ -63,7 +54,7 @@ namespace Microsoft.Diagnostics.Runtime
             var result = _symbolLocator.FindBinary(dacRequestFileName, (int)clrInfo.ModuleInfo.TimeStamp, (int)clrInfo.ModuleInfo.FileSize);
             if (result != null && File.Exists(result))
             {
-                _logger.Info("Got a dac from the remote server: '{0}'", result);
+                LogMessage("Got a dac from the remote server: '{0}'", result);
                 return result;
             }
 
@@ -78,6 +69,10 @@ namespace Microsoft.Diagnostics.Runtime
         private static Version GetVersion(VersionInfo versionInfo)
         {
             return new Version(versionInfo.Major, versionInfo.Minor, versionInfo.Revision, versionInfo.Patch);
+        }
+
+        protected virtual void LogMessage(string format, params object[] parameters)
+        {
         }
     }
 }
