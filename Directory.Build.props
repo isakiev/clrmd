@@ -22,5 +22,6 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <DefineConstants>NET45</DefineConstants>
   </PropertyGroup>
 </Project>
