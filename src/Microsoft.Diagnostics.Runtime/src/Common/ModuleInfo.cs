@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using JetBrains.Annotations;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
 namespace Microsoft.Diagnostics.Runtime
@@ -28,10 +29,16 @@ namespace Microsoft.Diagnostics.Runtime
         /// </summary>
         public virtual uint TimeStamp { get; set; }
 
+        private string _fileName;
         /// <summary>
         /// The filename of the module on disk.
         /// </summary>
-        public virtual string FileName { get; set; }
+        [NotNull]
+        public virtual string FileName
+        {
+            get => _fileName ?? string.Empty;
+            set => _fileName = value;
+        }
 
         /// <summary>
         /// Returns a PEImage from a stream constructed using instance fields of this object.
