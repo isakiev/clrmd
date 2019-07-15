@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using JetBrains.Annotations;
 using Microsoft.Diagnostics.Runtime.DacInterface;
 using Microsoft.Diagnostics.Runtime.Desktop;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
@@ -220,7 +221,10 @@ namespace Microsoft.Diagnostics.Runtime
         internal abstract ulong[] GetServerHeapList();
         internal abstract IThreadStoreData GetThreadStoreData();
         internal abstract ISegmentData GetSegmentData(ulong addr);
+
+        [CanBeNull]
         internal abstract IGCInfo GetGCInfo();
+
         internal abstract IMethodTableData GetMethodTableData(ulong addr);
         internal abstract uint GetTlsSlot();
         internal abstract uint GetThreadTypeIndex();

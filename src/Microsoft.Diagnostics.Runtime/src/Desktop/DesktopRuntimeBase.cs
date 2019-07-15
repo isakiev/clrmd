@@ -66,13 +66,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
         internal override IGCInfo GetGCInfo()
         {
-            IGCInfo data = GetGCInfoImpl();
-            if (data == null)
-            {
-                throw new ClrDiagnosticsException("This runtime is not initialized and contains no data.", ClrDiagnosticsExceptionKind.RuntimeUninitialized);
-            }
-
-            return data;
+            return GetGCInfoImpl();
         }
 
         public override IEnumerable<ClrException> EnumerateSerializedExceptions()
