@@ -160,7 +160,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
         internal override ulong GetDomainModule(ClrAppDomain domain)
         {
-            IList<ClrAppDomain> domains = _runtime.AppDomains;
+            IReadOnlyList<ClrAppDomain> domains = _runtime.AppDomains;
             if (domain == null)
             {
                 foreach (ulong addr in _mapping.Values)

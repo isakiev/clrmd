@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using JetBrains.Annotations;
 using Microsoft.Diagnostics.Runtime.DacInterface;
 using Microsoft.Diagnostics.Runtime.ICorDebug;
 
@@ -141,7 +142,6 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
             return result;
         }
 
-        public override IList<ClrAppDomain> AppDomains => _appDomains.Value.Domains;
         public override IList<ClrThread> Threads => _threads.Value;
 
         private List<ClrThread> CreateThreadList()
@@ -196,10 +196,9 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         }
 
         public override ClrThreadPool ThreadPool => _threadpool.Value;
-        public ulong SystemDomainAddress => _appDomains.Value.System.Address;
-        public ulong SharedDomainAddress => _appDomains.Value.Shared.Address;
         public override ClrAppDomain SystemDomain => _appDomains.Value.System;
         public override ClrAppDomain SharedDomain => _appDomains.Value.Shared;
+        public override IReadOnlyList<ClrAppDomain> AppDomains => _appDomains.Value.Domains;
         public bool IsSingleDomain => _appDomains.Value.Domains.Count == 1;
 
         public override ClrMethod GetMethodByHandle(ulong methodHandle)
@@ -324,21 +323,27 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
             // Enumerate each AppDomain and Module specific heap.
             AppDomainHeapWalker adhw = new AppDomainHeapWalker(this);
-            IAppDomainData ad = GetAppDomainData(SystemDomainAddress);
-            foreach (MemoryRegion region in adhw.EnumerateHeaps(ad))
-                yield return region;
-
-            foreach (ulong module in EnumerateModules(ad))
-                foreach (MemoryRegion region in adhw.EnumerateModuleHeaps(ad, module))
+            if (SystemDomain != null)
+            {
+                IAppDomainData ad = GetAppDomainData(SystemDomain.Address);
+                foreach (MemoryRegion region in adhw.EnumerateHeaps(ad))
                     yield return region;
 
-            ad = GetAppDomainData(SharedDomainAddress);
-            foreach (MemoryRegion region in adhw.EnumerateHeaps(ad))
-                yield return region;
+                foreach (ulong module in EnumerateModules(ad))
+                    foreach (MemoryRegion region in adhw.EnumerateModuleHeaps(ad, module))
+                        yield return region;
+            }
 
-            foreach (ulong module in EnumerateModules(ad))
-                foreach (MemoryRegion region in adhw.EnumerateModuleHeaps(ad, module))
+            if (SharedDomain != null)
+            {
+                IAppDomainData ad = GetAppDomainData(SharedDomain.Address);
+                foreach (MemoryRegion region in adhw.EnumerateHeaps(ad))
                     yield return region;
+
+                foreach (ulong module in EnumerateModules(ad))
+                    foreach (MemoryRegion region in adhw.EnumerateModuleHeaps(ad, module))
+                        yield return region;
+            }
 
             IAppDomainStoreData ads = GetAppDomainStoreData();
             if (ads != null)
@@ -348,7 +353,7 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
                 {
                     foreach (ulong addr in appDomains)
                     {
-                        ad = GetAppDomainData(addr);
+                        IAppDomainData ad = GetAppDomainData(addr);
                         foreach (MemoryRegion region in adhw.EnumerateHeaps(ad))
                             yield return region;
 
@@ -578,18 +583,16 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
         {
             IAppDomainStoreData ads = GetAppDomainStoreData();
             if (ads == null)
-                return new DomainContainer();
+                return new DomainContainer(null, null);
 
             ulong[] domains = GetAppDomainList(ads.Count);
             if (domains == null)
-                return new DomainContainer();
+                return new DomainContainer(null, null);
 
-            return new DomainContainer
-            {
-                Domains = domains.Select(ad => (ClrAppDomain)InitDomain(ad)).Where(ad => ad != null).ToList(),
-                Shared = InitDomain(ads.SharedDomain, "Shared Domain"),
-                System = InitDomain(ads.SystemDomain, "System Domain")
-            };
+            return new DomainContainer(
+                InitDomain(ads.SystemDomain, "System Domain"),
+                InitDomain(ads.SharedDomain, "Shared Domain"),
+                domains.Select(ad => (ClrAppDomain)InitDomain(ad)).Where(ad => ad != null).ToArray());
         }
 
         private DesktopAppDomain InitDomain(ulong domain, string name = null)
@@ -807,9 +810,21 @@ namespace Microsoft.Diagnostics.Runtime.Desktop
 
         private struct DomainContainer
         {
-            public List<ClrAppDomain> Domains;
-            public DesktopAppDomain System;
-            public DesktopAppDomain Shared;
+            [NotNull]
+            public readonly IReadOnlyList<ClrAppDomain> Domains;
+            
+            [CanBeNull]
+            public readonly DesktopAppDomain System;
+            
+            [CanBeNull]
+            public readonly DesktopAppDomain Shared;
+
+            public DomainContainer([CanBeNull] DesktopAppDomain system, [CanBeNull] DesktopAppDomain shared, params ClrAppDomain[] domains)
+            {
+                Domains = domains;
+                System = system;
+                Shared = shared;
+            }
         }
     }
 }

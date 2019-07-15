@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace Microsoft.Diagnostics.Runtime
 {
@@ -58,16 +59,19 @@ namespace Microsoft.Diagnostics.Runtime
         /// Enumerates the list of appdomains in the process.  Note the System appdomain and Shared
         /// AppDomain are omitted.
         /// </summary>
-        public abstract IList<ClrAppDomain> AppDomains { get; }
+        [NotNull]
+        public abstract IReadOnlyList<ClrAppDomain> AppDomains { get; }
 
         /// <summary>
         /// Give access to the System AppDomain
         /// </summary>
+        [CanBeNull]
         public abstract ClrAppDomain SystemDomain { get; }
 
         /// <summary>
         /// Give access to the Shared AppDomain
         /// </summary>
+        [CanBeNull]
         public abstract ClrAppDomain SharedDomain { get; }
 
         /// <summary>
